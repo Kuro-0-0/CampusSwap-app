@@ -1,5 +1,6 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
+import 'package:campusswap_app/core/services/auth_service.dart';
 import 'package:campusswap_app/features/auth/ui/screens/login_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:campusswap_app/features/profile/ui/widgets/product_list_card.dart';
@@ -155,14 +156,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.settings, color: Colors.white),
-                              ),
+                              PopupMenuButton<String>(
+  // Use your existing decoration style inside the icon button
+  icon: Container(
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.2),
+      shape: BoxShape.circle,
+    ),
+    child: const Icon(Icons.settings, color: Colors.white),
+  ),
+  onSelected: (value) async {
+    if (value == 'logout') {
+      await _handleLogout(context);
+    }
+  },
+  itemBuilder: (BuildContext context) {
+    return [
+      const PopupMenuItem<String>(
+        value: 'logout',
+        child: Row(
+          children: [
+            Icon(Icons.logout, color: Colors.black54),
+            SizedBox(width: 10),
+            Text('Cerrar Sesión'),
+          ],
+        ),
+      ),
+    ];
+  },
+)
                             ],
                           ),
                         ),
@@ -277,6 +300,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  
+
   Widget _buildFavoritosList(List<Favorito> favoritos) {
     if (favoritos.isEmpty) {
       return Center(
@@ -330,6 +355,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
   }
+
+
+  Future<void> _handleLogout(BuildContext context) async {
+  final authService = AuthService();
+
+  try {
+    await authService.logout();
+
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+}
 
   void _showConfirmDialog({
     required String title,
