@@ -62,7 +62,7 @@ class ProfileService implements IProfileService {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> body = jsonDecode(response.body);
-        final anuncioResponse = AnuncioResponse.fromJson(body);
+        final anuncioResponse = AnuncioResponseModel.fromJson(body);
         return anuncioResponse.content;
       } else if (response.statusCode == 401) {
         TokenStorage().deleteToken();
