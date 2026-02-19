@@ -3,6 +3,7 @@ import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
 import 'package:campusswap_app/features/auth/ui/screens/register_screen.dart';
 import 'package:campusswap_app/features/auth/ui/widgets/login_form.dart';
 import 'package:campusswap_app/features/auth/ui/widgets/login_header.dart';
+import 'package:campusswap_app/main_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -10,9 +11,9 @@ class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   void _navigateToHome(BuildContext context) {
-    // Navigator.of(context).pushReplacement(
-    //   MaterialPageRoute(builder: (context) => const MainLayout()),
-    // );
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const MainLayout()),
+    );
   }
 
   @override
