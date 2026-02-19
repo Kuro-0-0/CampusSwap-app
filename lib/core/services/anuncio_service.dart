@@ -60,11 +60,13 @@ class AnuncioService implements IAnuncioResponse {
     final http.Response response;
 
     try {
+      var token = await TokenStorage().getToken();
+
       response = await http.get(
         uri,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer ${TokenStorage().getToken()}",
+          "Authorization": "Bearer ${token}",
         },
       );
     } on SocketException {
