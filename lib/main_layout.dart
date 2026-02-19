@@ -1,3 +1,4 @@
+import 'package:campusswap_app/features/buscador/ui/screens/search_screen.dart';
 import 'package:campusswap_app/features/home/ui/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'core/theme/app_colors.dart';
@@ -14,7 +15,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const Center(child: Text("Pantalla busqueda"),),
+    const SearchScreen(),
     const Center(child: Text("Pantalla chats"),),
     const Center(child: Text("Pantalla perfil"),)
   ];
