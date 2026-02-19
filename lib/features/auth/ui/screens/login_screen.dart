@@ -1,8 +1,9 @@
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
+import 'package:campusswap_app/features/auth/ui/screens/register_screen.dart';
 import 'package:campusswap_app/features/auth/ui/widgets/login_form.dart';
 import 'package:campusswap_app/features/auth/ui/widgets/login_header.dart';
-import 'package:campusswap_app/features/profile/ui/screens/profile_screen.dart';
+import 'package:campusswap_app/main_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,7 +12,7 @@ class LoginScreen extends StatelessWidget {
 
   void _navigateToHome(BuildContext context) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      MaterialPageRoute(builder: (context) => const MainLayout()),
     );
   }
 
@@ -110,12 +111,12 @@ class LoginScreen extends StatelessWidget {
                               print("Olvidé contraseña tap");
                             },
                             onRegisterTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => const RegisterScreen(),
-                              //   ),
-                              // );
+                               Navigator.push(
+                                context,
+                                 MaterialPageRoute(
+                                   builder: (context) => const RegisterScreen(),
+                                ),
+                               );
                             },
                           ),
 

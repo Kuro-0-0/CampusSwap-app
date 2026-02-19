@@ -1,16 +1,26 @@
-class AnuncioResponse {
+class AnuncioResponseModel {
   final List<Anuncio> content;
   final PageInfo page;
 
-  AnuncioResponse({required this.content, required this.page});
+  AnuncioResponseModel({
+    required this.content,
+    required this.page,
+  });
 
-  factory AnuncioResponse.fromJson(Map<String, dynamic> json) {
-    return AnuncioResponse(
+  factory AnuncioResponseModel.fromJson(Map<String, dynamic> json) {
+    return AnuncioResponseModel(
       content: List<Anuncio>.from(
-        json['content'].map((x) => Anuncio.fromJson(x)),
+        (json['content'] as List).map((item) => Anuncio.fromJson(item)),
       ),
       page: PageInfo.fromJson(json['page']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'content': content.map((item) => item.toJson()).toList(),
+      'page': page.toJson(),
+    };
   }
 }
 
@@ -44,7 +54,7 @@ class Anuncio {
       id: json['id'],
       titulo: json['titulo'],
       descripcion: json['descripcion'],
-      precio: json['precio'] != null ? (json['precio'] as num).toDouble() : null,
+      precio: json['precio']?.toDouble(),
       categoria: json['categoria'],
       imagen: json['imagen'],
       tipoOperacion: json['tipoOperacion'],
@@ -52,6 +62,21 @@ class Anuncio {
       condicion: json['condicion'],
       usuarioId: json['usuarioId'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'titulo': titulo,
+      'descripcion': descripcion,
+      'precio': precio,
+      'categoria': categoria,
+      'imagen': imagen,
+      'tipoOperacion': tipoOperacion,
+      'estado': estado,
+      'condicion': condicion,
+      'usuarioId': usuarioId,
+    };
   }
 }
 
@@ -75,5 +100,14 @@ class PageInfo {
       totalElements: json['totalElements'],
       totalPages: json['totalPages'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'size': size,
+      'number': number,
+      'totalElements': totalElements,
+      'totalPages': totalPages,
+    };
   }
 }

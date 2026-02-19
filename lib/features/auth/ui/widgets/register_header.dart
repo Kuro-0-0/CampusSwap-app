@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-class LoginHeader extends StatelessWidget {
-  const LoginHeader({super.key});
+class RegisterHeader extends StatelessWidget {
+  final VoidCallback onBackTap;
+
+  const RegisterHeader({super.key, required this.onBackTap});
 
   @override
   Widget build(BuildContext context) {
@@ -9,7 +11,10 @@ class LoginHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         children: [
-          const SizedBox(height: 40), 
+          const SizedBox(height: 20), 
+          
+          const SizedBox(height: 10),
+          
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -18,9 +23,11 @@ class LoginHeader extends StatelessWidget {
             ),
             child: const Icon(Icons.menu_book_rounded, color: Color(0xFF1976D2), size: 32),
           ),
-          const SizedBox(height: 24),
+          
+          const SizedBox(height: 16),
+          
           const Text(
-            "Bienvenido de nuevo",
+            "Crear cuenta",
             style: TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -29,7 +36,7 @@ class LoginHeader extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "Inicia sesión para continuar",
+            "Únete a la comunidad CampusSwap",
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
               fontSize: 16,
