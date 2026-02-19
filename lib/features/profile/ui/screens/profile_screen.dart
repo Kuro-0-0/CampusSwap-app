@@ -17,7 +17,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _selectedTab = 0; // 0: Mis Anuncios, 1: Favoritos
+  int _selectedTab = 0;
 
   late ProfileBloc _profileBloc;
 
@@ -58,6 +58,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       MaterialPageRoute(builder: (context) => const LoginScreen()),
                       (route) => false,
                     );
+                  }
+                  
+                  if (state is AnuncioActionSuccess) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.green,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      _profileBloc.add(LoadProfile());
+                    });
+                  }
+                  
+                  if (state is FavoritoDeleteSuccess) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.green,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      _profileBloc.add(LoadProfile());
+                    });
                   }
                 },
                 builder: (context, state) {
@@ -159,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Expanded(
                           child: _selectedTab == 0
                               ? _buildAnunciosList(misAnuncios)
-                              : _buildFavoritosList(misFavoritos),
+                              : _buildFavoritosList(misFavoritos)
                         ),
                       ],
                     );
@@ -199,18 +225,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    final activeAnuncios = anuncios.where((a) => a.estado != "CERRADO").toList();
+
     return ListView.separated(
       padding: const EdgeInsets.symmetric(
         horizontal: 20,
         vertical: 10,
       ),
-      itemCount: anuncios.length,
+      itemCount: activeAnuncios.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
+        final anuncio = activeAnuncios[index];
+        final isPaused = anuncio.estado == 'PAUSADO';
+        
         return ProductListCard(
-          item: anuncios[index],
+          item: anuncio,
           onTap: () {
-            print("Ir a detalle del anuncio: ${anuncios[index].id}");
+            print("Ir a detalle del anuncio: ${anuncio.id}");
+          },
+          isPaused: isPaused,
+          onEdit: () {
+            print("Editar anuncio: ${anuncio.id}");
+          },
+          onPause: () {
+            _showConfirmDialog(
+              title: isPaused ? 'Reactivar Anuncio' : 'Pausar Anuncio',
+              message: isPaused 
+                ? '¿Deseas reactivar este anuncio?'
+                : '¿Deseas pausar este anuncio temporalmente?',
+              onConfirm: () {
+                if (isPaused) {
+                  _profileBloc.add(ReactivateAnuncio(anuncioId: anuncio.id));
+                } else {
+                  _profileBloc.add(PauseAnuncio(anuncioId: anuncio.id));
+                }
+              },
+            );
+          },
+          onDelete: () {
+            _showConfirmDialog(
+              title: 'Eliminar Anuncio',
+              message: '¿Estás seguro que deseas eliminar este anuncio? Esta acción no se puede deshacer.',
+              isDestructive: true,
+              onConfirm: () {
+                _profileBloc.add(DeleteAnuncio(anuncioId: anuncio.id));
+              },
+            );
           },
         );
       },
@@ -249,19 +309,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
       itemCount: favoritos.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
+        final favorito = favoritos[index];
+
         return ProductListCard(
-          item: favoritos[index],
+          item: favorito,
           onTap: () {
-            print("Ir a detalle de favorito: ${favoritos[index].tituloAnuncio}");
+            print("Ir a detalle de favorito: ${favorito.tituloAnuncio}");
           },
-          trailing: IconButton(
-            icon: const Icon(Icons.favorite, color: Colors.red),
-            onPressed: () {
-              print("Eliminar favorito: ${favoritos[index].tituloAnuncio}");
-            },
-          ),
+          onFavoritesDelete: () {
+            _showConfirmDialog(
+              title: 'Eliminar Favorito',
+              message: '¿Deseas eliminar este anuncio de tus favoritos?',
+              isDestructive: true,
+              onConfirm: () {
+                _profileBloc.add(DeleteFavorito(favoritoId: favorito.id));
+              },
+            );
+          },
         );
       },
+    );
+  }
+
+  void _showConfirmDialog({
+    required String title,
+    required String message,
+    required VoidCallback onConfirm,
+    bool isDestructive = false,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
+            child: Text(
+              'Confirmar',
+              style: TextStyle(
+                color: isDestructive ? Colors.red : AppColors.primaryBlue,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

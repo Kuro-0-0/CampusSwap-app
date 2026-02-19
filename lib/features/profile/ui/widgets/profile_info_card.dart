@@ -36,7 +36,6 @@ class ProfileInfoCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Fila Superior: Foto y Datos
           Row(
             children: [
               CircleAvatar(
@@ -64,19 +63,20 @@ class ProfileInfoCard extends StatelessWidget {
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 8),
-                    if (usuario.reputacionMedia != null) 
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            usuario.reputacionMedia!.toStringAsFixed(1),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.warningOrange,
+                          if (usuario.reputacionMedia != null) ... [
+                            const Icon(Icons.star, color: Colors.amber, size: 16),
+                            const SizedBox(width: 4),
+                            Text(
+                              usuario.reputacionMedia!.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.warningOrange,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
+                            const SizedBox(width: 8),
+                          ],
                           Text(
                             "Desde $formattedDate",
                             style: const TextStyle(fontSize: 10, color: Colors.grey),
@@ -92,7 +92,6 @@ class ProfileInfoCard extends StatelessWidget {
           const Divider(),
           const SizedBox(height: 16),
 
-          // Fila Inferior: Estadísticas
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [

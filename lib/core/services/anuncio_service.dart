@@ -92,4 +92,73 @@ class AnuncioService implements IAnuncioResponse {
         "Error del servidor (${response.statusCode}). Intenta más tarde.");
     }
   }
+
+  @override
+  Future<void> pauseAnuncio(int anuncioId) async {
+    await _toggleAnuncioState(anuncioId);
+  }
+
+  @override
+  Future<void> enableAnuncio(int anuncioId) async {
+    await _toggleAnuncioState(anuncioId);
+  }
+
+  Future<void> _toggleAnuncioState(int anuncioId) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final response = await http.put(
+        Uri.parse('http://10.0.2.2:8080/api/v1/anuncios/$anuncioId/alternar-estado'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
+      } else if (response.statusCode == 403) {
+        throw const AnuncioException('No tienes permiso para realizar esta acción.');
+      } else if (response.statusCode == 404) {
+        throw const AnuncioException('Anuncio no encontrado.');
+      } else {
+        throw AnuncioException('Error al alternar estado del anuncio (${response.statusCode})');
+      }
+    } on SocketException {
+      throw const AnuncioException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw AnuncioException('Error inesperado: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteAnuncio(int anuncioId) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final response = await http.delete(
+        Uri.parse('http://10.0.2.2:8080/api/v1/anuncios/$anuncioId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
+      } else if (response.statusCode == 403) {
+        throw const AnuncioException('No tienes permiso para eliminar este anuncio.');
+      } else if (response.statusCode == 404) {
+        throw const AnuncioException('Anuncio no encontrado.');
+      } else {
+        throw AnuncioException('Error al eliminar anuncio (${response.statusCode})');
+      }
+    } on SocketException {
+      throw const AnuncioException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw AnuncioException('Error inesperado: $e');
+    }
+  }
 }

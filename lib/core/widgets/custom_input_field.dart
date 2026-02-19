@@ -28,8 +28,7 @@ class CustomInputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Etiqueta superior
-        Text(
+      Text(
           label,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
@@ -37,7 +36,6 @@ class CustomInputField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // Campo de texto
         Container(
           decoration: BoxDecoration(
             color: Colors.white,

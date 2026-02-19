@@ -38,3 +38,14 @@ class ProfileUnauthorized extends ProfileState {
   final String message;
   ProfileUnauthorized({required this.message});
 }
+final class AnuncioActionSuccess extends ProfileState {
+  final String message;
+  final int anuncioId;
+  AnuncioActionSuccess({required this.message, required this.anuncioId});
+}
+
+final class FavoritoDeleteSuccess extends ProfileState {
+  final String message;
+  final int favoritoId;
+  FavoritoDeleteSuccess({required this.message, required this.favoritoId});
+}

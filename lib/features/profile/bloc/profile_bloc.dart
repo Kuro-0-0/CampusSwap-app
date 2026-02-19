@@ -18,6 +18,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<LoadProfile>(_onLoadProfile);
     on<LoadAnuncios>(_onLoadAnuncios);
     on<LoadFavoritos>(_onLoadFavoritos);
+    on<PauseAnuncio>(_onPauseAnuncio);
+    on<ReactivateAnuncio>(_onReactivateAnuncio);
+    on<DeleteAnuncio>(_onDeleteAnuncio);
+    on<DeleteFavorito>(_onDeleteFavorito);
   }
 
   Future<void> _onLoadProfile(
@@ -35,14 +39,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         favoritos: favoritos,
       ));
     } catch (e) {
-
-      if (e is ProfileException && e.message.contains('No autorizado')) {
-        
+      final errorMsg = e.toString();
+      if (errorMsg.contains('No autorizado')) {
         emit(ProfileUnauthorized(message: 'No autorizado. Por favor, inicia sesión de nuevo.'));
       } else {
-        emit(ProfileFailure(message: e.toString()));
+        emit(ProfileFailure(message: errorMsg));
       }
-
     }
   }
 
@@ -69,6 +71,86 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(ProfileFavoritosLoaded(favoritos: favoritos));
     } catch (e) {
       emit(ProfileFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> _onPauseAnuncio(
+    PauseAnuncio event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      await _service.pauseAnuncio(event.anuncioId);
+      emit(AnuncioActionSuccess(
+        message: 'Anuncio pausado correctamente',
+        anuncioId: event.anuncioId,
+      ));
+    } catch (e) {
+      final errorMsg = e.toString();
+      if (errorMsg.contains('No autorizado')) {
+        emit(ProfileUnauthorized(message: errorMsg));
+      } else {
+        emit(ProfileFailure(message: errorMsg));
+      }
+    }
+  }
+
+  Future<void> _onReactivateAnuncio(
+    ReactivateAnuncio event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      await _service.enableAnuncio(event.anuncioId);
+      emit(AnuncioActionSuccess(
+        message: 'Anuncio reactivado correctamente',
+        anuncioId: event.anuncioId,
+      ));
+    } catch (e) {
+      final errorMsg = e.toString();
+      if (errorMsg.contains('No autorizado')) {
+        emit(ProfileUnauthorized(message: errorMsg));
+      } else {
+        emit(ProfileFailure(message: errorMsg));
+      }
+    }
+  }
+
+  Future<void> _onDeleteAnuncio(
+    DeleteAnuncio event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      await _service.deleteAnuncio(event.anuncioId);
+      emit(AnuncioActionSuccess(
+        message: 'Anuncio eliminado correctamente',
+        anuncioId: event.anuncioId,
+      ));
+    } catch (e) {
+      final errorMsg = e.toString();
+      if (errorMsg.contains('No autorizado')) {
+        emit(ProfileUnauthorized(message: errorMsg));
+      } else {
+        emit(ProfileFailure(message: errorMsg));
+      }
+    }
+  }
+
+  Future<void> _onDeleteFavorito(
+    DeleteFavorito event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      await _service.deleteFavorito(event.favoritoId);
+      emit(FavoritoDeleteSuccess(
+        message: 'Favorito eliminado correctamente',
+        favoritoId: event.favoritoId,
+      ));
+    } catch (e) {
+      final errorMsg = e.toString();
+      if (errorMsg.contains('No autorizado')) {
+        emit(ProfileUnauthorized(message: errorMsg));
+      } else {
+        emit(ProfileFailure(message: errorMsg));
+      }
     }
   }
 }

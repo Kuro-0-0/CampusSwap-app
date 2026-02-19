@@ -20,7 +20,6 @@ class MyAdTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Imagen
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.network(
@@ -31,7 +30,6 @@ class MyAdTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // Info y Acciones
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +45,6 @@ class MyAdTile extends StatelessWidget {
                   style: const TextStyle(color: AppColors.primaryBlue, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-                // Botones de acción
                 Row(
                   children: [
                     _buildAction(Icons.edit_outlined, "Editar"),
@@ -67,7 +64,7 @@ class MyAdTile extends StatelessWidget {
 
   Widget _buildAction(IconData icon, String label, {bool isDestructive = false}) {
     return InkWell(
-      onTap: () {}, // TODO: Callbacks
+      onTap: () {},
       child: Row(
         children: [
           Icon(icon, size: 16, color: isDestructive ? Colors.red : Colors.grey),

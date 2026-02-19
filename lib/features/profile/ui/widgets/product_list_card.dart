@@ -7,13 +7,23 @@ import 'package:flutter/material.dart';
 class ProductListCard extends StatelessWidget {
   final Object item;
   final VoidCallback onTap;
-  final Widget? trailing; 
+  final Widget? trailing;
+  final VoidCallback? onEdit;
+  final VoidCallback? onPause;
+  final VoidCallback? onDelete;
+  final VoidCallback? onFavoritesDelete;
+  final bool isPaused;
 
   const ProductListCard({
     super.key,
     required this.item,
     required this.onTap,
     this.trailing,
+    this.onEdit,
+    this.onPause,
+    this.onDelete,
+    this.onFavoritesDelete,
+    this.isPaused = false,
   });
 
   @override
@@ -100,35 +110,47 @@ class ProductListCard extends StatelessWidget {
                           fontSize: 15,
                         ),
                       ),
+                      if (item is Favorito && onFavoritesDelete != null)...[
+                        Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.favorite, color: Colors.red),
+                          iconSize: 32.0,
+                          tooltip: "Eliminar",
+                          onPressed: onFavoritesDelete,
+                        ),
+                        SizedBox(width: 16),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 6),
-                  if (item is Anuncio)
-                    Row(
-                    children: [
-                      Icon(
-                        Icons.edit,
-                        size: 16,
-                        color: Colors.grey[600],
+                  if (item is Anuncio && onEdit != null)
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildActionButton(
+                            icon: Icons.edit,
+                            label: "Editar",
+                            color: Colors.blue,
+                            onPressed: onEdit!,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildActionButton(
+                            icon: isPaused ? Icons.play_circle_outline : Icons.pause_circle_outline,
+                            label: isPaused ? "Reactivar" : "Pausar",
+                            color: Colors.orange,
+                            onPressed: onPause!,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildActionButton(
+                            icon: Icons.delete_outline,
+                            label: "Eliminar",
+                            color: Colors.red,
+                            onPressed: onDelete!,
+                          ),
+                        ],
                       ),
-                      Text("Editar"),
-                      SizedBox(width: 12),
-                      Icon(
-                        Icons.pause_circle_outline,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      Text("Pausar"),
-                      SizedBox(width: 12),
-                      Icon(
-                        Icons.delete_outline,
-                        size: 16,
-                        color: Colors.red[600],
-                      ),
-                      Text("Eliminar")
-                    ],
-                  )
-                  
+                    )
                 ],
               ),
             ),
@@ -182,5 +204,39 @@ class ProductListCard extends StatelessWidget {
     if (item is Anuncio) precio = (item as Anuncio).precio;
     if (item is Favorito) precio = (item as Favorito).precio;
     return precio != null ? AppColors.primaryBlue : AppColors.successGreen;
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          border: Border.all(color: color, width: 1),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

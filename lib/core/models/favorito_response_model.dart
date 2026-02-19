@@ -18,13 +18,15 @@ class FavoriteResponse {
 }
 
 class Favorito {
+  final int id;
   final String nombreUsuario;
   final String tituloAnuncio;
-  final double? precio; // Nullable para intercambios o sin precio
+  final double? precio;
   final DateTime fechaFavorito;
-  final String? imagen; // Imagen del anuncio
+  final String? imagen;
 
   Favorito({
+    required this.id,
     required this.nombreUsuario,
     required this.tituloAnuncio,
     this.precio,
@@ -34,9 +36,9 @@ class Favorito {
 
   factory Favorito.fromJson(Map<String, dynamic> json) {
     return Favorito(
+      id: json['id'] as int,
       nombreUsuario: json['nombreUsuario'] as String,
       tituloAnuncio: json['tituloAnuncio'] as String,
-      // Manejo seguro de nulos y conversión a double
       precio: json['precio'] != null ? (json['precio'] as num).toDouble() : null,
       fechaFavorito: DateTime.parse(json['fechaFavorito'] as String),
       imagen: json['imagen'] as String?,
@@ -44,6 +46,7 @@ class Favorito {
   }
 
   Map<String, dynamic> toJson() => {
+    'id': id,
     'nombreUsuario': nombreUsuario,
     'tituloAnuncio': tituloAnuncio,
     'precio': precio,

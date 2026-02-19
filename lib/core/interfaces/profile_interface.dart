@@ -6,4 +6,8 @@ abstract class IProfileService {
   Future<UsuarioResponse> getCurrentUser();
   Future<List<Anuncio>> getMisAnuncios(String usuarioId);
   Future<List<Favorito>> getFavoritos(String usuarioId);
+  Future<void> pauseAnuncio(int anuncioId);
+  Future<void> enableAnuncio(int anuncioId);
+  Future<void> deleteAnuncio(int anuncioId);
+  Future<void> deleteFavorito(int favoritoId);
 }

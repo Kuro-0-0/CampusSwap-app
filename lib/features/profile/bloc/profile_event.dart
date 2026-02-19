@@ -14,3 +14,23 @@ final class LoadFavoritos extends ProfileEvent {
   final String usuarioId;
   LoadFavoritos({required this.usuarioId});
 }
+
+final class PauseAnuncio extends ProfileEvent {
+  final int anuncioId;
+  PauseAnuncio({required this.anuncioId});
+}
+
+final class ReactivateAnuncio extends ProfileEvent {
+  final int anuncioId;
+  ReactivateAnuncio({required this.anuncioId});
+}
+
+final class DeleteAnuncio extends ProfileEvent {
+  final int anuncioId;
+  DeleteAnuncio({required this.anuncioId});
+}
+
+final class DeleteFavorito extends ProfileEvent {
+  final int favoritoId;
+  DeleteFavorito({required this.favoritoId});
+}

@@ -66,7 +66,6 @@ class SearchTopBar extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               
-              // Botón de Filtros
               InkWell(
                 onTap: onFilterTap,
                 child: Container(

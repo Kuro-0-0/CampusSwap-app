@@ -15,7 +15,6 @@ class UsuarioResponse {
     required this.roles,
   });
 
-  // Factory constructor to create a User from JSON
   factory UsuarioResponse.fromJson(Map<String, dynamic> json) {
     return UsuarioResponse(
       id: json['id'] as String,
@@ -27,7 +26,6 @@ class UsuarioResponse {
     );
   }
 
-  // Method to convert User instance back to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
