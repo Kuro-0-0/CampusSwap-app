@@ -10,8 +10,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final AnuncioService _anuncioService;
 
   HomeBloc({AnuncioService? anuncioService})
-      : _anuncioService = anuncioService ?? AnuncioService(),
-        super(HomeInitial()) {
+    : _anuncioService = anuncioService ?? AnuncioService(),
+      super(HomeInitial()) {
     on<CargarCatalogo>(_onCargarCatalogo);
   }
 
@@ -19,7 +19,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     CargarCatalogo event,
     Emitter<HomeState> emit,
   ) async {
-    emit(HomeLoading());
+    final previousCatalogo = _catalogoFromState(state);
+
+    if (previousCatalogo != null) {
+      emit(HomeRefreshing(catalogo: previousCatalogo));
+    } else {
+      emit(HomeLoading());
+    }
 
     try {
       final catalogo = await _anuncioService.obtenerCatalogo(
@@ -37,9 +43,38 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       emit(HomeSuccess(catalogo: catalogo));
     } on AnuncioException catch (e) {
-      emit(HomeError(message: e.message));
+      if (previousCatalogo != null) {
+        emit(HomeRefreshError(message: e.message, catalogo: previousCatalogo));
+      } else {
+        emit(HomeError(message: e.message));
+      }
     } catch (e) {
-      emit(HomeError(message: 'Error inesperado al cargar el catálogo'));
+      if (previousCatalogo != null) {
+        emit(
+          HomeRefreshError(
+            message: 'Error inesperado al cargar el catálogo',
+            catalogo: previousCatalogo,
+          ),
+        );
+      } else {
+        emit(HomeError(message: 'Error inesperado al cargar el catálogo'));
+      }
     }
+  }
+
+  AnuncioResponseModel? _catalogoFromState(HomeState currentState) {
+    if (currentState is HomeSuccess) {
+      return currentState.catalogo;
+    }
+
+    if (currentState is HomeRefreshing) {
+      return currentState.catalogo;
+    }
+
+    if (currentState is HomeRefreshError) {
+      return currentState.catalogo;
+    }
+
+    return null;
   }
 }
