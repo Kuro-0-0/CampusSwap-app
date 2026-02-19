@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:campusswap_app/core/interfaces/auth_interface.dart';
 import 'package:campusswap_app/core/models/login_request_model.dart';
 import 'package:campusswap_app/core/models/login_response_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:http/http.dart' as http;
 
 class AuthException implements Exception {
@@ -17,15 +18,13 @@ class AuthException implements Exception {
 
 class AuthService implements IAuthService {
 
-  final String _baseUrl = "http://10.0.2.2:8080/auth";
-
   @override
   Future<LoginResponse> login(LoginRequest request) async {
     final http.Response response;
 
     try {
       response = await http.post(
-        Uri.parse("$_baseUrl/login"),
+        Uri.parse("${TokenStorage.baseUrl}/login"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(request.toJson()),
       );

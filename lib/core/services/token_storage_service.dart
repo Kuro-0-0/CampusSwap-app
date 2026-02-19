@@ -3,6 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class TokenStorage {
   // Create storage instance
   final _storage = const FlutterSecureStorage();
+  
+  static const baseUrl = "http://10.0.0.2:8080";
 
   // Keys to avoid typos
   static const _keyToken = '';
