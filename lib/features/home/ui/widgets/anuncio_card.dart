@@ -91,7 +91,7 @@ class AnuncioCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          anuncio.precio.toString(),
+                          anuncio.precio != null ? anuncio.precio.toString() : "",
                           style: TextStyle(
                             color: anuncio.tipoOperacion == "VENTA" 
                                 ? AppColors.primaryBlue 
@@ -100,6 +100,16 @@ class AnuncioCard extends StatelessWidget {
                             fontSize: 15,
                           ),
                         ),
+                        Text(
+                          anuncio.tipoOperacion,
+                          style: TextStyle(
+                            color: anuncio.tipoOperacion == "VENTA" 
+                                ? AppColors.primaryBlue 
+                                : AppColors.successGreen,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        )
                       ],
                     ),
                   ],
