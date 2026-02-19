@@ -2,7 +2,7 @@ class UsuarioResponse {
   final String id;
   final String nombre;
   final String email;
-  final double reputacionMedia;
+  final double? reputacionMedia;
   final DateTime fechaRegistro;
   final List<String> roles;
 
@@ -21,7 +21,7 @@ class UsuarioResponse {
       id: json['id'] as String,
       nombre: json['nombre'] as String,
       email: json['email'] as String,
-      reputacionMedia: (json['reputacionMedia'] as num).toDouble(),
+        reputacionMedia: json['reputacionMedia'] == null ? null : (json['reputacionMedia'] as num).toDouble(),
       fechaRegistro: DateTime.parse(json['fechaRegistro'] as String),
       roles: List<String>.from(json['roles']),
     );

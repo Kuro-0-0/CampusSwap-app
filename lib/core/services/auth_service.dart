@@ -21,13 +21,15 @@ class AuthService implements IAuthService {
   @override
   Future<LoginResponse> login(LoginRequest request) async {
     final http.Response response;
+    await TokenStorage().deleteToken();
 
     try {
       response = await http.post(
-        Uri.parse("${TokenStorage.baseUrl}/login"),
+        Uri.parse("${TokenStorage.baseUrl}/auth/login"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(request.toJson()),
       );
+
     } on SocketException {
       throw const AuthException("No se pudo conectar al servidor. Verifica tu conexión.");
     } catch (e) {

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 class ProductListCard extends StatelessWidget {
   final Object item;
   final VoidCallback onTap;
-  // Opcional: Para mostrar un icono de acción a la derecha (ej: Corazón o Basura)
   final Widget? trailing; 
 
   const ProductListCard({
@@ -22,8 +21,8 @@ class ProductListCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 110, // Altura fija para consistencia en listas
-        padding: const EdgeInsets.all(10), // Padding interno
+        height: 110,
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -37,16 +36,12 @@ class ProductListCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // 1. Imagen a la izquierda (Cuadrada o rectangular)
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
-                    // Si es Anuncio mostramos la imagen, si es Favorito mostramos un placeholder
-                    item is Anuncio && (item as Anuncio).imagen.isNotEmpty
-                        ? (item as Anuncio).imagen
-                        : '',
+                    _getImageUrl(),
                     width: 90,
                     height: 90,
                     fit: BoxFit.cover,
@@ -54,43 +49,38 @@ class ProductListCard extends StatelessWidget {
                         Container(width: 90, height: 90, color: Colors.grey[200]),
                   ),
                 ),
-                // Badge de estado (Nuevo/Usado)
-                Positioned(
-                  top: 6,
-                  left: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      // Mostrar condición si viene de Anuncio
-                      (item is Anuncio ? (item as Anuncio).condicion : "").toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
+                if (_getCondition().isNotEmpty)
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _getCondition(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
             
             const SizedBox(width: 16),
 
-            // 2. Información Central
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    // Título según tipo
-                    item is Anuncio
-                        ? (item as Anuncio).titulo
-                        : (item is Favorito ? (item as Favorito).tituloAnuncio : ''),
+                    _getTitle(),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -100,49 +90,49 @@ class ProductListCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  
-                  // Precio y Rating
                   Row(
                     children: [
                       Text(
-                        // Precio según tipo
-                        () {
-                          double? precio;
-                          if (item is Anuncio) precio = (item as Anuncio).precio;
-                          if (item is Favorito) precio = (item as Favorito).precio;
-                          return precio != null ? '\$${precio}' : 'Sin precio';
-                        }(),
+                        _getPriceText(),
                         style: TextStyle(
-                          color: () {
-                            double? precio;
-                            if (item is Anuncio) precio = (item as Anuncio).precio;
-                            if (item is Favorito) precio = (item as Favorito).precio;
-                            return precio != null ? AppColors.primaryBlue : AppColors.successGreen;
-                          }(),
+                          color: _getPriceColor(),
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                         ),
                       ),
-                      const Spacer(),
-                      if (trailing == null) ...[
-                        const Icon(Icons.star, size: 14, color: Colors.amber),
-                        const SizedBox(width: 4),
-                        Text(
-                          10.toString(), // MODIFICAR POR EL RATING DEL USUARIO
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ]
                     ],
                   ),
+                  const SizedBox(height: 6),
+                  if (item is Anuncio)
+                    Row(
+                    children: [
+                      Icon(
+                        Icons.edit,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      Text("Editar"),
+                      SizedBox(width: 12),
+                      Icon(
+                        Icons.pause_circle_outline,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      Text("Pausar"),
+                      SizedBox(width: 12),
+                      Icon(
+                        Icons.delete_outline,
+                        size: 16,
+                        color: Colors.red[600],
+                      ),
+                      Text("Eliminar")
+                    ],
+                  )
+                  
                 ],
               ),
             ),
 
-            // 3. Widget opcional a la derecha (ej: Corazón de favoritos)
             if (trailing != null) ...[
               const SizedBox(width: 8),
               trailing!,
@@ -151,5 +141,46 @@ class ProductListCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getImageUrl() {
+    if (item is Anuncio) {
+      final anuncio = item as Anuncio;
+      return anuncio.imagen.isNotEmpty ? anuncio.imagen : '';
+    } else if (item is Favorito) {
+      final favorito = item as Favorito;
+      return favorito.imagen?.isNotEmpty ?? false ? favorito.imagen! : '';
+    }
+    return '';
+  }
+
+  String _getTitle() {
+    if (item is Anuncio) {
+      return (item as Anuncio).titulo;
+    } else if (item is Favorito) {
+      return (item as Favorito).tituloAnuncio;
+    }
+    return '';
+  }
+
+  String _getCondition() {
+    if (item is Anuncio) {
+      return (item as Anuncio).condicion;
+    }
+    return '';
+  }
+
+  String _getPriceText() {
+    double? precio;
+    if (item is Anuncio) precio = (item as Anuncio).precio;
+    if (item is Favorito) precio = (item as Favorito).precio;
+    return precio != null ? '\$${precio.toStringAsFixed(2)}' : 'Sin precio';
+  }
+
+  Color _getPriceColor() {
+    double? precio;
+    if (item is Anuncio) precio = (item as Anuncio).precio;
+    if (item is Favorito) precio = (item as Favorito).precio;
+    return precio != null ? AppColors.primaryBlue : AppColors.successGreen;
   }
 }

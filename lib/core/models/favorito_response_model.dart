@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class FavoriteResponse {
   final List<Favorito> content;
   final PageInfo page;
@@ -24,12 +22,14 @@ class Favorito {
   final String tituloAnuncio;
   final double? precio; // Nullable para intercambios o sin precio
   final DateTime fechaFavorito;
+  final String? imagen; // Imagen del anuncio
 
   Favorito({
     required this.nombreUsuario,
     required this.tituloAnuncio,
     this.precio,
     required this.fechaFavorito,
+    this.imagen,
   });
 
   factory Favorito.fromJson(Map<String, dynamic> json) {
@@ -39,6 +39,7 @@ class Favorito {
       // Manejo seguro de nulos y conversión a double
       precio: json['precio'] != null ? (json['precio'] as num).toDouble() : null,
       fechaFavorito: DateTime.parse(json['fechaFavorito'] as String),
+      imagen: json['imagen'] as String?,
     );
   }
 
@@ -47,6 +48,7 @@ class Favorito {
     'tituloAnuncio': tituloAnuncio,
     'precio': precio,
     'fechaFavorito': fechaFavorito.toIso8601String(),
+    'imagen': imagen,
   };
 }
 
