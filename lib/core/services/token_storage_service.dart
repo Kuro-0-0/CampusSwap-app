@@ -6,6 +6,7 @@ class TokenStorage {
 
   // Keys to avoid typos
   static const _keyToken = '';
+  static const baseUrl = 'http://10.0.2.2:8080';
 
   // Save the token
   Future<void> saveToken(String token) async {

@@ -1,5 +1,5 @@
 import 'package:campusswap_app/core/theme/app_colors.dart';
-import 'package:campusswap_app/core/widgets/campo_input_custom.dart';
+import 'package:campusswap_app/core/widgets/custom_input_field.dart';
 import 'package:flutter/material.dart';
 
 
