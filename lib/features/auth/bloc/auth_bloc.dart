@@ -32,7 +32,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final response = await _authService.login(
         LoginRequest(email: event.email.trim(), password: event.password),
-      );
+      ).timeout(const Duration(seconds: 10));
       final storage = TokenStorage();
       await storage.saveToken(response.accessToken);
       emit(AuthSuccess(response: response));

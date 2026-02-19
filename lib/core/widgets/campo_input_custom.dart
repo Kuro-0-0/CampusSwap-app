@@ -1,4 +1,4 @@
-import 'package:campusswap_app/core/theme/colores_app.dart';
+import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class CustomInputField extends StatelessWidget {
@@ -31,7 +31,7 @@ class CustomInputField extends StatelessWidget {
           label,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
-            color: ColoresApp.textDark,
+            color: AppColors.textDark,
           ),
         ),
         const SizedBox(height: 8),
@@ -46,7 +46,7 @@ class CustomInputField extends StatelessWidget {
             controller: controller,
             obscureText: isPassword,
             keyboardType: keyboardType,
-            style: const TextStyle(color: ColoresApp.textDark),
+            style: const TextStyle(color: AppColors.textDark),
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: TextStyle(color: Colors.grey.shade400),

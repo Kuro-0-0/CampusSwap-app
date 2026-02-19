@@ -1,15 +1,15 @@
-import 'package:campusswap_app/core/theme/colores_app.dart';
+import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/core/widgets/campo_input_custom.dart';
 import 'package:flutter/material.dart';
 
 
-class LoginFormulario extends StatefulWidget {
+class LoginForm extends StatefulWidget {
   final void Function(String email, String password) onLoginTap;
   final VoidCallback onForgotPasswordTap;
   final VoidCallback onRegisterTap;
   final bool isLoading;
 
-  const LoginFormulario({
+  const LoginForm({
     super.key,
     required this.onLoginTap,
     required this.onForgotPasswordTap,
@@ -18,10 +18,10 @@ class LoginFormulario extends StatefulWidget {
   });
 
   @override
-  State<LoginFormulario> createState() => _LoginFormularioState();
+  State<LoginForm> createState() => _LoginFormState();
 }
 
-class _LoginFormularioState extends State<LoginFormulario> {
+class _LoginFormState extends State<LoginForm> {
   bool _isPasswordVisible = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -96,7 +96,7 @@ class _LoginFormularioState extends State<LoginFormulario> {
               ),
               child: const Text(
                 "¿Olvidaste tu contraseña?",
-                style: TextStyle(color: ColoresApp.primaryBlue),
+                style: TextStyle(color: AppColors.primaryBlue),
               ),
             ),
           ),
@@ -112,7 +112,7 @@ class _LoginFormularioState extends State<LoginFormulario> {
                       _passwordController.text,
                     ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: ColoresApp.primaryBlue,
+              backgroundColor: AppColors.primaryBlue,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -150,7 +150,7 @@ class _LoginFormularioState extends State<LoginFormulario> {
                 child: const Text(
                   "Regístrate aquí",
                   style: TextStyle(
-                    color: ColoresApp.primaryBlue,
+                    color: AppColors.primaryBlue,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

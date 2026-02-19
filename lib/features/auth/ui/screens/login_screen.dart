@@ -1,6 +1,6 @@
-import 'package:campusswap_app/core/theme/colores_app.dart';
+import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
-import 'package:campusswap_app/features/auth/ui/widgets/login_formulario.dart';
+import 'package:campusswap_app/features/auth/ui/widgets/login_form.dart';
 import 'package:campusswap_app/features/auth/ui/widgets/login_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,7 +55,7 @@ class LoginScreen extends StatelessWidget {
                       Text("¡Inicio de sesión exitoso!"),
                     ],
                   ),
-                  backgroundColor: ColoresApp.successGreen,
+                  backgroundColor: AppColors.successGreen,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -71,7 +71,7 @@ class LoginScreen extends StatelessWidget {
           final isLoading = state is AuthLoading;
 
           return Scaffold(
-            backgroundColor: ColoresApp.background,
+            backgroundColor: AppColors.background,
             body: SingleChildScrollView(
               child: SizedBox(
                 height: size.height,
@@ -80,7 +80,7 @@ class LoginScreen extends StatelessWidget {
                     Container(
                       height: size.height * 0.45,
                       decoration: const BoxDecoration(
-                        color: ColoresApp.primaryBlue,
+                        color: AppColors.primaryBlue,
                         borderRadius: BorderRadius.vertical(
                           bottom: Radius.circular(32),
                         ),
@@ -95,7 +95,7 @@ class LoginScreen extends StatelessWidget {
 
                           const SizedBox(height: 30),
 
-                          LoginFormulario(
+                          LoginForm(
                             isLoading: isLoading,
                             onLoginTap: (email, password) {
                               context.read<AuthBloc>().add(
