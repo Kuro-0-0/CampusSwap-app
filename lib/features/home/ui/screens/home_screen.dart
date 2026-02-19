@@ -1,3 +1,4 @@
+import 'package:campusswap_app/features/buscador/ui/screens/search_screen.dart';
 import 'package:campusswap_app/features/home/ui/widgets/catalogo_anuncios.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,9 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             HomeAppBar(
               userName: "Juan",
-              onSearchTap: () {
-                Navigator.pushNamed(context, '/search');
-              },
             ),
             
             Expanded(

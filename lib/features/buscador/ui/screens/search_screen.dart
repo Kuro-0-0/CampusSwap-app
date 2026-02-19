@@ -1,4 +1,4 @@
-import 'dart:async'; // ¡IMPORTANTE! Necesario para el Timer (Debounce)
+import 'dart:async';
 import 'package:campusswap_app/features/buscador/ui/widgets/filtros_busqueda.dart';
 import 'package:campusswap_app/features/home/ui/widgets/catalogo_anuncios.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +16,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   String _currentQuery = '';
-  
-  // Variable para evitar saturar el servidor al escribir rápido
   Timer? _debounce; 
-
-  // Variables de Estado para los Filtros
   int? _categoriaId;
   double? _minPrecio;
   double? _maxPrecio;
@@ -28,39 +24,32 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
-    // Si el usuario sale de la pantalla, cancelamos el temporizador pendiente
     _debounce?.cancel();
     super.dispose();
   }
 
-  // Método que se llama CADA VEZ que el usuario teclea una letra
   void _onSearchChanged(String query, BuildContext context) {
     setState(() {
       _currentQuery = query;
     });
 
-    // Cancelamos el temporizador anterior si el usuario sigue escribiendo
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-    // Iniciamos un nuevo temporizador de 500 milisegundos
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      // Si pasa medio segundo y no ha escrito nada más, ¡buscamos en el backend!
       _ejecutarBusqueda(context);
     });
   }
 
-  // Método unificado para lanzar la petición con TODOS los parámetros
   void _ejecutarBusqueda(BuildContext context) {
     context.read<HomeBloc>().add(CargarCatalogo(
       q: _currentQuery.isNotEmpty ? _currentQuery : null,
-      categoriaId: _categoriaId, // Los filtros se mantienen intactos
+      categoriaId: _categoriaId,
       minPrecio: _minPrecio,
       maxPrecio: _maxPrecio,
       tipoOperacion: _tipoOperacion,
     ));
   }
 
-  // Método para abrir el BottomSheet de filtros
   void _abrirFiltros(BuildContext context) async {
     final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
@@ -81,7 +70,6 @@ class _SearchScreenState extends State<SearchScreen> {
       },
     );
 
-    // Si el usuario le dio a "Aplicar", actualizamos variables y buscamos
     if (result != null && mounted) {
       setState(() {
         _categoriaId = result['categoriaId'];
@@ -89,7 +77,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _maxPrecio = result['maxPrecio'];
         _tipoOperacion = result['tipoOperacion'];
       });
-      _ejecutarBusqueda(context); // Lanza la búsqueda con los nuevos filtros y el texto que ya estuviese escrito
+      _ejecutarBusqueda(context);
     }
   }
 
@@ -109,8 +97,7 @@ class _SearchScreenState extends State<SearchScreen> {
           title: Builder(
             builder: (context) {
               return TextField(
-                autofocus: true, // Abre el teclado automáticamente al entrar a la pantalla
-                // AQUÍ USAMOS LA FUNCIÓN CON DEBOUNCE
+                autofocus: true,
                 onChanged: (val) => _onSearchChanged(val, context), 
                 decoration: const InputDecoration(
                   hintText: "Buscar anuncios...",
@@ -156,7 +143,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 ),
                                 if (isFiltroActivo)
                                   GestureDetector(
-                                    onTap: () => _abrirFiltros(context), // Abrir filtros si tocan el check
+                                    onTap: () => _abrirFiltros(context),
                                     child: Row(
                                       children: const [
                                         Text("Filtros activos ", style: TextStyle(color: AppColors.primaryBlue, fontSize: 12)),

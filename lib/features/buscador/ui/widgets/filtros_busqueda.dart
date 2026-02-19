@@ -68,7 +68,6 @@ class _FiltrosBusquedaState extends State<FiltrosBusqueda> {
             ),
             const SizedBox(height: 16),
 
-            // FILTRO DE CATEGORÍAS (Usando CategoriaBloc)
             const Text("Categoría", style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             BlocBuilder<CategoriaBloc, CategoriaState>(
@@ -97,7 +96,6 @@ class _FiltrosBusquedaState extends State<FiltrosBusqueda> {
             ),
             const SizedBox(height: 16),
 
-            // FILTRO DE PRECIO
             const Text("Rango de Precio (€)", style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Row(
@@ -127,7 +125,6 @@ class _FiltrosBusquedaState extends State<FiltrosBusqueda> {
             ),
             const SizedBox(height: 16),
 
-            // FILTRO DE TIPO DE OPERACIÓN
             const Text("Tipo de Operación", style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Wrap(
@@ -146,7 +143,6 @@ class _FiltrosBusquedaState extends State<FiltrosBusqueda> {
             ),
             const SizedBox(height: 24),
 
-            // BOTONES DE ACCIÓN
             Row(
               children: [
                 Expanded(
@@ -167,7 +163,6 @@ class _FiltrosBusquedaState extends State<FiltrosBusqueda> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryBlue, foregroundColor: Colors.white),
                     onPressed: () {
-                      // Devolvemos un Map con los filtros aplicados al cerrar el modal
                       Navigator.pop(context, {
                         'categoriaId': _selectedCategoriaId,
                         'minPrecio': double.tryParse(_minPrecioCtrl.text),

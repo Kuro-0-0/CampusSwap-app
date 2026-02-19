@@ -21,7 +21,6 @@ class SearchTopBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Fila 1: Botón atrás y Título
           Row(
             children: [
               IconButton(
@@ -43,10 +42,8 @@ class SearchTopBar extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           
-          // Fila 2: Input y Botón Filtros
           Row(
             children: [
-              // Campo de texto
               Expanded(
                 child: Container(
                   height: 48,
@@ -64,7 +61,6 @@ class SearchTopBar extends StatelessWidget {
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 14),
                     ),
-                    // TODO: BLoC - onChanged: (val) => bloc.add(SearchQueryChanged(val))
                   ),
                 ),
               ),
