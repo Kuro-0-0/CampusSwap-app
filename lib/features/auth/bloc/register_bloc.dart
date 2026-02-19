@@ -13,7 +13,7 @@ final AuthService _authService;
 
   RegisterBloc(this._authService) : super(RegisterInitial()) {
     on<RegisterUser>((event, emit) async {
-      emit(RegisrterLoading());
+      emit(RegisterLoading());
       try{
         final response = await _authService.register(event.registerRequest);
         emit(RegisterSuccess(response));

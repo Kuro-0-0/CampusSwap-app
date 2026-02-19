@@ -9,8 +9,7 @@ class LoginHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         children: [
-          const SizedBox(height: 40), // Espacio superior
-          // Icono del libro/puerta
+          const SizedBox(height: 40), 
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -20,7 +19,6 @@ class LoginHeader extends StatelessWidget {
             child: const Icon(Icons.menu_book_rounded, color: Color(0xFF1976D2), size: 32),
           ),
           const SizedBox(height: 24),
-          // Textos
           const Text(
             "Bienvenido de nuevo",
             style: TextStyle(
