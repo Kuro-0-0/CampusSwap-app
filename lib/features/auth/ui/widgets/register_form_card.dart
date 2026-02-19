@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 class RegisterFormCard extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController nameController;
+  final TextEditingController usernameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
@@ -16,6 +17,7 @@ class RegisterFormCard extends StatefulWidget {
     super.key,
     required this.formKey,
     required this.nameController,
+    required this.usernameController,
     required this.emailController,
     required this.passwordController,
     required this.confirmPasswordController,
@@ -55,7 +57,6 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
           children: [
             const SizedBox(height: 8),
 
-            // 1. Nombre
             CustomInputField(
               label: "Nombre completo",
               hintText: "Ej. Juan Pérez",
@@ -71,7 +72,27 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
             ),
             const SizedBox(height: 16),
 
-            // 2. Email
+            CustomInputField(
+              label: "Nombre de usuario",
+              hintText: "Ej. juanperez99",
+              prefixIcon: Icons.alternate_email,
+              controller: widget.usernameController,
+              keyboardType: TextInputType.text,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'El nombre de usuario es requerido';
+                }
+                if (value.trim().length < 3) {
+                  return 'Debe tener al menos 3 caracteres';
+                }
+                if (value.trim().length > 50) {
+                  return 'Debe tener como máximo 50 caracteres';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
             CustomInputField(
               label: "Correo electrónico institucional",
               hintText: "ejemplo@colegio.edu",
@@ -91,7 +112,6 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
             ),
             const SizedBox(height: 16),
 
-            // 3. Contraseña
             CustomInputField(
               label: "Contraseña",
               hintText: "••••••••",
@@ -120,7 +140,6 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
             ),
             const SizedBox(height: 16),
 
-            // 4. Repetir contraseña
             CustomInputField(
               label: "Repetir contraseña",
               hintText: "••••••••",
@@ -150,7 +169,6 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
 
             const SizedBox(height: 30),
 
-            // 5. Botón Crear Cuenta
             ElevatedButton(
               onPressed: widget.isLoading ? null : widget.onRegisterTap,
               style: ElevatedButton.styleFrom(
@@ -179,7 +197,6 @@ class _RegisterFormCardState extends State<RegisterFormCard> {
 
             const SizedBox(height: 20),
 
-            // 6. Link a Login
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

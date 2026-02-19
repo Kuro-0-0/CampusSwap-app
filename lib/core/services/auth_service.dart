@@ -73,7 +73,21 @@ class AuthService implements IAuthService {
       final Map<String, dynamic> body = jsonDecode(response.body);
       return RegisterResponse.fromJson(body);
     } else if (response.statusCode == 400) {
-      throw const AuthException('Datos de registro inválidos. Revisa los campos.');
+      try {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        final invalidParams = body['invalid-params'] as List<dynamic>?;
+        if (invalidParams != null && invalidParams.isNotEmpty) {
+          final messages = invalidParams
+              .map((p) => p['mensaje'] as String)
+              .join('\n');
+          throw AuthException(messages);
+        }
+        throw AuthException(body['detail'] ?? 'Datos de registro inválidos.');
+      } on AuthException {
+        rethrow;
+      } catch (_) {
+        throw AuthException('Error 400: ${response.body}');
+      }
     } else if (response.statusCode == 409) {
       throw const AuthException('El email o username ya está en uso.');
     } else {

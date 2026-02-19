@@ -11,11 +11,10 @@ class RegisterHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         children: [
-          const SizedBox(height: 20), // Margen superior SafeArea
+          const SizedBox(height: 20), 
           
           const SizedBox(height: 10),
           
-          // Icono del libro
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -27,7 +26,6 @@ class RegisterHeader extends StatelessWidget {
           
           const SizedBox(height: 16),
           
-          // Títulos
           const Text(
             "Crear cuenta",
             style: TextStyle(
