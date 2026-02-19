@@ -22,12 +22,11 @@ class HomeAppBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Saludo
           Row(
             children: [
               Text(
                 "Hola, ",
-                style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 18),
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               Text(
                 "$userName 👋",
@@ -41,16 +40,15 @@ class HomeAppBar extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           
-          // Barra de Búsqueda (Fake)
           GestureDetector(
-            onTap: onSearchTap, // TODO: Trigger navigation to Search Feature
+            onTap: onSearchTap,
             child: Container(
               height: 50,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withAlpha(30),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                border: Border.all(color: Colors.white.withAlpha(50)),
               ),
               child: Row(
                 children: const [
