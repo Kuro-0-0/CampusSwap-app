@@ -66,7 +66,7 @@ class AnuncioService implements IAnuncioResponse {
         uri,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer ${token}",
+          "Authorization": "Bearer $token",
         },
       );
     } on SocketException {
