@@ -97,6 +97,7 @@ class ProfileService implements IProfileService {
         TokenStorage().deleteToken();
         throw const ProfileException('No autorizado. Por favor, inicia sesión de nuevo.');
       } else {
+        print('Error al obtener favoritos: ${response.statusCode} - ${response.body}');
         throw ProfileException('Error al obtener favoritos (${response.statusCode})');
       }
     } on SocketException {
@@ -168,6 +169,7 @@ class ProfileService implements IProfileService {
       } else if (response.statusCode == 404) {
         throw const ProfileException('Anuncio no encontrado.');
       } else {
+        print('Error al eliminar anuncio (${response.body})');
         throw ProfileException('Error al eliminar anuncio (${response.statusCode})');
       }
     } on SocketException {
