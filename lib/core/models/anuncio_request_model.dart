@@ -2,7 +2,6 @@ class AnuncioRequestModel {
   final String titulo;
   final String descripcion;
   final double? precio;
-  final String imagen;
   final String tipoOperacion;
   final String condicion;
   final int categoriaId;
@@ -11,7 +10,6 @@ class AnuncioRequestModel {
     required this.titulo,
     required this.descripcion,
     required this.precio,
-    required this.imagen,
     required this.tipoOperacion,
     required this.condicion,
     required this.categoriaId,
@@ -22,7 +20,6 @@ class AnuncioRequestModel {
       titulo: json['titulo'] as String,
       descripcion: json['descripcion'] as String,
       precio: (json['precio'] as num).toDouble(),
-      imagen: json['imagen'] as String,
       tipoOperacion: json['tipoOperacion'] as String,
       condicion: json['condicion'] as String,
       categoriaId: json['categoriaId'] as int,
@@ -34,7 +31,6 @@ class AnuncioRequestModel {
       'titulo': titulo,
       'descripcion': descripcion,
       'precio': precio,
-      'imagen': imagen,
       'tipoOperacion': tipoOperacion,
       'condicion': condicion,
       'categoriaId': categoriaId,
