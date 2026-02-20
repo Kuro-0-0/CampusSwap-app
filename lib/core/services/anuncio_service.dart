@@ -6,6 +6,7 @@ import 'package:campusswap_app/core/models/anuncio_request_model.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class AnuncioException implements Exception {
   final String message;
@@ -164,26 +165,38 @@ class AnuncioService implements IAnuncioResponse {
   }
 
   @override
-  Future<Anuncio> crearAnuncio(AnuncioRequestModel request) async {
+  Future<Anuncio> crearAnuncio(AnuncioRequestModel requestModel) async {
     try {
       final token = await TokenStorage().getToken();
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2:8080/api/v1/anuncios'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(request.toJson()),
-      ).timeout(const Duration(seconds: 15));
+      final uri = Uri.parse('http://10.0.2.2:8080/api/v1/anuncios');
+      
+      var request = http.MultipartRequest('POST', uri);
+      request.headers['Authorization'] = 'Bearer $token';
 
-      if (response.statusCode == 201) {
-        return Anuncio.fromJson(jsonDecode(response.body));
+      request.files.add(http.MultipartFile.fromString(
+        'nuevoAnuncio', 
+        jsonEncode(requestModel.toJson()),
+        contentType: MediaType('application', 'json'),
+      ));
+
+      if (requestModel.imagen.isNotEmpty && !requestModel.imagen.startsWith('http')) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'file',
+          requestModel.imagen,
+        ));
+      }
+
+      final streamedResponse = await request.send().timeout(const Duration(seconds: 15));
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return Anuncio.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
       } else if (response.statusCode == 400) {
         throw const AnuncioException('Datos del anuncio inválidos.');
       } else if (response.statusCode == 401) {
         throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
       } else {
-        throw AnuncioException('Error al crear anuncio (${response.statusCode})');
+        throw AnuncioException('Error al crear anuncio (${response.statusCode}): ${response.body}');
       }
     } on SocketException {
       throw const AnuncioException('No se pudo conectar al servidor.');
@@ -193,24 +206,34 @@ class AnuncioService implements IAnuncioResponse {
   }
 
   @override
-  Future<Anuncio> editarAnuncio(int id, AnuncioRequestModel request) async {
+  Future<Anuncio> editarAnuncio(int id, AnuncioRequestModel requestModel) async {
     try {
       final token = await TokenStorage().getToken();
-      final response = await http.put(
-        Uri.parse('http://10.0.2.2:8080/api/v1/anuncios/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(request.toJson()),
-      ).timeout(const Duration(seconds: 15));
+      final uri = Uri.parse('http://10.0.2.2:8080/api/v1/anuncios/$id');
+      
+      var request = http.MultipartRequest('PUT', uri);
+      request.headers['Authorization'] = 'Bearer $token';
+
+      request.files.add(http.MultipartFile.fromString(
+        'anuncioModificado', 
+        jsonEncode(requestModel.toJson()),
+        contentType: MediaType('application', 'json'),
+      ));
+
+      if (requestModel.imagen.isNotEmpty && !requestModel.imagen.startsWith('http')) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'file',
+          requestModel.imagen,
+        ));
+      }
+
+      final streamedResponse = await request.send().timeout(const Duration(seconds: 15));
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
-        return Anuncio.fromJson(jsonDecode(response.body));
+        return Anuncio.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
       } else if (response.statusCode == 400) {
         throw const AnuncioException('Datos del anuncio inválidos.');
-      } else if (response.statusCode == 401) {
-        throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
       } else if (response.statusCode == 403) {
         throw const AnuncioException('No tienes permiso para editar este anuncio.');
       } else if (response.statusCode == 404) {
