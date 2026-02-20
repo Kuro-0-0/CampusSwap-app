@@ -69,6 +69,82 @@ class _HomeScreenState extends State<HomeScreen> {
                                     fontSize: 12,
                                   ),
                                 ),
+                              );
+                            }
+
+                            if (categoriaState is CategoriaError) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        categoriaState.message,
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        context.read<CategoriaBloc>().add(
+                                          CargarCategorias(),
+                                        );
+                                      },
+                                      child: const Text('Reintentar'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            if (categoriaState is CategoriaSuccess) {
+                              return CategoryFilter(
+                                categorias: categoriaState.categorias,
+                                selectedCategoriaId:
+                                    categoriaState.selectedCategoriaId,
+                                onCategoriaSelected: (newCategory) {
+                                  context.read<CategoriaBloc>().add(
+                                    SeleccionarCategoria(
+                                      categoriaId: newCategory,
+                                    ),
+                                  );
+                                  context.read<HomeBloc>().add(
+                                    CargarCatalogo(categoriaId: newCategory),
+                                  );
+                                },
+                              );
+                            }
+
+                            return const SizedBox.shrink();
+                          },
+                          
+                        ),
+
+                        if (isRefreshing)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: LinearProgressIndicator(
+                              minHeight: 2,
+                              color: AppColors.primaryBlue,
+                            ),
+                          ),
+
+                        if (refreshErrorMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 12,
+                              left: 24,
+                              right: 24,
+                            ),
+                            child: Text(
+                              refreshErrorMessage,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
                               ),
                               TextButton(
                                 onPressed: () => context
