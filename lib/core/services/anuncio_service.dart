@@ -7,6 +7,7 @@ import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 
 class AnuncioException implements Exception {
   final String message;
@@ -207,7 +208,16 @@ class AnuncioService implements IAnuncioResponse {
         ),
       );
 
-      request.files.add(await http.MultipartFile.fromPath('file', rutaImagen));
+      final mimeType = lookupMimeType(rutaImagen); // Returns something like "image/png"
+
+      if (mimeType == null) {
+        print("Could not determine file type");
+        return;
+      }
+
+      final subTypePart = mimeType.split('/')[1];
+
+      request.files.add(await http.MultipartFile.fromPath('file', rutaImagen, contentType: MediaType('image', subTypePart)));
 
       final streamedResponse = await request.send();
 
@@ -216,6 +226,7 @@ class AnuncioService implements IAnuncioResponse {
       if (response.statusCode == 201) {
         return;
       }else if (response.statusCode == 400){
+        print('Error al editar el anuncio (${response.body})');
         throw const AnuncioException(
           'Solicitud inválida, revise los campos'
         );
@@ -275,12 +286,10 @@ class AnuncioService implements IAnuncioResponse {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-
-      print(response.body);
-
       if (response.statusCode == 200) {
         return;
       }else if (response.statusCode == 400){
+        print('Error al editar el anuncio (${response.body})');
         throw const AnuncioException(
           'Solicitud inválida, revise los campos'
         );
