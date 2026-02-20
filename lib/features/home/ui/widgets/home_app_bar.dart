@@ -3,12 +3,10 @@ import '../../../../core/theme/app_colors.dart';
 
 class HomeAppBar extends StatelessWidget {
   final String userName;
-  final VoidCallback onSearchTap;
 
   const HomeAppBar({
     super.key,
     required this.userName,
-    required this.onSearchTap,
   });
 
   @override
@@ -22,6 +20,7 @@ class HomeAppBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: 25,),
           Row(
             children: [
               Text(
@@ -37,30 +36,6 @@ class HomeAppBar extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 24),
-          
-          GestureDetector(
-            onTap: onSearchTap,
-            child: Container(
-              height: 50,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(30),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withAlpha(50)),
-              ),
-              child: Row(
-                children: const [
-                  Icon(Icons.search, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text(
-                    "Buscar libros, uniformes, material...",
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),

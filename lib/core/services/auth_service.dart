@@ -53,6 +53,12 @@ class AuthService implements IAuthService {
     }
   }
 
+
+  Future<void> logout() async {
+    final storage = TokenStorage();
+    await storage.deleteToken();
+  }
+
   @override
   Future<RegisterResponse> register(RegisterRequest request) async {
     final http.Response response;
