@@ -18,6 +18,6 @@ abstract class IAnuncioResponse {
   Future<void> enableAnuncio(int anuncioId);
   Future<void> deleteAnuncio(int anuncioId);
 
-  Future<Anuncio> crearAnuncio(AnuncioRequestModel request);
-  Future<Anuncio> editarAnuncio(int id, AnuncioRequestModel request);
+  Future<void> crearAnuncio(AnuncioRequestModel request, String rutaImagen);
+  Future<void> editarAnuncio(int id, AnuncioRequestModel request, [String? rutaImagen]);
 }
