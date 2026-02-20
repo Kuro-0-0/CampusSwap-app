@@ -87,7 +87,9 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
       final request = AnuncioRequestModel(
         titulo: _tituloCtrl.text.trim(),
         descripcion: _descripcionCtrl.text.trim(),
-        precio: double.tryParse(_precioCtrl.text.trim()) ?? 0.0,
+        precio: _selectedTipoOperacion == "VENTA"
+            ? (double.tryParse(_precioCtrl.text.trim()) ?? 0.0)
+            : null,
         imagen: _imagenBaseUrl,
         tipoOperacion: _selectedTipoOperacion!,
         condicion: _selectedCondicion!,
@@ -211,7 +213,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
             const SizedBox(height: 12),
             GestureDetector(
               onTap: () {
-                print("Añadir foto click");
+                
               },
               child: Container(
                 width: 100,
