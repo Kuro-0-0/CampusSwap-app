@@ -16,4 +16,6 @@ abstract class IAnuncioResponse {
   Future<void> pauseAnuncio(int anuncioId);
   Future<void> enableAnuncio(int anuncioId);
   Future<void> deleteAnuncio(int anuncioId);
+
+  //Future<AnuncioRequestModel>
 }

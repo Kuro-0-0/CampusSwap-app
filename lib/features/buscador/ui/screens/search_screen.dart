@@ -16,7 +16,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   String _currentQuery = '';
-  Timer? _debounce; 
+  Timer? _debounce;
   int? _categoriaId;
   double? _minPrecio;
   double? _maxPrecio;
@@ -34,20 +34,23 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-
     _debounce = Timer(const Duration(milliseconds: 500), () {
       _ejecutarBusqueda(context);
     });
   }
 
   void _ejecutarBusqueda(BuildContext context) {
-    context.read<HomeBloc>().add(CargarCatalogo(
-      q: _currentQuery.isNotEmpty ? _currentQuery : null,
-      categoriaId: _categoriaId,
-      minPrecio: _minPrecio,
-      maxPrecio: _maxPrecio,
-      tipoOperacion: _tipoOperacion,
-    ));
+    context.read<HomeBloc>().add(
+      CargarCatalogo(
+        q: _currentQuery.isNotEmpty && _currentQuery.length >= 3
+            ? _currentQuery
+            : _currentQuery = '',
+        categoriaId: _categoriaId,
+        minPrecio: _minPrecio,
+        maxPrecio: _maxPrecio,
+        tipoOperacion: _tipoOperacion,
+      ),
+    );
   }
 
   void _abrirFiltros(BuildContext context) async {
@@ -98,13 +101,13 @@ class _SearchScreenState extends State<SearchScreen> {
             builder: (context) {
               return TextField(
                 autofocus: true,
-                onChanged: (val) => _onSearchChanged(val, context), 
+                onChanged: (val) => _onSearchChanged(val, context),
                 decoration: const InputDecoration(
                   hintText: "Buscar anuncios...",
                   border: InputBorder.none,
                 ),
               );
-            }
+            },
           ),
           actions: [
             Builder(
@@ -117,7 +120,11 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         body: Builder(
           builder: (context) {
-            final isFiltroActivo = _categoriaId != null || _minPrecio != null || _maxPrecio != null || _tipoOperacion != null;
+            final isFiltroActivo =
+                _categoriaId != null ||
+                _minPrecio != null ||
+                _maxPrecio != null ||
+                _tipoOperacion != null;
 
             return Column(
               children: [
@@ -126,28 +133,40 @@ class _SearchScreenState extends State<SearchScreen> {
                     onRetry: () => _ejecutarBusqueda(context),
                     topContent: (_currentQuery.isNotEmpty || isFiltroActivo)
                         ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24.0,
+                              vertical: 8.0,
+                            ),
                             child: Row(
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    _currentQuery.isNotEmpty 
-                                      ? "Resultados para '$_currentQuery'"
-                                      : "Anuncios filtrados",
-                                    style: const TextStyle(
-                                      color: AppColors.primaryBlue,
-                                      fontStyle: FontStyle.italic,
-                                      fontWeight: FontWeight.w500,
+                                if(_currentQuery.isNotEmpty && _currentQuery.length >= 3)
+                                  Expanded(
+                                    child: Text(
+                                      "Resultados para '$_currentQuery'",
+                                      style: const TextStyle(
+                                        color: AppColors.primaryBlue,
+                                        fontStyle: FontStyle.italic,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
-                                ),
                                 if (isFiltroActivo)
                                   GestureDetector(
                                     onTap: () => _abrirFiltros(context),
                                     child: Row(
                                       children: const [
-                                        Text("Filtros activos ", style: TextStyle(color: AppColors.primaryBlue, fontSize: 12)),
-                                        Icon(Icons.check_circle, size: 16, color: AppColors.primaryBlue),
+                                        Text(
+                                          "Filtros activos ",
+                                          style: TextStyle(
+                                            color: AppColors.primaryBlue,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.check_circle,
+                                          size: 16,
+                                          color: AppColors.primaryBlue,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -159,7 +178,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ],
             );
-          }
+          },
         ),
       ),
     );
