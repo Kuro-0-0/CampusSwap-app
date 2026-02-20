@@ -92,7 +92,6 @@ class LoginScreen extends StatelessWidget {
                     SafeArea(
                       child: Column(
                         children: [
-                          // Header Azul
                           const LoginHeader(),
 
                           const SizedBox(height: 30),

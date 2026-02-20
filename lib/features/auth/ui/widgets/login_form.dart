@@ -52,7 +52,6 @@ class _LoginFormState extends State<LoginForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Input Email
           CustomInputField(
             label: "Correo electrónico",
             hintText: "ejemplo@colegio.edu",
@@ -62,7 +61,6 @@ class _LoginFormState extends State<LoginForm> {
           ),
           const SizedBox(height: 20),
           
-          // Input Contraseña con toggle de visibilidad
           CustomInputField(
             label: "Contraseña",
             hintText: "••••••••",
@@ -84,7 +82,6 @@ class _LoginFormState extends State<LoginForm> {
           
           const SizedBox(height: 12),
 
-          // Olvidaste contraseña
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -103,7 +100,6 @@ class _LoginFormState extends State<LoginForm> {
           
           const SizedBox(height: 24),
 
-          // Botón Iniciar Sesión
           ElevatedButton(
             onPressed: widget.isLoading
                 ? null
@@ -137,7 +133,6 @@ class _LoginFormState extends State<LoginForm> {
 
           const SizedBox(height: 24),
 
-          // Registro
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

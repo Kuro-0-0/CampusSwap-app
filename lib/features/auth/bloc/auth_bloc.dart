@@ -23,7 +23,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
 
-    // Basic client-side validation
     if (event.email.trim().isEmpty || event.password.trim().isEmpty) {
       emit(AuthFailure(message: "Por favor, completa todos los campos."));
       return;
@@ -39,7 +38,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on AuthException catch (e) {
       emit(AuthFailure(message: e.message));
     } catch (e) {
-      print("Error inesperado en AuthBloc: $e");
       emit(AuthFailure(message: "Ocurrió un error inesperado. Intenta de nuevo."));
     }
   }
