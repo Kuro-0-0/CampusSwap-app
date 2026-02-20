@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key}); // ✅ sin idAnuncio
+  const MessagesScreen({super.key}); 
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
@@ -18,7 +18,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   void initState() {
     super.initState();
-    _mensajeBloc = MensajeBloc()..add(GetChats()); // ✅ evento correcto
+    _mensajeBloc = MensajeBloc()..add(GetChats()); 
   }
 
   @override
@@ -48,7 +48,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
               ),
             ),
 
-            // 2. Barra de búsqueda
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Container(
@@ -74,7 +73,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
             const Divider(height: 1, color: Color(0xFFEEEEEE)),
 
-            // 3. Lista desde BLoC
             Expanded(
               child: BlocBuilder<MensajeBloc, MensajeState>(
                 bloc: _mensajeBloc,
@@ -100,7 +98,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       ),
                     );
                   } else if (state is MensajeSuccess) {
-                    // ✅ state.response en lugar de state.data
                     final conversaciones = state.response.content
                         .where((c) => c.ultimoMensaje.contenido
                             .toLowerCase()

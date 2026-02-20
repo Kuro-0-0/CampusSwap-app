@@ -63,14 +63,14 @@ class ConversationTile extends StatelessWidget {
         ],
       ),
       title: Text(
-        otro.nombre, // ✅ nombre del otro participante
+        otro.nombre, 
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            conversacion.anuncio.titulo, // ✅ título del anuncio
+            conversacion.anuncio.titulo,
             style: const TextStyle(
               fontSize: 12,
               color: AppColors.textGrey,
@@ -85,7 +85,7 @@ class ConversationTile extends StatelessWidget {
         ],
       ),
       trailing: Text(
-        _timeAgo(conversacion.ultimoMensaje.fechaEnvio), // ✅ tiempo relativo
+        _timeAgo(conversacion.ultimoMensaje.fechaEnvio), 
         style: const TextStyle(fontSize: 11, color: AppColors.textGrey),
       ),
     );
