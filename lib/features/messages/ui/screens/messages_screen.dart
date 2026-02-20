@@ -5,18 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MessagesScreen extends StatefulWidget {
-  final int idAnuncio;
-  const MessagesScreen({super.key, required this.idAnuncio});
+  const MessagesScreen({super.key}); // ✅ sin idAnuncio
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
 }
 
 class _MessagesScreenState extends State<MessagesScreen> {
+  late MensajeBloc _mensajeBloc;
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
-    context.read<MensajeBloc>().add(ObtenerMensajes(widget.idAnuncio));
+    _mensajeBloc = MensajeBloc()..add(GetChats()); // ✅ evento correcto
+  }
+
+  @override
+  void dispose() {
+    _mensajeBloc.close();
+    super.dispose();
   }
 
   @override
@@ -58,7 +66,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     contentPadding: EdgeInsets.symmetric(vertical: 14),
                   ),
                   onChanged: (value) {
-                    // TODO: filtrar lista localmente
+                    setState(() => _searchQuery = value.toLowerCase());
                   },
                 ),
               ),
@@ -69,19 +77,41 @@ class _MessagesScreenState extends State<MessagesScreen> {
             // 3. Lista desde BLoC
             Expanded(
               child: BlocBuilder<MensajeBloc, MensajeState>(
+                bloc: _mensajeBloc,
                 builder: (context, state) {
                   if (state is MensajeLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is MensajeFailure) {
-                    return Center(child: Text(state.message));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              color: Colors.red, size: 40),
+                          const SizedBox(height: 8),
+                          Text(state.message,
+                              style: const TextStyle(color: Colors.red)),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () => _mensajeBloc.add(GetChats()),
+                            child: const Text("Reintentar"),
+                          ),
+                        ],
+                      ),
+                    );
                   } else if (state is MensajeSuccess) {
-                    final mensajes = state.data.content;
+                    // ✅ state.response en lugar de state.data
+                    final conversaciones = state.response.content
+                        .where((c) => c.ultimoMensaje.contenido
+                            .toLowerCase()
+                            .contains(_searchQuery))
+                        .toList();
 
-                    if (mensajes.isEmpty) return _buildEmptyState();
+                    if (conversaciones.isEmpty) return _buildEmptyState();
 
                     return ListView.separated(
                       padding: const EdgeInsets.only(top: 0, bottom: 20),
-                      itemCount: mensajes.length,
+                      itemCount: conversaciones.length,
                       separatorBuilder: (_, __) => const Divider(
                         height: 1,
                         color: Color(0xFFF5F5F5),
@@ -89,7 +119,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       ),
                       itemBuilder: (context, index) {
                         return ConversationTile(
-                          mensaje: mensajes[index], // ← directo, sin mapper
+                          conversacion: conversaciones[index],
                           onTap: () {
                             // TODO: navegar al chat
                           },
@@ -114,7 +144,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
         children: [
           Icon(Icons.chat_bubble_outline, size: 60, color: Colors.grey),
           SizedBox(height: 16),
-          Text("No tienes mensajes aún", style: TextStyle(color: Colors.grey)),
+          Text("No tienes mensajes aún",
+              style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
