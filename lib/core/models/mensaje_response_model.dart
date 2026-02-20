@@ -19,7 +19,6 @@ class MensajeResponse {
   }
 }
 
-// ──────────────────────────────────────────────────────────────
 
 class Conversacion {
   final AnuncioResumen anuncio;
@@ -32,15 +31,12 @@ class Conversacion {
     required this.ultimoMensaje,
   });
 
-  /// El otro participante (no el usuario logueado)
   Participante get otroParticipante =>
       participantes.firstWhere((p) => !p.yo);
 
-  /// El usuario logueado
   Participante get usuarioLogueado =>
       participantes.firstWhere((p) => p.yo);
 
-  /// Si el último mensaje lo envió el usuario logueado
   bool get ultimoMensajeEsMio =>
       ultimoMensaje.emisorId == usuarioLogueado.id;
 
@@ -57,7 +53,6 @@ class Conversacion {
   }
 }
 
-// ──────────────────────────────────────────────────────────────
 
 class AnuncioResumen {
   final int id;
@@ -79,7 +74,6 @@ class AnuncioResumen {
   }
 }
 
-// ──────────────────────────────────────────────────────────────
 
 class Participante {
   final String id;
@@ -101,7 +95,7 @@ class Participante {
   }
 }
 
-// ──────────────────────────────────────────────────────────────
+
 
 class Mensaje {
   final int id;
@@ -132,7 +126,6 @@ class Mensaje {
   }
 }
 
-// ──────────────────────────────────────────────────────────────
 
 class Pagina {
   final int size;
