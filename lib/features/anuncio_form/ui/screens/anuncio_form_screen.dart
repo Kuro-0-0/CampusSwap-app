@@ -19,28 +19,24 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 1;
 
-  // Form Keys para validación por separado
   final _formKeyStep1 = GlobalKey<FormState>();
   final _formKeyStep2 = GlobalKey<FormState>();
 
-  // Controladores Paso 1
   final _tituloCtrl = TextEditingController();
   final _descripcionCtrl = TextEditingController();
   String _imagenBaseUrl = "https://via.placeholder.com/300";
 
-  // Variables Paso 2
   int? _selectedCategoriaId;
   String? _selectedTipoOperacion;
   String? _selectedCondicion;
   final _precioCtrl = TextEditingController();
 
   final List<String> _tiposOperacion = ['VENTA', 'INTERCAMBIO', 'CESION'];
-  final List<String> _condiciones = ['Nuevo', 'Como nuevo', 'Usado', 'Deteriorado'];
+  final List<String> _condiciones = ['NUEVO', 'COMO_NUEVO', 'USADO', 'DETERIORADO'];
 
   @override
   void initState() {
     super.initState();
-    // Si estamos editando, precargamos los datos
     if (widget.anuncioAEditar != null) {
       final a = widget.anuncioAEditar!;
       _tituloCtrl.text = a.titulo;
@@ -113,68 +109,92 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
         BlocProvider(create: (_) => AnuncioFormBloc()),
         BlocProvider(create: (_) => CategoriaBloc()..add(CargarCategorias())),
       ],
-      child: BlocConsumer<AnuncioFormBloc, AnuncioFormState>(
-        listener: (context, state) {
-          if (state is AnuncioFormSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(isEditing ? 'Anuncio actualizado con éxito' : 'Anuncio publicado con éxito'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.pop(context, true);
-          } else if (state is AnuncioFormError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-        },
-        builder: (context, formState) {
-          final isLoading = formState is AnuncioFormLoading;
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<AnuncioFormBloc, AnuncioFormState>(
+            listener: (context, state) {
+              if (state is AnuncioFormSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(isEditing ? 'Anuncio actualizado con éxito' : 'Anuncio publicado con éxito'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                Navigator.pop(context, true); 
+              } else if (state is AnuncioFormError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                );
+              }
+            },
+          ),
 
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: AppBar(
-              backgroundColor: Colors.white,
-              elevation: 0,
-              iconTheme: const IconThemeData(color: AppColors.textDark),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: _currentStep == 2 ? _previousStep : () => Navigator.pop(context),
-              ),
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isEditing ? "Editar Anuncio" : "Publicar Anuncio",
-                    style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  Text(
-                    "Paso $_currentStep de 2",
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                ],
-              ),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(4),
-                child: Row(
+          BlocListener<CategoriaBloc, CategoriaState>(
+            listener: (context, state) {
+              if (state is CategoriaSuccess && isEditing && _selectedCategoriaId == null) {
+                try {
+                  final categoriaMatch = state.categorias.firstWhere(
+                    (c) => c.nombre.toLowerCase() == widget.anuncioAEditar!.categoria.toLowerCase(),
+                  );
+                  
+                  setState(() {
+                    _selectedCategoriaId = categoriaMatch.id;
+                  });
+                } catch (e) {
+                  print("No se encontró la categoría pre-seleccionada");
+                }
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<AnuncioFormBloc, AnuncioFormState>(
+          builder: (context, formState) {
+            final isLoading = formState is AnuncioFormLoading;
+
+            return Scaffold(
+              backgroundColor: AppColors.background,
+              appBar: AppBar(
+                backgroundColor: Colors.white,
+                elevation: 0,
+                iconTheme: const IconThemeData(color: AppColors.textDark),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _currentStep == 2 ? _previousStep : () => Navigator.pop(context),
+                ),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Container(height: 4, color: AppColors.primaryBlue)),
-                    Expanded(child: Container(height: 4, color: _currentStep == 2 ? AppColors.primaryBlue : Colors.grey.shade300)),
+                    Text(
+                      isEditing ? "Editar Anuncio" : "Publicar Anuncio",
+                      style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    Text(
+                      "Paso $_currentStep de 2",
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                   ],
                 ),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(4),
+                  child: Row(
+                    children: [
+                      Expanded(child: Container(height: 4, color: AppColors.primaryBlue)),
+                      Expanded(child: Container(height: 4, color: _currentStep == 2 ? AppColors.primaryBlue : Colors.grey.shade300)),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            body: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildStep1(),
-                _buildStep2(context, isLoading),
-              ],
-            ),
-          );
-        },
+              body: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildStep1(),
+                  _buildStep2(context, isLoading),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -282,7 +302,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
                 if (state is CategoriaLoading) return const CircularProgressIndicator();
                 if (state is CategoriaSuccess) {
                   return DropdownButtonFormField<int>(
-                    value: _selectedCategoriaId,
+                    initialValue: _selectedCategoriaId,
                     decoration: InputDecoration(
                       hintText: "Seleccionar categoría",
                       filled: true,
@@ -294,6 +314,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
                       value: cat.id,
                       child: Text(cat.nombre),
                     )).toList(),
+                    
                     onChanged: (val) => setState(() => _selectedCategoriaId = val),
                     validator: (val) => val == null ? "Requerido" : null,
                   );
@@ -323,20 +344,22 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
             ),
             const SizedBox(height: 24),
 
-            const Text("Precio (€) *", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _precioCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                hintText: "0.00",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+            if (_selectedTipoOperacion == "VENTA") ...[
+              const Text("Precio (€) *", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _precioCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  hintText: "0.00",
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                ),
+                validator: (val) => val == null || val.isEmpty ? "Requerido" : null,
               ),
-              validator: (val) => val == null || val.isEmpty ? "Requerido" : null,
-            ),
+            ],
             const SizedBox(height: 24),
 
             const Text("Condición del producto *", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
