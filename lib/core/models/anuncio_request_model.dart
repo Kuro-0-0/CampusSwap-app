@@ -1,7 +1,7 @@
 class AnuncioRequestModel {
   final String titulo;
   final String descripcion;
-  final double precio;
+  final double? precio;
   final String imagen;
   final String tipoOperacion;
   final String condicion;
