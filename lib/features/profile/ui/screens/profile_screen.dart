@@ -3,6 +3,7 @@ import 'package:campusswap_app/core/models/favorito_response_model.dart';
 import 'package:campusswap_app/core/services/auth_service.dart';
 import 'package:campusswap_app/features/anuncio_form/ui/screens/anuncio_form_screen.dart';
 import 'package:campusswap_app/features/auth/ui/screens/login_screen.dart';
+import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:campusswap_app/features/profile/ui/widgets/product_list_card.dart';
 import 'package:flutter/material.dart';
@@ -21,227 +22,223 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   int _selectedTab = 0;
 
-  late ProfileBloc _profileBloc;
-
-  @override
-  void initState() {
-    super.initState();
-    _profileBloc = ProfileBloc();
-    _profileBloc.add(LoadProfile());
-  }
-
-  @override
-  void dispose() {
-    _profileBloc.close();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ProfileBloc>.value(
-      value: _profileBloc,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Stack(
-          children: [
-            Container(
-              height: 280,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryBlue,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(32),
-                ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          Container(
+            height: 280,
+            decoration: const BoxDecoration(
+              color: AppColors.primaryBlue,
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(32),
               ),
             ),
+          ),
 
-            SafeArea(
-              child: BlocConsumer<ProfileBloc, ProfileState>(
-                listener: (context, state) {
-                  if (state is ProfileUnauthorized) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ),
-                      (route) => false,
-                    );
-                  }
+          SafeArea(
+            child: BlocConsumer<ProfileBloc, ProfileState>(
+              listener: (context, state) {
+                if (state is ProfileUnauthorized) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                    (route) => false,
+                  );
+                }
 
-                  if (state is AnuncioActionSuccess) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.green,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                    Future.delayed(const Duration(milliseconds: 500), () {
-                      _profileBloc.add(LoadProfile());
-                    });
-                  }
+                if (state is AnuncioActionSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                  context.read<HomeBloc>().add(CargarCatalogo());
+                  context.read<ProfileBloc>().add(LoadProfile());
+                }
 
-                  if (state is FavoritoDeleteSuccess) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.green,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                    Future.delayed(const Duration(milliseconds: 500), () {
-                      _profileBloc.add(LoadProfile());
-                    });
-                  }
-                },
-                builder: (context, state) {
-                  if (state is ProfileLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    );
-                  }
+                if (state is FavoritoDeleteSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                  context.read<ProfileBloc>().add(LoadProfile());
+                }
 
-                  if (state is ProfileFailure) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Error al cargar el perfil',
-                            style: TextStyle(
-                              color: Colors.red[400],
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            state.message,
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () {
-                              _profileBloc.add(LoadProfile());
-                            },
-                            child: const Text('Reintentar'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                if (state is ProfileFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is ProfileLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  );
+                }
 
-                  if (state is ProfileUnauthorized) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-
-                  if (state is ProfileLoaded) {
-                    final usuario = state.usuario;
-                    final misAnuncios = state.anuncios;
-                    final misFavoritos = state.favoritos;
-
-                    return Column(
+                if (state is ProfileFailure) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                "Perfil",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              PopupMenuButton<String>(
-                                icon: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.settings,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                onSelected: (value) async {
-                                  if (value == 'logout') {
-                                    await _handleLogout(context);
-                                  }
-                                },
-                                itemBuilder: (BuildContext context) {
-                                  return [
-                                    const PopupMenuItem<String>(
-                                      value: 'logout',
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.logout,
-                                            color: Colors.black54,
-                                          ),
-                                          SizedBox(width: 10),
-                                          Text('Cerrar Sesión'),
-                                        ],
-                                      ),
-                                    ),
-                                  ];
-                                },
-                              ),
-                            ],
-                          ),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red,
                         ),
-
-                        const SizedBox(height: 10),
-
-                        ProfileInfoCard(
-                          usuario: usuario,
-                          anunciosCount: misAnuncios
-                              .where((a) => a.estado != "CERRADO")
-                              .length,
-                          favoritosCount: misFavoritos.length,
-                          ventasCount: misAnuncios
-                              .where((a) => a.estado == "CERRADO")
-                              .length,
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        ProfileTabToggle(
-                          selectedIndex: _selectedTab,
-                          onTabChanged: (index) {
-                            setState(() => _selectedTab = index);
-                          },
-                        ),
-
                         const SizedBox(height: 16),
-
-                        Expanded(
-                          child: _selectedTab == 0
-                              ? _buildAnunciosList(misAnuncios)
-                              : _buildFavoritosList(misFavoritos),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 48),
+                          child: Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AppColors.textDark,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: () => context.read<ProfileBloc>().add(LoadProfile()),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Reintentar'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ],
-                    );
-                  }
+                    ),
+                  );
+                }
 
-                  return const SizedBox.expand();
-                },
-              ),
+                if (state is ProfileUnauthorized) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state is ProfileLoaded) {
+                  final usuario = state.usuario;
+                  final misAnuncios = state.anuncios;
+                  final misFavoritos = state.favoritos;
+
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Perfil",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              icon: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.settings,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              onSelected: (value) async {
+                                if (value == 'logout') {
+                                  await _handleLogout(context);
+                                }
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return [
+                                  const PopupMenuItem<String>(
+                                    value: 'logout',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.logout,
+                                          color: Colors.black54,
+                                        ),
+                                        SizedBox(width: 10),
+                                        Text('Cerrar Sesión'),
+                                      ],
+                                    ),
+                                  ),
+                                ];
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      ProfileInfoCard(
+                        usuario: usuario,
+                        anunciosCount: misAnuncios
+                            .where((a) => a.estado != "CERRADO")
+                            .length,
+                        favoritosCount: misFavoritos.length,
+                        ventasCount: misAnuncios
+                            .where((a) => a.estado == "CERRADO")
+                            .length,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      ProfileTabToggle(
+                        selectedIndex: _selectedTab,
+                        onTabChanged: (index) {
+                          setState(() => _selectedTab = index);
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      Expanded(
+                        child: _selectedTab == 0
+                            ? _buildAnunciosList(context, misAnuncios)
+                            : _buildFavoritosList(context, misFavoritos),
+                      ),
+                    ],
+                  );
+                }
+
+                return const SizedBox.expand();
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildAnunciosList(List<Anuncio> anuncios) {
+  Widget _buildAnunciosList(BuildContext context, List<Anuncio> anuncios) {
     if (anuncios.isEmpty) {
       return Center(
         child: Column(
@@ -287,7 +284,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 builder: (context) =>
                     AnuncioFormScreen(anuncioAEditar: anuncio),
               ),
-            );
+            ).then((editadoConExito) {
+              if (editadoConExito == true) {
+                context.read<HomeBloc>().add(CargarCatalogo());
+                context.read<ProfileBloc>().add(LoadProfile());
+              }
+            });
           },
           onPause: () {
             _showConfirmDialog(
@@ -297,9 +299,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   : '¿Deseas pausar este anuncio temporalmente?',
               onConfirm: () {
                 if (isPaused) {
-                  _profileBloc.add(ReactivateAnuncio(anuncioId: anuncio.id));
+                  context.read<ProfileBloc>().add(ReactivateAnuncio(anuncioId: anuncio.id));
                 } else {
-                  _profileBloc.add(PauseAnuncio(anuncioId: anuncio.id));
+                  context.read<ProfileBloc>().add(PauseAnuncio(anuncioId: anuncio.id));
                 }
               },
             );
@@ -311,7 +313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   '¿Estás seguro que deseas eliminar este anuncio? Esta acción no se puede deshacer.',
               isDestructive: true,
               onConfirm: () {
-                _profileBloc.add(DeleteAnuncio(anuncioId: anuncio.id));
+                context.read<ProfileBloc>().add(DeleteAnuncio(anuncioId: anuncio.id));
               },
             );
           },
@@ -320,7 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildFavoritosList(List<Favorito> favoritos) {
+  Widget _buildFavoritosList(BuildContext context, List<Favorito> favoritos) {
     if (favoritos.isEmpty) {
       return Center(
         child: Column(
@@ -355,7 +357,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               message: '¿Deseas eliminar este anuncio de tus favoritos?',
               isDestructive: true,
               onConfirm: () {
-                _profileBloc.add(DeleteFavorito(favoritoId: favorito.id));
+                // AÑADIDO: Usar context.read
+                context.read<ProfileBloc>().add(DeleteFavorito(favoritoId: favorito.id));
               },
             );
           },

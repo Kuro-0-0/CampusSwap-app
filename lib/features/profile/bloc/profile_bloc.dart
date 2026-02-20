@@ -84,6 +84,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         message: 'Anuncio pausado correctamente',
         anuncioId: event.anuncioId,
       ));
+      add(LoadProfile());
     } catch (e) {
       final errorMsg = e.toString();
       if (errorMsg.contains('No autorizado')) {
@@ -104,6 +105,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         message: 'Anuncio reactivado correctamente',
         anuncioId: event.anuncioId,
       ));
+      add(LoadProfile());
     } catch (e) {
       final errorMsg = e.toString();
       if (errorMsg.contains('No autorizado')) {
@@ -124,6 +126,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         message: 'Anuncio eliminado correctamente',
         anuncioId: event.anuncioId,
       ));
+      add(LoadProfile());
     } catch (e) {
       final errorMsg = e.toString();
       if (errorMsg.contains('No autorizado')) {
@@ -144,6 +147,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         message: 'Favorito eliminado correctamente',
         favoritoId: event.favoritoId,
       ));
+      add(LoadProfile());
     } catch (e) {
       final errorMsg = e.toString();
       if (errorMsg.contains('No autorizado')) {
