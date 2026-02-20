@@ -1,3 +1,4 @@
+import 'package:campusswap_app/features/anuncio_form/ui/screens/anuncio_form_screen.dart';
 import 'package:campusswap_app/features/buscador/ui/screens/search_screen.dart';
 import 'package:campusswap_app/features/home/ui/screens/home_screen.dart';
 import 'package:campusswap_app/features/profile/ui/screens/profile_screen.dart';
@@ -40,7 +41,10 @@ class _MainLayoutState extends State<MainLayout> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-            //Navegar a crear
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AnuncioFormScreen()),
+            );
         },
         backgroundColor: AppColors.primaryBlue,
         elevation: 4,
