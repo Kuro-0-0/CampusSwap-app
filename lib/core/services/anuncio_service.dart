@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:campusswap_app/core/interfaces/anuncio_interface.dart';
+import 'package:campusswap_app/core/models/anuncio_request_model.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class AnuncioException implements Exception {
   final String message;
@@ -15,7 +17,8 @@ class AnuncioException implements Exception {
 }
 
 class AnuncioService implements IAnuncioResponse {
-  final String _baseUrl = "http://10.0.2.2:8080/api/v1/catalogo";
+  final String _catalogoUrl = "http://10.0.2.2:8080/api/v1/catalogo";
+  final String _baseUrl = "http://10.0.2.2:8080/api/v1/anuncios";
 
   @override
   Future<AnuncioResponseModel> obtenerCatalogo({
@@ -55,7 +58,9 @@ class AnuncioService implements IAnuncioResponse {
       queryParams['estado'] = estado;
     }
 
-    final Uri uri = Uri.parse(_baseUrl).replace(queryParameters: queryParams);
+    final Uri uri = Uri.parse(
+      _catalogoUrl,
+    ).replace(queryParameters: queryParams);
 
     final http.Response response;
 
@@ -71,7 +76,8 @@ class AnuncioService implements IAnuncioResponse {
       );
     } on SocketException {
       throw const AnuncioException(
-          "No se pudo conectar al servidor. Verifica tu conexión.");
+        "No se pudo conectar al servidor. Verifica tu conexión.",
+      );
     } catch (e) {
       throw const AnuncioException("Error de conexión inesperado.");
     }
@@ -89,7 +95,8 @@ class AnuncioService implements IAnuncioResponse {
       throw const AnuncioException("Recurso no encontrado.");
     } else {
       throw AnuncioException(
-        "Error del servidor (${response.statusCode}). Intenta más tarde.");
+        "Error del servidor (${response.statusCode}). Intenta más tarde.",
+      );
     }
   }
 
@@ -106,24 +113,34 @@ class AnuncioService implements IAnuncioResponse {
   Future<void> _toggleAnuncioState(int anuncioId) async {
     try {
       final token = await TokenStorage().getToken();
-      final response = await http.put(
-        Uri.parse('http://10.0.2.2:8080/api/v1/anuncios/$anuncioId/alternar-estado'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .put(
+            Uri.parse(
+              '$_baseUrl/$anuncioId/alternar-estado',
+            ),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return;
       } else if (response.statusCode == 401) {
-        throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
+        throw const AnuncioException(
+          'No autorizado. Por favor, inicia sesión.',
+        );
       } else if (response.statusCode == 403) {
-        throw const AnuncioException('No tienes permiso para realizar esta acción.');
+        throw const AnuncioException(
+          'No tienes permiso para realizar esta acción.',
+        );
       } else if (response.statusCode == 404) {
         throw const AnuncioException('Anuncio no encontrado.');
       } else {
-        throw AnuncioException('Error al alternar estado del anuncio (${response.statusCode})');
+        throw AnuncioException(
+          'Error al alternar estado del anuncio (${response.statusCode})',
+        );
       }
     } on SocketException {
       throw const AnuncioException('No se pudo conectar al servidor.');
@@ -136,29 +153,155 @@ class AnuncioService implements IAnuncioResponse {
   Future<void> deleteAnuncio(int anuncioId) async {
     try {
       final token = await TokenStorage().getToken();
-      final response = await http.delete(
-        Uri.parse('http://10.0.2.2:8080/api/v1/anuncios/$anuncioId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .delete(
+            Uri.parse('$_baseUrl/$anuncioId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return;
       } else if (response.statusCode == 401) {
-        throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
+        throw const AnuncioException(
+          'No autorizado. Por favor, inicia sesión.',
+        );
       } else if (response.statusCode == 403) {
-        throw const AnuncioException('No tienes permiso para eliminar este anuncio.');
+        throw const AnuncioException(
+          'No tienes permiso para eliminar este anuncio.',
+        );
       } else if (response.statusCode == 404) {
         throw const AnuncioException('Anuncio no encontrado.');
       } else {
-        throw AnuncioException('Error al eliminar anuncio (${response.statusCode})');
+        throw AnuncioException(
+          'Error al eliminar anuncio (${response.statusCode})',
+        );
       }
     } on SocketException {
       throw const AnuncioException('No se pudo conectar al servidor.');
     } catch (e) {
       throw AnuncioException('Error inesperado: $e');
+    }
+  }
+
+  @override
+  Future<void> crearAnuncio(
+    AnuncioRequestModel anuncio,
+    String rutaImagen,
+  ) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final uri = Uri.parse(_baseUrl);
+
+      var request = http.MultipartRequest('POST', uri);
+      request.headers['Authorization'] = 'Bearer $token';
+
+      request.files.add(
+        http.MultipartFile.fromString(
+          'data',
+          jsonEncode(anuncio.toJson()),
+          contentType: MediaType('application', 'json'),
+        ),
+      );
+
+      request.files.add(await http.MultipartFile.fromPath('file', rutaImagen));
+
+      final streamedResponse = await request.send();
+
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 201) {
+        return;
+      }else if (response.statusCode == 400){
+        throw const AnuncioException(
+          'Solicitud inválida, revise los campos'
+        );
+
+      } else if (response.statusCode == 401) {
+        throw const AnuncioException(
+          'No autorizado. Por favor, inicia sesión.',
+        );
+      } else if (response.statusCode == 403) {
+        throw const AnuncioException(
+          'No tienes permiso para crear anuncios.',
+        );
+      } else if (response.statusCode == 404) {
+        throw const AnuncioException('Entidad no encontrada.');
+      } else {
+        throw AnuncioException(
+          'Error al crear el anuncio: ${response.statusCode}',
+        );
+      }
+    } on SocketException {
+      throw const AnuncioException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw AnuncioException('Error inesperado: $e');
+    }
+  }
+
+  @override
+  Future<void> editarAnuncio(
+    int id,
+    AnuncioRequestModel anuncio, [
+    String? rutaImagen,
+  ]) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final uri = Uri.parse('$_baseUrl/$id');
+
+      var request = http.MultipartRequest('PUT', uri);
+      request.headers['Authorization'] = 'Bearer $token';
+
+      request.files.add(
+        http.MultipartFile.fromString(
+          'data',
+          jsonEncode(anuncio.toJson()),
+          contentType: MediaType('application', 'json'),
+        ),
+      );
+
+      if (rutaImagen != null && rutaImagen.isNotEmpty) {
+        request.files.add(
+          await http.MultipartFile.fromPath('file', rutaImagen),
+        );
+      }
+
+      print(id);
+      print(anuncio.toJson());
+      print(rutaImagen.toString());
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        return;
+      }else if (response.statusCode == 400){
+        throw const AnuncioException(
+          'Solicitud inválida, revise los campos'
+        );
+
+      } else if (response.statusCode == 401) {
+        throw const AnuncioException(
+          'No autorizado. Por favor, inicia sesión.',
+        );
+      } else if (response.statusCode == 403) {
+        throw const AnuncioException(
+          'No tienes permiso para crear anuncios.',
+        );
+      } else if (response.statusCode == 404) {
+        throw const AnuncioException('Entidad no encontrada.');
+      } else {
+        throw AnuncioException(
+          'Error al crear el anuncio: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw AnuncioException('Error de conexión al editar el anuncio: $e');
     }
   }
 }

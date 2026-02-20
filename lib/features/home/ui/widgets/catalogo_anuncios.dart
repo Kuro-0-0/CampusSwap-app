@@ -8,11 +8,13 @@ class CatalogoAnunciosWidget extends StatelessWidget {
   final Widget? topContent;
   
   final VoidCallback onRetry;
+  final Future<void> Function() onRefresh;
 
   const CatalogoAnunciosWidget({
     super.key,
     this.topContent,
     required this.onRetry,
+    required this.onRefresh,
   });
 
   @override
@@ -67,82 +69,87 @@ class CatalogoAnunciosWidget extends StatelessWidget {
           final isRefreshing = state is HomeRefreshing;
           final refreshErrorMessage = state is HomeRefreshError ? state.message : null;
 
-          return ListView(
-            padding: const EdgeInsets.only(top: 24, bottom: 100),
-            children: [
-              if (topContent != null) topContent!,
-
-              if (isRefreshing)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8),
-                  child: LinearProgressIndicator(minHeight: 2, color: AppColors.primaryBlue),
-                ),
-
-              if (refreshErrorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, left: 24, right: 24),
-                  child: Text(refreshErrorMessage, style: const TextStyle(color: Colors.red, fontSize: 12)),
-                ),
-
-              const SizedBox(height: 24),
-
-              if (anuncios.isEmpty)
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+          return RefreshIndicator(
+            onRefresh: onRefresh,
+            color: AppColors.primaryBlue,
+            backgroundColor: Colors.white,
+            child: ListView(
+              padding: const EdgeInsets.only(top: 24, bottom: 100),
+              children: [
+                if (topContent != null) topContent!,
+            
+                if (isRefreshing)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: LinearProgressIndicator(minHeight: 2, color: AppColors.primaryBlue),
+                  ),
+            
+                if (refreshErrorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, left: 24, right: 24),
+                    child: Text(refreshErrorMessage, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                  ),
+            
+                const SizedBox(height: 24),
+            
+                if (anuncios.isEmpty)
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.4,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey.shade400),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No se encontraron anuncios',
+                            style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey.shade400),
-                        const SizedBox(height: 16),
+                        const Text(
+                          "Anuncios",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                        ),
                         Text(
-                          'No se encontraron anuncios',
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+                          "${anuncios.length} resultados",
+                          style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
                         ),
                       ],
                     ),
                   ),
-                )
-              else ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Anuncios",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                      ),
-                      Text(
-                        "${anuncios.length} resultados",
-                        style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.7,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: anuncios.length,
+                    itemBuilder: (context, index) {
+                      return AnuncioCard(
+                        anuncio: anuncios[index],
+                        onTap: () {
+                          print("Abrir producto: ${anuncios[index].titulo}");
+                        },
+                      );
+                    },
                   ),
-                ),
-                const SizedBox(height: 16),
-                GridView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: anuncios.length,
-                  itemBuilder: (context, index) {
-                    return AnuncioCard(
-                      anuncio: anuncios[index],
-                      onTap: () {
-                        print("Abrir producto: ${anuncios[index].titulo}");
-                      },
-                    );
-                  },
-                ),
+                ],
               ],
-            ],
+            ),
           );
         }
 
