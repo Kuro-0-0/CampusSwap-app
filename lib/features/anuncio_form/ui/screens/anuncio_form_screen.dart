@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
@@ -5,6 +7,7 @@ import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/anuncio_request_model.dart';
 import 'package:campusswap_app/features/categorias/bloc/categoria_bloc.dart';
 import 'package:campusswap_app/features/anuncio_form/bloc/anuncio_form_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AnuncioFormScreen extends StatefulWidget {
   final Anuncio? anuncioAEditar;
@@ -24,12 +27,15 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
 
   final _tituloCtrl = TextEditingController();
   final _descripcionCtrl = TextEditingController();
-  String _imagenBaseUrl = "https://via.placeholder.com/300";
 
   int? _selectedCategoriaId;
   String? _selectedTipoOperacion;
   String? _selectedCondicion;
   final _precioCtrl = TextEditingController();
+
+  String _imagenAntiguaUrl = ""; 
+  String? _rutaImagenSeleccionada; 
+  final ImagePicker _picker = ImagePicker();
 
   final List<String> _tiposOperacion = ['VENTA', 'INTERCAMBIO', 'CESION'];
   final List<String> _condiciones = ['NUEVO', 'COMO_NUEVO', 'USADO', 'DETERIORADO'];
@@ -41,7 +47,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
       final a = widget.anuncioAEditar!;
       _tituloCtrl.text = a.titulo;
       _descripcionCtrl.text = a.descripcion;
-      _imagenBaseUrl = a.imagen;
+      _imagenAntiguaUrl = a.imagen;
       _selectedTipoOperacion = a.tipoOperacion;
       _selectedCondicion = a.condicion;
       if (a.precio != null) _precioCtrl.text = a.precio.toString();
@@ -57,8 +63,24 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
     super.dispose();
   }
 
+  Future<void> _abrirGaleria() async {
+    final XFile? imagen = await _picker.pickImage(source: ImageSource.gallery);
+    if (imagen != null) {
+      setState(() {
+        _rutaImagenSeleccionada = imagen.path;
+      });
+    }
+  }
+
   void _nextStep() {
     if (_formKeyStep1.currentState!.validate()) {
+      if (widget.anuncioAEditar == null && _rutaImagenSeleccionada == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por favor, selecciona una foto de tu galería.'), backgroundColor: Colors.red),
+        );
+        return;
+      }
+
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -90,14 +112,13 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
         precio: _selectedTipoOperacion == "VENTA"
             ? (double.tryParse(_precioCtrl.text.trim()) ?? 0.0)
             : null,
-        imagen: _imagenBaseUrl,
         tipoOperacion: _selectedTipoOperacion!,
         condicion: _selectedCondicion!,
         categoriaId: _selectedCategoriaId!,
       );
 
       context.read<AnuncioFormBloc>().add(
-        SubmitAnuncio(request: request, anuncioId: widget.anuncioAEditar?.id),
+        SubmitAnuncio(request: request, anuncioId: widget.anuncioAEditar?.id, rutaImagen: _rutaImagenSeleccionada),
       );
     }
   }
@@ -212,9 +233,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
             const Text("Fotos del artículo *", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
             const SizedBox(height: 12),
             GestureDetector(
-              onTap: () {
-                
-              },
+              onTap: _abrirGaleria,
               child: Container(
                 width: 100,
                 height: 100,
@@ -222,13 +241,14 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.grey.shade300),
+                  image: _obtenerFondoImagen(),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Icon(Icons.camera_alt_outlined, color: Colors.grey, size: 32),
                     SizedBox(height: 8),
-                    Text("Añadir", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text("Abrir galeria", style: TextStyle(color: Colors.grey, fontSize: 12)),
                   ],
                 ),
               ),
@@ -289,6 +309,19 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
     );
   }
 
+  DecorationImage? _obtenerFondoImagen() {
+    if (_rutaImagenSeleccionada != null) {
+      return DecorationImage(image: FileImage(File(_rutaImagenSeleccionada!)), fit: BoxFit.cover);
+    } else if (_imagenAntiguaUrl.isNotEmpty) {
+      String fullUrl = _imagenAntiguaUrl;
+      if (!fullUrl.startsWith('http')) {
+        fullUrl = 'http://10.0.2.2:8080/api/v1/imagen/$_imagenAntiguaUrl';
+      }
+      return DecorationImage(image: NetworkImage(fullUrl), fit: BoxFit.cover);
+    }
+    return null;
+  }
+
   Widget _buildStep2(BuildContext context, bool isLoading) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -340,6 +373,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
                   backgroundColor: Colors.white,
                   onSelected: (selected) {
                     setState(() => _selectedTipoOperacion = selected ? tipo : null);
+                    print(_selectedTipoOperacion);
                   },
                 );
               }).toList(),
@@ -372,7 +406,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
               children: _condiciones.map((cond) {
                 final isSelected = _selectedCondicion == cond;
                 return SizedBox(
-                  width: (MediaQuery.of(context).size.width - 60) / 2, // 2 columnas
+                  width: (MediaQuery.of(context).size.width - 60) / 2,
                   child: ChoiceChip(
                     label: Center(child: Text(cond)),
                     selected: isSelected,

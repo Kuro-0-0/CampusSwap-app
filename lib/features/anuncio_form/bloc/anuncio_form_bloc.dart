@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:campusswap_app/core/models/anuncio_request_model.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 
 part 'anuncio_form_event.dart';
@@ -19,7 +21,7 @@ class AnuncioFormBloc extends Bloc<AnuncioFormEvent, AnuncioFormState> {
     emit(AnuncioFormLoading());
     try {
       if (event.anuncioId == null) {
-        await _service.crearAnuncio(event.request);
+        await _service.crearAnuncio(event.request, event.rutaImagen!);
       } else {
         await _service.editarAnuncio(event.anuncioId!, event.request);
       }
