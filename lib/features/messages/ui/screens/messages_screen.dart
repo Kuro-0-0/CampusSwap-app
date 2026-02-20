@@ -1,4 +1,6 @@
 import 'package:campusswap_app/core/theme/app_colors.dart';
+import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
+import 'package:campusswap_app/features/chat/ui/screens/chat_screen.dart';
 import 'package:campusswap_app/features/messages/bloc/mensaje_bloc.dart';
 import 'package:campusswap_app/features/messages/ui/widgets/conversation_tile.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +50,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
               ),
             ),
 
+            // 2. Buscador
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Container(
@@ -73,6 +76,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
             const Divider(height: 1, color: Color(0xFFEEEEEE)),
 
+            // 3. Lista
             Expanded(
               child: BlocBuilder<MensajeBloc, MensajeState>(
                 bloc: _mensajeBloc,
@@ -115,10 +119,29 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         indent: 90,
                       ),
                       itemBuilder: (context, index) {
+                        final conversacion = conversaciones[index];
+                        final otro = conversacion.otroParticipante;
+
                         return ConversationTile(
-                          conversacion: conversaciones[index],
+                          conversacion: conversacion,
                           onTap: () {
-                            // TODO: navegar al chat
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => BlocProvider(
+                                  create: (_) => ChatDetalleBloc(),
+                                  child: ChatScreen(
+                                    userName: otro.nombre,
+                                    fotoUsuario: null,
+                                    idAnuncio: conversacion.anuncio.id,
+                                    idContrario: otro.id,
+                                    tituloAnuncio: conversacion.anuncio.titulo,
+                                    imagenAnuncio: conversacion.anuncio.imagen,
+                                    precioAnuncio: 0.0,
+                                  ),
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
