@@ -1,4 +1,5 @@
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
+import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
@@ -183,8 +184,15 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  AnuncioDetailScreen(anuncio: anuncios[index]),
+                              builder: (ctx) => BlocProvider.value(
+                                value: context
+                                    .read<
+                                      ProfileBloc
+                                    >(),
+                                child: AnuncioDetailScreen(
+                                  anuncio: anuncios[index],
+                                ),
+                              ),
                             ),
                           );
                         },

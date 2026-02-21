@@ -1,12 +1,14 @@
 import 'package:campusswap_app/features/anuncio_detail/ui/widgets/vendedor_card.dart';
+import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/anuncio_form/ui/screens/anuncio_form_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AnuncioDetailScreen extends StatelessWidget {
   final Anuncio anuncio;
-  final bool isMine; // <-- 1. AÑADIMOS LA BANDERA PARA SABER SI ES TUYO
+  final bool isMine;
 
   const AnuncioDetailScreen({
     super.key,
@@ -44,9 +46,45 @@ class AnuncioDetailScreen extends StatelessWidget {
               if (!isMine)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: _buildCircleButton(
-                    icon: Icons.favorite_border,
-                    onTap: () {
+                  child: BlocBuilder<ProfileBloc, ProfileState>(
+                    builder: (context, state) {
+                      bool isFavorited = false;
+                      int? favoritoId;
+
+                      if (state is ProfileLoaded) {
+                        bool existe = state.favoritos.any((f) => f.tituloAnuncio == anuncio.titulo);
+                        
+                        if (existe) {
+                          final fav = state.favoritos.firstWhere((f) => f.tituloAnuncio == anuncio.titulo);
+                          isFavorited = true;
+                          favoritoId = fav.id;
+                        }
+                      }
+
+                      return GestureDetector(
+                        onTap: () {
+                          if (isFavorited && favoritoId != null) {
+                            context.read<ProfileBloc>().add(DeleteFavorito(favoritoId: favoritoId));
+                          } else {
+                            context.read<ProfileBloc>().add(AddFavorito(anuncioId: anuncio.id));
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2)),
+                            ],
+                          ),
+                          child: Icon(
+                            isFavorited ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorited ? Colors.red : AppColors.textDark,
+                            size: 20,
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),
