@@ -274,13 +274,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return ProductListCard(
           item: anuncio,
-          onTap: () {
+         onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AnuncioDetailScreen(
-                  anuncio: anuncio,
-                  isMine: true, 
+                builder: (ctx) => BlocProvider.value(
+                  value: context.read<ProfileBloc>(),
+                  child: AnuncioDetailScreen(
+                    anuncio: anuncio,
+                    isMine: true, 
+                  ),
                 ),
               ),
             ).then((resultado) {
