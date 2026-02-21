@@ -10,4 +10,5 @@ abstract class IProfileService {
   Future<void> enableAnuncio(int anuncioId);
   Future<void> deleteAnuncio(int anuncioId);
   Future<void> deleteFavorito(int favoritoId);
+  Future<void> addFavorito(int anuncioId);
 }
