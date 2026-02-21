@@ -51,16 +51,16 @@ class Anuncio {
 
   factory Anuncio.fromJson(Map<String, dynamic> json) {
     return Anuncio(
-      id: json['id'],
-      titulo: json['titulo'],
-      descripcion: json['descripcion'],
+      id: json['id'] ?? 0,
+      titulo: json['titulo'] ?? 'Sin título',
+      descripcion: json['descripcion'] ?? 'Sin descripción',
       precio: json['precio']?.toDouble(),
-      categoria: json['categoria'],
-      imagen: json['imagen'],
-      tipoOperacion: json['tipoOperacion'],
-      estado: json['estado'],
-      condicion: json['condicion'],
-      usuarioId: json['usuarioId'],
+      categoria: json['categoria'] ?? 'Sin categoría',
+      imagen: json['imagen'] ?? '', // Si no hay imagen, pone un texto vacío
+      tipoOperacion: json['tipoOperacion'] ?? 'VENTA',
+      estado: json['estado'] ?? 'ACTIVO',
+      condicion: json['condicion'] ?? 'USADO',
+      usuarioId: json['usuarioId'] ?? '',
     );
   }
 
@@ -95,10 +95,10 @@ class PageInfo {
 
   factory PageInfo.fromJson(Map<String, dynamic> json) {
     return PageInfo(
-      size: json['size'],
-      number: json['number'],
-      totalElements: json['totalElements'],
-      totalPages: json['totalPages'],
+      size: json['size'] ?? 0,
+      number: json['number'] ?? 0,
+      totalElements: json['totalElements'] ?? 0,
+      totalPages: json['totalPages'] ?? 0,
     );
   }
 
