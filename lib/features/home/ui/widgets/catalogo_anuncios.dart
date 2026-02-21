@@ -1,3 +1,4 @@
+import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
@@ -6,7 +7,7 @@ import 'package:campusswap_app/features/home/ui/widgets/anuncio_card.dart';
 
 class CatalogoAnunciosWidget extends StatelessWidget {
   final Widget? topContent;
-  
+
   final VoidCallback onRetry;
   final Future<void> Function() onRefresh;
 
@@ -39,7 +40,10 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                   child: Text(
                     state.message,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.textDark, fontSize: 16),
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -50,8 +54,13 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryBlue,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ],
@@ -59,15 +68,19 @@ class CatalogoAnunciosWidget extends StatelessWidget {
           );
         }
 
-        if (state is HomeSuccess || state is HomeRefreshing || state is HomeRefreshError) {
+        if (state is HomeSuccess ||
+            state is HomeRefreshing ||
+            state is HomeRefreshError) {
           final catalogo = state is HomeSuccess
               ? state.catalogo
               : state is HomeRefreshing
-                  ? state.catalogo
-                  : (state as HomeRefreshError).catalogo;
+              ? state.catalogo
+              : (state as HomeRefreshError).catalogo;
           final anuncios = catalogo.content;
           final isRefreshing = state is HomeRefreshing;
-          final refreshErrorMessage = state is HomeRefreshError ? state.message : null;
+          final refreshErrorMessage = state is HomeRefreshError
+              ? state.message
+              : null;
 
           return RefreshIndicator(
             onRefresh: onRefresh,
@@ -77,21 +90,31 @@ class CatalogoAnunciosWidget extends StatelessWidget {
               padding: const EdgeInsets.only(top: 24, bottom: 100),
               children: [
                 if (topContent != null) topContent!,
-            
+
                 if (isRefreshing)
                   const Padding(
                     padding: EdgeInsets.only(top: 8),
-                    child: LinearProgressIndicator(minHeight: 2, color: AppColors.primaryBlue),
+                    child: LinearProgressIndicator(
+                      minHeight: 2,
+                      color: AppColors.primaryBlue,
+                    ),
                   ),
-            
+
                 if (refreshErrorMessage != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 12, left: 24, right: 24),
-                    child: Text(refreshErrorMessage, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                    padding: const EdgeInsets.only(
+                      top: 12,
+                      left: 24,
+                      right: 24,
+                    ),
+                    child: Text(
+                      refreshErrorMessage,
+                      style: const TextStyle(color: Colors.red, fontSize: 12),
+                    ),
                   ),
-            
+
                 const SizedBox(height: 24),
-            
+
                 if (anuncios.isEmpty)
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.4,
@@ -99,11 +122,18 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey.shade400),
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            size: 64,
+                            color: Colors.grey.shade400,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'No se encontraron anuncios',
-                            style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 16,
+                            ),
                           ),
                         ],
                       ),
@@ -117,11 +147,18 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                       children: [
                         const Text(
                           "Anuncios",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
                         ),
                         Text(
                           "${anuncios.length} resultados",
-                          style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
+                          style: const TextStyle(
+                            color: AppColors.textGrey,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
@@ -131,18 +168,25 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.7,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.7,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
                     itemCount: anuncios.length,
                     itemBuilder: (context, index) {
                       return AnuncioCard(
                         anuncio: anuncios[index],
                         onTap: () {
-                          print("Abrir producto: ${anuncios[index].titulo}");
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  AnuncioDetailScreen(anuncio: anuncios[index]),
+                            ),
+                          );
                         },
                       );
                     },
