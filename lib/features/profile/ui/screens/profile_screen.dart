@@ -349,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return ProductListCard(
           item: favorito,
           onTap: () {
-            print("Ir a detalle de favorito: ${favorito.tituloAnuncio}");
+            print("Ir a detalle de favorito: ${favorito.anuncio.id}");
           },
           onFavoritesDelete: () {
             _showConfirmDialog(

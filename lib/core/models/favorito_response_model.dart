@@ -17,10 +17,32 @@ class FavoriteResponse {
   }
 }
 
+class AnuncioDto {
+  final int id;
+  final String titulo;
+
+  AnuncioDto({
+    required this.id,
+    required this.titulo,
+  });
+
+  factory AnuncioDto.fromJson(Map<String, dynamic> json) {
+    return AnuncioDto(
+      id: json['id'] as int,
+      titulo: json['titulo'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'titulo': titulo,
+  };
+}
+
 class Favorito {
   final int id;
   final String nombreUsuario;
-  final String tituloAnuncio;
+  final AnuncioDto anuncio;
   final double? precio;
   final DateTime fechaFavorito;
   final String? imagen;
@@ -28,7 +50,7 @@ class Favorito {
   Favorito({
     required this.id,
     required this.nombreUsuario,
-    required this.tituloAnuncio,
+    required this.anuncio,
     this.precio,
     required this.fechaFavorito,
     this.imagen,
@@ -38,7 +60,7 @@ class Favorito {
     return Favorito(
       id: json['id'] as int,
       nombreUsuario: json['nombreUsuario'] as String,
-      tituloAnuncio: json['tituloAnuncio'] as String,
+      anuncio: AnuncioDto.fromJson(json['anuncio']),
       precio: json['precio'] != null ? (json['precio'] as num).toDouble() : null,
       fechaFavorito: DateTime.parse(json['fechaFavorito'] as String),
       imagen: json['imagen'] as String?,
@@ -48,7 +70,7 @@ class Favorito {
   Map<String, dynamic> toJson() => {
     'id': id,
     'nombreUsuario': nombreUsuario,
-    'tituloAnuncio': tituloAnuncio,
+    'anuncio': anuncio.toJson(),
     'precio': precio,
     'fechaFavorito': fechaFavorito.toIso8601String(),
     'imagen': imagen,

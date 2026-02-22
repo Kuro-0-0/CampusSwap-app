@@ -180,7 +180,7 @@ class ProductListCard extends StatelessWidget {
     if (item is Anuncio) {
       return (item as Anuncio).titulo;
     } else if (item is Favorito) {
-      return (item as Favorito).tituloAnuncio;
+      return (item as Favorito).anuncio.titulo;
     }
     return '';
   }
