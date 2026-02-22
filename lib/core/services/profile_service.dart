@@ -209,4 +209,35 @@ class ProfileService implements IProfileService {
       throw ProfileException('Error inesperado: $e');
     }
   }
+
+ @override
+  Future<void> addFavorito(int anuncioId) async {
+    try {
+      final token = await _storage.getToken();
+      
+      final response = await http.post(
+        Uri.parse('${TokenStorage.baseUrl}/api/v1/favoritos'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'anuncioId': anuncioId
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 401) {
+        _storage.deleteToken();
+        throw const ProfileException('No autorizado. Por favor, inicia sesión.');
+      } else {
+        throw ProfileException('Error al añadir favorito (${response.statusCode})');
+      }
+    } on SocketException {
+      throw const ProfileException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw ProfileException('Error inesperado: $e');
+    }
+  }
 }
