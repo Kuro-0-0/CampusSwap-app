@@ -1,6 +1,9 @@
 import 'package:campusswap_app/core/models/mensaje_response_model.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
+import 'package:campusswap_app/features/profile/bloc/public_profile_bloc.dart';
+import 'package:campusswap_app/features/profile/ui/screens/public_profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ConversationTile extends StatelessWidget {
   final Conversacion conversacion; 
@@ -28,43 +31,69 @@ class ConversationTile extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
-      leading: Stack(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: Colors.grey[200],
-            backgroundImage: conversacion.anuncio.imagen.isNotEmpty
-                ? NetworkImage(conversacion.anuncio.imagen)
-                : null,
-            child: conversacion.anuncio.imagen.isEmpty
-                ? Text(
-                    otro.nombre[0].toUpperCase(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  )
-                : null,
-          ),
-          // Badge naranja
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF97316),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+      leading: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                create: (context) => PublicProfileBloc(),
+                child: PublicProfileScreen(usuarioId: otro.id),
               ),
             ),
-          ),
-        ],
+          );
+        },
+        child: Stack(
+          children: [
+            CircleAvatar(
+              radius: 26,
+              backgroundColor: Colors.grey[200],
+              backgroundImage: conversacion.anuncio.imagen.isNotEmpty
+                  ? NetworkImage(conversacion.anuncio.imagen)
+                  : null,
+              child: conversacion.anuncio.imagen.isEmpty
+                  ? Text(
+                      otro.nombre[0].toUpperCase(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
+            ),
+            // Badge naranja
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF97316),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      title: Text(
-        otro.nombre, 
-        style: const TextStyle(fontWeight: FontWeight.bold),
+      title: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                create: (context) => PublicProfileBloc(),
+                child: PublicProfileScreen(usuarioId: otro.id),
+              ),
+            ),
+          );
+        },
+        child: Text(
+          otro.nombre, 
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -237,6 +237,7 @@ class AnuncioDetailScreen extends StatelessWidget {
                     date: isMine
                         ? "Este es tu anuncio"
                         : "Activo en la plataforma",
+                    usuarioId: isMine ? null : anuncio.usuarioId,
                   ),
 
                   const SizedBox(height: 100),
