@@ -6,11 +6,7 @@ class AnuncioCard extends StatelessWidget {
   final Anuncio anuncio;
   final VoidCallback onTap;
 
-  const AnuncioCard({
-    super.key,
-    required this.anuncio,
-    required this.onTap,
-  });
+  const AnuncioCard({super.key, required this.anuncio, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +33,17 @@ class AnuncioCard extends StatelessWidget {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
                       image: DecorationImage(
-                        image: NetworkImage(anuncio.imagen),
+                        image: NetworkImage(
+                          anuncio.imagen.isEmpty
+                              ? 'https://via.placeholder.com/150.png?text=Sin+Imagen'
+                              : anuncio.imagen.startsWith('http')
+                              ? anuncio.imagen
+                              : 'http://10.0.2.2:8080/uploads/${anuncio.imagen}',
+                        ),
                         fit: BoxFit.cover,
                       ),
                       color: Colors.grey[200],
@@ -49,7 +53,10 @@ class AnuncioCard extends StatelessWidget {
                     top: 10,
                     right: 10,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
@@ -67,7 +74,7 @@ class AnuncioCard extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             Expanded(
               flex: 4,
               child: Padding(
@@ -91,10 +98,12 @@ class AnuncioCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          anuncio.precio != null ? anuncio.precio.toString() : "",
+                          anuncio.precio != null
+                              ? anuncio.precio.toString()
+                              : "",
                           style: TextStyle(
-                            color: anuncio.tipoOperacion == "VENTA" 
-                                ? AppColors.primaryBlue 
+                            color: anuncio.tipoOperacion == "VENTA"
+                                ? AppColors.primaryBlue
                                 : AppColors.successGreen,
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -103,13 +112,13 @@ class AnuncioCard extends StatelessWidget {
                         Text(
                           anuncio.tipoOperacion,
                           style: TextStyle(
-                            color: anuncio.tipoOperacion == "VENTA" 
-                                ? AppColors.primaryBlue 
+                            color: anuncio.tipoOperacion == "VENTA"
+                                ? AppColors.primaryBlue
                                 : AppColors.successGreen,
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ],
