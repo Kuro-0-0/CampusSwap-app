@@ -102,6 +102,45 @@ class AnuncioService implements IAnuncioResponse {
   }
 
   @override
+  Future<Anuncio> getAnuncioById(int anuncioId) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl/unique/$anuncioId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return Anuncio.fromJson(body);
+      } else if (response.statusCode == 401) {
+        throw const AnuncioException(
+          'No autorizado. Por favor, inicia sesión.',
+        );
+      } else if (response.statusCode == 403) {
+        throw const AnuncioException(
+          'No tienes permiso para acceder a este anuncio.',
+        );
+      } else if (response.statusCode == 404) {
+        throw const AnuncioException('Anuncio no encontrado.');
+      } else {
+        throw AnuncioException(
+          'Error al obtener el anuncio (${response.statusCode})',
+        );
+      }
+    } on SocketException {
+      throw const AnuncioException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw AnuncioException('Error inesperado: $e');
+    }
+  }
+
+  @override
   Future<void> pauseAnuncio(int anuncioId) async {
     await _toggleAnuncioState(anuncioId);
   }

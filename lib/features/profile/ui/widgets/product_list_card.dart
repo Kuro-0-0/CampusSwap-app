@@ -196,7 +196,7 @@ class ProductListCard extends StatelessWidget {
     double? precio;
     if (item is Anuncio) precio = (item as Anuncio).precio;
     if (item is Favorito) precio = (item as Favorito).precio;
-    return precio != null ? '\$${precio.toStringAsFixed(2)}' : 'Sin precio';
+    return precio != null ? '${precio.toStringAsFixed(2)} €' : 'Sin precio';
   }
 
   Color _getPriceColor() {
