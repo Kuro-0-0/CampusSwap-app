@@ -57,6 +57,8 @@ class AnuncioService implements IAnuncioResponse {
     }
     if (estado != null && estado.isNotEmpty) {
       queryParams['estado'] = estado;
+    } else{
+      queryParams['estado'] = 'ACTIVO';
     }
 
     final Uri uri = Uri.parse(
