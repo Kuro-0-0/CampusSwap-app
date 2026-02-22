@@ -99,7 +99,7 @@ class AnuncioCard extends StatelessWidget {
                       children: [
                         Text(
                           anuncio.precio != null
-                              ? anuncio.precio.toString()
+                              ? anuncio.precio!.toStringAsFixed(2) + "€"
                               : "",
                           style: TextStyle(
                             color: anuncio.tipoOperacion == "VENTA"

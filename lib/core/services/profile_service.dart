@@ -68,6 +68,7 @@ class ProfileService implements IProfileService {
         TokenStorage().deleteToken();
         throw const ProfileException('No autorizado. Por favor, inicia sesión de nuevo.');
       } else {
+        print('Error al obtener anuncios: ${response.statusCode} - ${response.body}');
         throw ProfileException('Error al obtener anuncios (${response.statusCode})');
       }
     } on SocketException {
