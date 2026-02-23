@@ -1,4 +1,5 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -7,6 +8,16 @@ class AnuncioCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const AnuncioCard({super.key, required this.anuncio, required this.onTap});
+
+  String get _imageUrl {
+    if (anuncio.imagen.isEmpty)
+      return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
+
+    if (anuncio.imagen.startsWith('http'))
+      return anuncio.imagen;
+
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +49,7 @@ class AnuncioCard extends StatelessWidget {
                       ),
                       image: DecorationImage(
                         image: NetworkImage(
-                          anuncio.imagen.isEmpty
-                              ? 'https://via.placeholder.com/150.png?text=Sin+Imagen'
-                              : anuncio.imagen.startsWith('http')
-                              ? anuncio.imagen
-                              : 'http://10.0.2.2:8080/uploads/${anuncio.imagen}',
+                          _imageUrl,
                         ),
                         fit: BoxFit.cover,
                       ),

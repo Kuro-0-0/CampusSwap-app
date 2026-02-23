@@ -2,17 +2,18 @@ class AnuncioResponseModel {
   final List<Anuncio> content;
   final PageInfo page;
 
-  AnuncioResponseModel({
-    required this.content,
-    required this.page,
-  });
+  AnuncioResponseModel({required this.content, required this.page});
 
   factory AnuncioResponseModel.fromJson(Map<String, dynamic> json) {
     return AnuncioResponseModel(
-      content: List<Anuncio>.from(
-        (json['content'] as List).map((item) => Anuncio.fromJson(item)),
-      ),
-      page: PageInfo.fromJson(json['page']),
+      content: json['content'] != null
+          ? List<Anuncio>.from(
+              (json['content'] as List).map((item) => Anuncio.fromJson(item)),
+            )
+          : [],
+      page: json['page'] != null
+          ? PageInfo.fromJson(json['page'])
+          : PageInfo(size: 0, number: 0, totalElements: 0, totalPages: 0),
     );
   }
 
