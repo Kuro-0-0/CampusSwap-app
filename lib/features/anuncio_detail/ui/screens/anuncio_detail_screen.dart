@@ -1,3 +1,5 @@
+import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/services/profile_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/widgets/vendedor_card.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
@@ -231,15 +233,40 @@ class AnuncioDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  VendedorCard(
-                    name: isMine ? "Tú" : "Usuario del anuncio",
-                    rating: 5.0,
-                    date: isMine
-                        ? "Este es tu anuncio"
-                        : "Activo en la plataforma",
-                    usuarioId: isMine ? null : anuncio.usuarioId,
-                  ),
+                  
+                  FutureBuilder<UsuarioResponse>(
+                    future: ProfileService().getPublicUserProfile(anuncio.usuarioId),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: AppColors.primaryBlue),
+                        );
+                      }
+                      
+                      if (snapshot.hasError || !snapshot.hasData) {
+                        return VendedorCard(
+                          name: isMine ? "Tú" : "Usuario del anuncio",
+                          rating: 0.0,
+                          date: isMine ? "Este es tu anuncio" : "Error al cargar datos",
+                          usuarioId: isMine ? null : anuncio.usuarioId,
+                        );
+                      }
 
+                      final vendedor = snapshot.data!;
+                      
+                      final date = vendedor.fechaRegistro;
+                      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                      final dateString = "${monthNames[date.month - 1]} ${date.year}";
+
+                      return VendedorCard(
+                        name: isMine ? "Tú (${vendedor.nombre})" : vendedor.nombre,
+                        rating: vendedor.reputacionMedia ?? 0.0,
+                        date: isMine ? "Este es tu anuncio" : "Miembro desde $dateString",
+                        usuarioId: isMine ? null : anuncio.usuarioId,
+                      );
+                    },
+                  ),
+                  
                   const SizedBox(height: 100),
                 ],
               ),

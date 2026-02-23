@@ -249,7 +249,7 @@ class AnuncioService implements IAnuncioResponse {
         ),
       );
 
-      final mimeType = lookupMimeType(rutaImagen); // Returns something like "image/png"
+      final mimeType = lookupMimeType(rutaImagen);
 
       if (mimeType == null) {
         print("Could not determine file type");
