@@ -8,6 +8,13 @@ import 'package:campusswap_app/features/chat/ui/widgets/chat_product_header.dart
 import 'package:campusswap_app/features/chat/ui/widgets/message_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
+import 'package:campusswap_app/features/chat/ui/widgets/char_input_bar.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../widgets/chat_product_header.dart';
+import '../widgets/message_bubble.dart';
 
 class ChatScreen extends StatefulWidget {
   final String userName;
@@ -112,6 +119,18 @@ class _ChatScreenState extends State<ChatScreen> {
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.userName,
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -143,6 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   _scrollAlFinal();
                 }
               },
+            child: BlocBuilder<ChatDetalleBloc, ChatDetalleState>(
               builder: (context, state) {
                 if (state is ChatDetalleLoading) {
                   return const Center(child: CircularProgressIndicator());
