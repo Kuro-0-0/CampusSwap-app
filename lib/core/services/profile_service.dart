@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:campusswap_app/core/interfaces/profile_interface.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
+import 'package:campusswap_app/core/models/usuario_page_response_model.dart';
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:http/http.dart' as http;
@@ -291,6 +292,34 @@ class ProfileService implements IProfileService {
         throw const ProfileException('Usuario no encontrado.');
       } else {
         throw ProfileException('Error al obtener anuncios (${response.statusCode})');
+      }
+    } on SocketException {
+      throw const ProfileException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw ProfileException('Error inesperado: $e');
+    }
+  }
+
+  @override
+  Future<UsuarioPageResponse> getTotalUsuarios({int page = 0, int size = 20}) async {
+    try {
+      final token = await _storage.getToken();
+
+      final response = await http.get(
+        Uri.parse('${TokenStorage.baseUrl}/api/v1/admin/usuarios?page=$page&size=$size'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return UsuarioPageResponse.fromJson(body);
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        throw const ProfileException('No tienes permisos de administrador.');
+      } else {
+        throw ProfileException('Error al obtener total de usuarios (${response.statusCode})');
       }
     } on SocketException {
       throw const ProfileException('No se pudo conectar al servidor.');

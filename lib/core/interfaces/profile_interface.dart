@@ -1,5 +1,6 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
+import 'package:campusswap_app/core/models/usuario_page_response_model.dart';
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
 
 abstract class IProfileService {
@@ -13,4 +14,5 @@ abstract class IProfileService {
   Future<void> addFavorito(int anuncioId);
   Future<UsuarioResponse> getPublicUserProfile(String usuarioId);
   Future<List<Anuncio>> getUserAnuncios(String usuarioId);
+  Future<UsuarioPageResponse> getTotalUsuarios({int page = 0, int size = 10});
 }
