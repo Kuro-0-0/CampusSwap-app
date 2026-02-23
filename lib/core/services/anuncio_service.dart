@@ -7,6 +7,7 @@ import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 
 class AnuncioException implements Exception {
   final String message;
@@ -56,6 +57,8 @@ class AnuncioService implements IAnuncioResponse {
     }
     if (estado != null && estado.isNotEmpty) {
       queryParams['estado'] = estado;
+    } else{
+      queryParams['estado'] = 'ACTIVO';
     }
 
     final Uri uri = Uri.parse(
@@ -97,6 +100,45 @@ class AnuncioService implements IAnuncioResponse {
       throw AnuncioException(
         "Error del servidor (${response.statusCode}). Intenta más tarde.",
       );
+    }
+  }
+
+  @override
+  Future<Anuncio> getAnuncioById(int anuncioId) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl/unique/$anuncioId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return Anuncio.fromJson(body);
+      } else if (response.statusCode == 401) {
+        throw const AnuncioException(
+          'No autorizado. Por favor, inicia sesión.',
+        );
+      } else if (response.statusCode == 403) {
+        throw const AnuncioException(
+          'No tienes permiso para acceder a este anuncio.',
+        );
+      } else if (response.statusCode == 404) {
+        throw const AnuncioException('Anuncio no encontrado.');
+      } else {
+        throw AnuncioException(
+          'Error al obtener el anuncio (${response.statusCode})',
+        );
+      }
+    } on SocketException {
+      throw const AnuncioException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw AnuncioException('Error inesperado: $e');
     }
   }
 
@@ -207,7 +249,16 @@ class AnuncioService implements IAnuncioResponse {
         ),
       );
 
-      request.files.add(await http.MultipartFile.fromPath('file', rutaImagen));
+      final mimeType = lookupMimeType(rutaImagen); // Returns something like "image/png"
+
+      if (mimeType == null) {
+        print("Could not determine file type");
+        return;
+      }
+
+      final subTypePart = mimeType.split('/')[1];
+
+      request.files.add(await http.MultipartFile.fromPath('file', rutaImagen, contentType: MediaType('image', subTypePart)));
 
       final streamedResponse = await request.send();
 
@@ -216,6 +267,7 @@ class AnuncioService implements IAnuncioResponse {
       if (response.statusCode == 201) {
         return;
       }else if (response.statusCode == 400){
+        print('Error al editar el anuncio (${response.body})');
         throw const AnuncioException(
           'Solicitud inválida, revise los campos'
         );
@@ -275,12 +327,10 @@ class AnuncioService implements IAnuncioResponse {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-
-      print(response.body);
-
       if (response.statusCode == 200) {
         return;
       }else if (response.statusCode == 400){
+        print('Error al editar el anuncio (${response.body})');
         throw const AnuncioException(
           'Solicitud inválida, revise los campos'
         );

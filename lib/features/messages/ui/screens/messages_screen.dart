@@ -1,13 +1,11 @@
 import 'package:campusswap_app/core/theme/app_colors.dart';
-import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
-import 'package:campusswap_app/features/chat/ui/screens/chat_screen.dart';
 import 'package:campusswap_app/features/messages/bloc/mensaje_bloc.dart';
 import 'package:campusswap_app/features/messages/ui/widgets/conversation_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key}); 
+  const MessagesScreen({super.key});
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
@@ -20,7 +18,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   void initState() {
     super.initState();
-    _mensajeBloc = MensajeBloc()..add(GetChats()); 
+    _mensajeBloc = MensajeBloc()..add(GetChats());
   }
 
   @override
@@ -50,7 +48,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
               ),
             ),
 
-            // 2. Buscador
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Container(
@@ -76,7 +73,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
             const Divider(height: 1, color: Color(0xFFEEEEEE)),
 
-            // 3. Lista
             Expanded(
               child: BlocBuilder<MensajeBloc, MensajeState>(
                 bloc: _mensajeBloc,
@@ -88,24 +84,50 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline,
-                              color: Colors.red, size: 40),
-                          const SizedBox(height: 8),
-                          Text(state.message,
-                              style: const TextStyle(color: Colors.red)),
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red,
+                          ),
                           const SizedBox(height: 16),
-                          TextButton(
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 48),
+                            child: Text(
+                              state.message,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: AppColors.textDark,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
                             onPressed: () => _mensajeBloc.add(GetChats()),
-                            child: const Text("Reintentar"),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Reintentar'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryBlue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     );
                   } else if (state is MensajeSuccess) {
                     final conversaciones = state.response.content
-                        .where((c) => c.ultimoMensaje.contenido
-                            .toLowerCase()
-                            .contains(_searchQuery))
+                        .where(
+                          (c) => c.ultimoMensaje.contenido
+                              .toLowerCase()
+                              .contains(_searchQuery),
+                        )
                         .toList();
 
                     if (conversaciones.isEmpty) return _buildEmptyState();
@@ -119,29 +141,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         indent: 90,
                       ),
                       itemBuilder: (context, index) {
-                        final conversacion = conversaciones[index];
-                        final otro = conversacion.otroParticipante;
-
                         return ConversationTile(
-                          conversacion: conversacion,
+                          conversacion: conversaciones[index],
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => BlocProvider(
-                                  create: (_) => ChatDetalleBloc(),
-                                  child: ChatScreen(
-                                    userName: otro.nombre,
-                                    fotoUsuario: null,
-                                    idAnuncio: conversacion.anuncio.id,
-                                    idContrario: otro.id,
-                                    tituloAnuncio: conversacion.anuncio.titulo,
-                                    imagenAnuncio: conversacion.anuncio.imagen,
-                                    precioAnuncio: 0.0,
-                                  ),
-                                ),
-                              ),
-                            );
+                            // TODO: navegar al chat
                           },
                         );
                       },
@@ -164,8 +167,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
         children: [
           Icon(Icons.chat_bubble_outline, size: 60, color: Colors.grey),
           SizedBox(height: 16),
-          Text("No tienes mensajes aún",
-              style: TextStyle(color: Colors.grey)),
+          Text("No tienes mensajes aún", style: TextStyle(color: Colors.grey)),
         ],
       ),
     );

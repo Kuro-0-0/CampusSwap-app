@@ -34,3 +34,8 @@ final class DeleteFavorito extends ProfileEvent {
   final int favoritoId;
   DeleteFavorito({required this.favoritoId});
 }
+
+final class AddFavorito extends ProfileEvent {
+  final int anuncioId;
+  AddFavorito({required this.anuncioId});
+}

@@ -68,6 +68,7 @@ class ProfileService implements IProfileService {
         TokenStorage().deleteToken();
         throw const ProfileException('No autorizado. Por favor, inicia sesión de nuevo.');
       } else {
+        print('Error al obtener anuncios: ${response.statusCode} - ${response.body}');
         throw ProfileException('Error al obtener anuncios (${response.statusCode})');
       }
     } on SocketException {
@@ -97,6 +98,7 @@ class ProfileService implements IProfileService {
         TokenStorage().deleteToken();
         throw const ProfileException('No autorizado. Por favor, inicia sesión de nuevo.');
       } else {
+        print('Error al obtener favoritos: ${response.statusCode} - ${response.body}');
         throw ProfileException('Error al obtener favoritos (${response.statusCode})');
       }
     } on SocketException {
@@ -168,6 +170,7 @@ class ProfileService implements IProfileService {
       } else if (response.statusCode == 404) {
         throw const ProfileException('Anuncio no encontrado.');
       } else {
+        print('Error al eliminar anuncio (${response.body})');
         throw ProfileException('Error al eliminar anuncio (${response.statusCode})');
       }
     } on SocketException {
@@ -200,6 +203,37 @@ class ProfileService implements IProfileService {
         throw const ProfileException('Favorito no encontrado.');
       } else {
         throw ProfileException('Error al eliminar favorito (${response.statusCode})');
+      }
+    } on SocketException {
+      throw const ProfileException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw ProfileException('Error inesperado: $e');
+    }
+  }
+
+ @override
+  Future<void> addFavorito(int anuncioId) async {
+    try {
+      final token = await _storage.getToken();
+      
+      final response = await http.post(
+        Uri.parse('${TokenStorage.baseUrl}/api/v1/favoritos'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'anuncioId': anuncioId
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 401) {
+        _storage.deleteToken();
+        throw const ProfileException('No autorizado. Por favor, inicia sesión.');
+      } else {
+        throw ProfileException('Error al añadir favorito (${response.statusCode})');
       }
     } on SocketException {
       throw const ProfileException('No se pudo conectar al servidor.');

@@ -1,6 +1,8 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
+import 'package:campusswap_app/core/services/anuncio_service.dart';
 import 'package:campusswap_app/core/services/auth_service.dart';
+import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/anuncio_form/ui/screens/anuncio_form_screen.dart';
 import 'package:campusswap_app/features/auth/ui/screens/login_screen.dart';
 import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
@@ -273,8 +275,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return ProductListCard(
           item: anuncio,
-          onTap: () {
-            print("Ir a detalle del anuncio: ${anuncio.id}");
+         onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => BlocProvider.value(
+                  value: context.read<ProfileBloc>(),
+                  child: AnuncioDetailScreen(
+                    anuncio: anuncio,
+                    isMine: true, 
+                  ),
+                ),
+              ),
+            ).then((resultado) {
+              if (resultado == 'recargar') {
+                context.read<HomeBloc>().add(CargarCatalogo());
+                context.read<ProfileBloc>().add(LoadProfile());
+              } else if (resultado == 'pausar') {
+                context.read<ProfileBloc>().add(PauseAnuncio(anuncioId: anuncio.id));
+              } else if (resultado == 'reactivar') {
+                context.read<ProfileBloc>().add(ReactivateAnuncio(anuncioId: anuncio.id));
+              } else if (resultado == 'eliminar') {
+                context.read<ProfileBloc>().add(DeleteAnuncio(anuncioId: anuncio.id));
+              }
+            });
           },
           isPaused: isPaused,
           onEdit: () {
@@ -348,8 +372,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return ProductListCard(
           item: favorito,
-          onTap: () {
-            print("Ir a detalle de favorito: ${favorito.tituloAnuncio}");
+        onTap: () async {
+            _showLoadingDialog(context);
+            try {
+              final anuncioService = AnuncioService();
+              final anuncioCompleto = await anuncioService.getAnuncioById(favorito.anuncio.id);
+              
+              if (context.mounted) {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) => BlocProvider.value(
+                      value: context.read<ProfileBloc>(),
+                      child: AnuncioDetailScreen(
+                        anuncio: anuncioCompleto,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error al cargar el anuncio: $e'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            }
           },
           onFavoritesDelete: () {
             _showConfirmDialog(
@@ -357,7 +411,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               message: '¿Deseas eliminar este anuncio de tus favoritos?',
               isDestructive: true,
               onConfirm: () {
-                // AÑADIDO: Usar context.read
                 context.read<ProfileBloc>().add(DeleteFavorito(favoritoId: favorito.id));
               },
             );
@@ -419,6 +472,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primaryBlue,
+        ),
       ),
     );
   }

@@ -14,6 +14,7 @@ abstract class IAnuncioResponse {
     String? tipoOperacion,
     String? estado,
   });
+  Future<Anuncio> getAnuncioById(int anuncioId);
   Future<void> pauseAnuncio(int anuncioId);
   Future<void> enableAnuncio(int anuncioId);
   Future<void> deleteAnuncio(int anuncioId);
