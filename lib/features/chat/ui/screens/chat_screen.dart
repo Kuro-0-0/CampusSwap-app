@@ -1,5 +1,6 @@
 // features/chat/ui/screens/chat_screen.dart
 
+import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/chat_mensaje_model.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
@@ -17,6 +18,7 @@ class ChatScreen extends StatefulWidget {
   final String tituloAnuncio;
   final String imagenAnuncio;
   final double precioAnuncio;
+  final Anuncio anuncio; // 👈 añadido
 
   const ChatScreen({
     super.key,
@@ -27,6 +29,7 @@ class ChatScreen extends StatefulWidget {
     required this.tituloAnuncio,
     required this.imagenAnuncio,
     required this.precioAnuncio,
+    required this.anuncio, // 👈 añadido
   });
 
   @override
@@ -129,6 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
             tituloAnuncio: widget.tituloAnuncio,
             imagenAnuncio: widget.imagenAnuncio,
             precioAnuncio: widget.precioAnuncio,
+            anuncio: widget.anuncio, 
             onBuyTap: () {
               // TODO: proceso de pago
             },

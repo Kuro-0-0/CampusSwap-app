@@ -161,12 +161,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
                                     idContrario: otro.id,
                                     tituloAnuncio: conversacion.anuncio.titulo,
                                     imagenAnuncio: conversacion.anuncio.imagen,
-                                    precioAnuncio: 0.0,
+                                    precioAnuncio: conversacion.anuncio.precio,
+                                    anuncio: conversacion.anuncio.toAnuncio(),
                                   ),
                                 ),
                               ),
                             ).then((_) {
-                              // Recarga la lista al volver del chat
                               _mensajeBloc.add(GetChats());
                             });
                           },
