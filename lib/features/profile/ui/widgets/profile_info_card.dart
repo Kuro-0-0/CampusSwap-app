@@ -65,7 +65,7 @@ class ProfileInfoCard extends StatelessWidget {
                     const SizedBox(height: 8),
                       Row(
                         children: [
-                          if (usuario.reputacionMedia != null) ... [
+                          if (usuario.reputacionMedia != null) ...[
                             const Icon(Icons.star, color: Colors.amber, size: 16),
                             const SizedBox(width: 4),
                             Text(
@@ -75,8 +75,15 @@ class ProfileInfoCard extends StatelessWidget {
                                 color: AppColors.warningOrange,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                          ] else ...[
+                            const Icon(Icons.star_border, color: Colors.grey, size: 16),
+                            const SizedBox(width: 4),
+                            const Text(
+                              "Sin valoraciones",
+                              style: TextStyle(fontSize: 10, color: Colors.grey),
+                            ),
                           ],
+                          const SizedBox(width: 8),
                           Text(
                             "Desde $formattedDate",
                             style: const TextStyle(fontSize: 10, color: Colors.grey),

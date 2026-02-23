@@ -5,11 +5,13 @@ import '../../../../core/theme/app_colors.dart';
 class PublicProfileInfoCard extends StatelessWidget {
   final UsuarioResponse usuario;
   final int anunciosCount;
+  final int ventasCount;
 
   const PublicProfileInfoCard({
     super.key,
     required this.usuario,
     required this.anunciosCount,
+    required this.ventasCount,
   });
 
   @override
@@ -71,8 +73,15 @@ class PublicProfileInfoCard extends StatelessWidget {
                               color: AppColors.warningOrange,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                        ] else ...[
+                          const Icon(Icons.star_border, color: Colors.grey, size: 16),
+                          const SizedBox(width: 4),
+                          const Text(
+                            "Sin valoraciones",
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
+                          ),
                         ],
+                        const SizedBox(width: 8),
                         Text(
                           "Desde $formattedDate",
                           style: const TextStyle(fontSize: 10, color: Colors.grey),
@@ -88,9 +97,10 @@ class PublicProfileInfoCard extends StatelessWidget {
           const Divider(),
           const SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem(anunciosCount.toString(), "Anuncios"),
+              _buildStatItem(ventasCount.toString(), "Ventas"),
             ],
           ),
         ],

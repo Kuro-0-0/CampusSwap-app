@@ -1,5 +1,5 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
-import 'package:campusswap_app/core/services/anuncio_service.dart';
+import 'package:campusswap_app/core/models/favorito_response_model.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/public_profile_bloc.dart';
 import 'package:campusswap_app/features/profile/ui/widgets/product_list_card.dart';
@@ -45,7 +45,15 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
           SafeArea(
             child: BlocConsumer<PublicProfileBloc, PublicProfileState>(
               listener: (context, state) {
-                if (state is PublicProfileFailure) {
+                if (state is PublicProfileIsOwnProfile) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Este es tu perfil. Usa la pestaña Perfil para verlo.'),
+                      backgroundColor: AppColors.primaryBlue,
+                    ),
+                  );
+                } else if (state is PublicProfileFailure) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.message),
@@ -112,6 +120,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                 if (state is PublicProfileLoaded) {
                   final usuario = state.usuario;
                   final anuncios = state.anuncios;
+                  final myFavoritos = state.myFavoritos;
 
                   return Column(
                     children: [
@@ -155,10 +164,13 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                         anunciosCount: anuncios
                             .where((a) => a.estado != "CERRADO")
                             .length,
+                        ventasCount: anuncios
+                            .where((a) => a.estado == "CERRADO")
+                            .length,
                       ),
                       const SizedBox(height: 24),
                       Expanded(
-                        child: _buildAnunciosList(context, anuncios),
+                        child: _buildAnunciosList(context, anuncios, myFavoritos),
                       ),
                     ],
                   );
@@ -173,7 +185,11 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     );
   }
 
-  Widget _buildAnunciosList(BuildContext context, List<Anuncio> anuncios) {
+  Widget _buildAnunciosList(
+    BuildContext context,
+    List<Anuncio> anuncios,
+    List<Favorito> myFavoritos,
+  ) {
     if (anuncios.isEmpty) {
       return Center(
         child: Column(
@@ -204,9 +220,21 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final anuncio = activeAnuncios[index];
+        final isFav = myFavoritos.any((f) => f.anuncio.id == anuncio.id);
 
         return ProductListCard(
           item: anuncio,
+          trailing: IconButton(
+            icon: Icon(
+              isFav ? Icons.favorite : Icons.favorite_border,
+              color: isFav ? Colors.red : Colors.grey,
+            ),
+            onPressed: () {
+              context.read<PublicProfileBloc>().add(
+                ToggleFavoritoPublicProfile(anuncioId: anuncio.id),
+              );
+            },
+          ),
           onTap: () {
             Navigator.push(
               context,
