@@ -72,16 +72,15 @@ class PublicProfileBloc extends Bloc<PublicProfileEvent, PublicProfileState> {
             .toList();
         emit(currentState.copyWith(myFavoritos: updatedFavoritos));
       } else {
-        // Not a favorite — add it, then reload favorites to get the new ID
         await _service.addFavorito(event.anuncioId);
         try {
           final currentUser = await _service.getCurrentUser();
           final refreshedFavoritos = await _service.getFavoritos(currentUser.id);
           emit(currentState.copyWith(myFavoritos: refreshedFavoritos));
         } catch (_) {
-          // Best effort — state already updated optimistically
         }
       }
+      add(LoadPublicProfile(usuarioId: currentState.usuario.id));
     } catch (e) {
       emit(PublicProfileFailure(message: e.toString()));
     }
