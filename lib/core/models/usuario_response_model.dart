@@ -3,6 +3,7 @@ class UsuarioResponse {
   final String nombre;
   final String email;
   final double? reputacionMedia;
+  final String imageUrl;
   final DateTime fechaRegistro;
   final List<String> roles;
 
@@ -11,6 +12,7 @@ class UsuarioResponse {
     required this.nombre,
     required this.email,
     required this.reputacionMedia,
+    required this.imageUrl,
     required this.fechaRegistro,
     required this.roles,
   });
@@ -20,7 +22,8 @@ class UsuarioResponse {
       id: json['id'] as String,
       nombre: json['nombre'] as String,
       email: json['email'] as String,
-        reputacionMedia: json['reputacionMedia'] == null ? null : (json['reputacionMedia'] as num).toDouble(),
+      reputacionMedia: json['reputacionMedia'] == null ? null : (json['reputacionMedia'] as num).toDouble(),
+      imageUrl: json['imageUrl'] == null ? '' : json['imageUrl'] as String,
       fechaRegistro: DateTime.parse(json['fechaRegistro'] as String),
       roles: List<String>.from(json['roles']),
     );
@@ -32,6 +35,7 @@ class UsuarioResponse {
       'nombre': nombre,
       'email': email,
       'reputacionMedia': reputacionMedia,
+      'imageUrl': imageUrl,
       'fechaRegistro': fechaRegistro.toIso8601String(),
       'roles': roles,
     };
