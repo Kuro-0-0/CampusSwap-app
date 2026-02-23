@@ -106,24 +106,40 @@ class _ChatScreenState extends State<ChatScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: NetworkImage(
-                _imageUrl(widget.fotoUsuario ?? ''),
+        title: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(create: (_) => PublicProfileBloc()),
+                    BlocProvider(create: (_) => ProfileBloc()..add(LoadProfile())),
+                  ],
+                  child: PublicProfileScreen(usuarioId: widget.idContrario),
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              widget.userName,
-              style: const TextStyle(
-                color: AppColors.textDark,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            );
+          },
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundImage: NetworkImage(
+                  _imageUrl(widget.fotoUsuario ?? ''),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 10),
+              Text(
+                widget.userName,
+                style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           IconButton(
