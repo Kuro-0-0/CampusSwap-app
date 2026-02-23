@@ -181,16 +181,24 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                       return AnuncioCard(
                         anuncio: anuncios[index],
                         onTap: () {
+                          final profileState = context
+                              .read<ProfileBloc>()
+                              .state;
+                          bool isMine = false;
+
+                          if (profileState is ProfileLoaded) {
+                            isMine =
+                                profileState.usuario.id == anuncios[index].usuarioId;
+                          }
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (ctx) => BlocProvider.value(
-                                value: context
-                                    .read<
-                                      ProfileBloc
-                                    >(),
+                                value: context.read<ProfileBloc>(),
                                 child: AnuncioDetailScreen(
                                   anuncio: anuncios[index],
+                                  isMine: isMine,
                                 ),
                               ),
                             ),
