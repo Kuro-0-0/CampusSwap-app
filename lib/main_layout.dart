@@ -23,13 +23,6 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const SearchScreen(),
-    const MessagesScreen(),
-    const ProfileScreen()
-  ];
-
   void _onTabTapped(int index, BuildContext innerContext, bool isAdmin) {
     setState(() {
       _currentIndex = index;

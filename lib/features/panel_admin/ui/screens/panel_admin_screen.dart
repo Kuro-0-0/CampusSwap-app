@@ -214,25 +214,6 @@ class AdminPanelScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActivityItem(String title, String user, String time) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textDark)),
-              Text(user, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
-            ],
-          ),
-          Text(time, style: TextStyle(fontSize: 11, color: Colors.grey.shade400)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildAnuncioRecienteItem(BuildContext context, Anuncio anuncio) {
     return InkWell(
       onTap: () {
