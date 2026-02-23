@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key}); 
+  const MessagesScreen({super.key});
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
@@ -20,7 +20,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   void initState() {
     super.initState();
-    _mensajeBloc = MensajeBloc()..add(GetChats()); 
+    _mensajeBloc = MensajeBloc()..add(GetChats());
   }
 
   @override
@@ -88,15 +88,39 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline,
-                              color: Colors.red, size: 40),
-                          const SizedBox(height: 8),
-                          Text(state.message,
-                              style: const TextStyle(color: Colors.red)),
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red,
+                          ),
                           const SizedBox(height: 16),
-                          TextButton(
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 48),
+                            child: Text(
+                              state.message,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: AppColors.textDark,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
                             onPressed: () => _mensajeBloc.add(GetChats()),
-                            child: const Text("Reintentar"),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Reintentar'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryBlue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -141,7 +165,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
                                   ),
                                 ),
                               ),
-                            );
+                            ).then((_) {
+                              // Recarga la lista al volver del chat
+                              _mensajeBloc.add(GetChats());
+                            });
                           },
                         );
                       },
@@ -164,8 +191,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
         children: [
           Icon(Icons.chat_bubble_outline, size: 60, color: Colors.grey),
           SizedBox(height: 16),
-          Text("No tienes mensajes aún",
-              style: TextStyle(color: Colors.grey)),
+          Text(
+            "No tienes mensajes aún",
+            style: TextStyle(color: Colors.grey),
+          ),
         ],
       ),
     );
