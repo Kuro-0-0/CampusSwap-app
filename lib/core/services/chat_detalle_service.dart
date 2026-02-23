@@ -55,19 +55,15 @@ class ChatDetalleService implements ChatDetalleInterface{
       return content
           .map((e) => ChatMensajeResponse.fromJson(e as Map<String, dynamic>))
           .toList();
-    } else if (response.statusCode == 401) {
+    } else if (response.statusCode == 403 || response.statusCode == 404) {
+      return [];
+    }else if (response.statusCode == 401) {
       throw const ChatDetalleException(
           "No autorizado. Por favor, inicia sesión.");
-    } else if (response.statusCode == 403) {
-      throw const ChatDetalleException(
-          "Acceso prohibido. No tienes permisos.");
-    } else if (response.statusCode == 404) {
-      throw const ChatDetalleException("Recurso no encontrado.");
     } else {
       throw ChatDetalleException(
           "Error del servidor (${response.statusCode}). Intenta más tarde.");
     }
-
 
   }
 
