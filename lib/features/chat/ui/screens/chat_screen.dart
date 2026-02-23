@@ -1,10 +1,14 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/chat_mensaje_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
 import 'package:campusswap_app/features/chat/ui/widgets/char_input_bar.dart';
 import 'package:campusswap_app/features/chat/ui/widgets/chat_product_header.dart';
 import 'package:campusswap_app/features/chat/ui/widgets/message_bubble.dart';
+import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
+import 'package:campusswap_app/features/profile/bloc/public_profile_bloc.dart';
+import 'package:campusswap_app/features/profile/ui/screens/public_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -83,6 +87,14 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  String _imageUrl(String imagen) {
+    if (imagen.isEmpty)
+      return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
+
+    if (imagen.startsWith('http')) return imagen;
+    return '${TokenStorage.baseUrl}/api/v1/imagen/$imagen';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,12 +110,9 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundImage: widget.fotoUsuario != null
-                  ? NetworkImage(widget.fotoUsuario!)
-                  : null,
-              child: widget.fotoUsuario == null
-                  ? const Icon(Icons.person, size: 16)
-                  : null,
+              backgroundImage: NetworkImage(
+                _imageUrl(widget.fotoUsuario ?? ''),
+              ),
             ),
             const SizedBox(width: 10),
             Text(
