@@ -2,6 +2,8 @@ import 'package:campusswap_app/core/models/usuario_response_model.dart';
 import 'package:campusswap_app/core/services/profile_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/widgets/vendedor_card.dart';
+import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
+import 'package:campusswap_app/features/chat/ui/screens/chat_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
@@ -383,8 +385,50 @@ class AnuncioDetailScreen extends StatelessWidget {
       ),
       child: SafeArea(
         child: ElevatedButton.icon(
-          onPressed: () {
-            print("Iniciar Chat");
+          onPressed: () async {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryBlue),
+              ),
+            );
+
+            try {
+              final vendedor = await ProfileService().getPublicUserProfile(anuncio.usuarioId);
+
+              if (context.mounted) {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => ChatDetalleBloc(),
+                      child: ChatScreen(
+                        userName: vendedor.nombre,
+                        fotoUsuario: vendedor.imageUrl.isNotEmpty ? vendedor.imageUrl : null,
+                        idAnuncio: anuncio.id,
+                        idContrario: anuncio.usuarioId,
+                        tituloAnuncio: anuncio.titulo,
+                        imagenAnuncio: anuncio.imagen,
+                        precioAnuncio: anuncio.precio ?? 0.0,
+                        anuncio: anuncio,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Error al intentar abrir el chat.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
           },
           icon: const Icon(Icons.chat_bubble_outline),
           label: const Text("Iniciar chat"),
