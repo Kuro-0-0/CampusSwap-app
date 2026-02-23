@@ -1,4 +1,5 @@
 import 'package:campusswap_app/features/home/ui/screens/home_screen.dart';
+import 'package:campusswap_app/features/messages/bloc/mensaje_bloc.dart';
 import 'package:campusswap_app/features/messages/ui/screens/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,10 +29,14 @@ class _MainLayoutState extends State<MainLayout> {
     const ProfileScreen()
   ];
 
-  void _onTabTapped(int index) {
+  void _onTabTapped(int index, BuildContext innerContext) {
     setState(() {
       _currentIndex = index;
     });
+
+    if(index == 2){
+      innerContext.read<MensajeBloc>().add(GetChats());
+    }
   }
 
   @override
@@ -41,9 +46,10 @@ class _MainLayoutState extends State<MainLayout> {
         BlocProvider(create: (_) => HomeBloc()..add(CargarCatalogo())),
         BlocProvider(create: (_) => CategoriaBloc()..add(CargarCategorias())),
         BlocProvider(create: (_) => ProfileBloc()..add(LoadProfile())),
+        BlocProvider(create: (_) => MensajeBloc()..add(GetChats())),
       ],
       child: Builder(
-        builder: (context) {
+        builder: (innerContext) {
           return Scaffold(
             backgroundColor: AppColors.background,
             
@@ -56,12 +62,12 @@ class _MainLayoutState extends State<MainLayout> {
             floatingActionButton: FloatingActionButton(
               onPressed: () {
                 Navigator.push(
-                  context,
+                  innerContext,
                   MaterialPageRoute(builder: (context) => const AnuncioFormScreen()),
                 ).then((creadoConExito) {
                   if (creadoConExito == true) {
-                    context.read<HomeBloc>().add(CargarCatalogo());
-                    context.read<ProfileBloc>().add(LoadProfile());
+                    innerContext.read<HomeBloc>().add(CargarCatalogo());
+                    innerContext.read<ProfileBloc>().add(LoadProfile());
                   }
                 });
               },
@@ -81,11 +87,11 @@ class _MainLayoutState extends State<MainLayout> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildNavItem(icon: Icons.home, index: 0, label: "Inicio"),
-                    _buildNavItem(icon: Icons.search, index: 1, label: "Buscar"),
+                    _buildNavItem(innerContext, icon: Icons.home, index: 0, label: "Inicio"),
+                    _buildNavItem(innerContext, icon: Icons.search, index: 1, label: "Buscar"),
                     const SizedBox(width: 48),
-                    _buildNavItem(icon: Icons.chat_bubble_outline, index: 2, label: "Mensajes"),
-                    _buildNavItem(icon: Icons.person_outline, index: 3, label: "Perfil"),
+                    _buildNavItem(innerContext, icon: Icons.chat_bubble_outline, index: 2, label: "Mensajes"),
+                    _buildNavItem(innerContext, icon: Icons.person_outline, index: 3, label: "Perfil"),
                   ],
                 ),
               ),
@@ -96,10 +102,10 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  Widget _buildNavItem({required IconData icon, required int index, required String label}) {
+  Widget _buildNavItem(BuildContext innerContext, {required IconData icon, required int index, required String label}) {
     final isSelected = _currentIndex == index;
     return InkWell(
-      onTap: () => _onTabTapped(index),
+      onTap: () => _onTabTapped(index, innerContext),
       borderRadius: BorderRadius.circular(30),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
