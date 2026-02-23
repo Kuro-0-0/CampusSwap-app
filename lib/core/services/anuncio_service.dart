@@ -18,8 +18,8 @@ class AnuncioException implements Exception {
 }
 
 class AnuncioService implements IAnuncioResponse {
-  final String _catalogoUrl = "http://10.0.2.2:8080/api/v1/catalogo";
-  final String _baseUrl = "http://10.0.2.2:8080/api/v1/anuncios";
+  final String _catalogoUrl = "${TokenStorage.baseUrl}/api/v1/catalogo";
+  final String _baseUrl = "${TokenStorage.baseUrl}/api/v1/anuncios";
 
   @override
   Future<AnuncioResponseModel> obtenerCatalogo({
@@ -249,7 +249,7 @@ class AnuncioService implements IAnuncioResponse {
         ),
       );
 
-      final mimeType = lookupMimeType(rutaImagen); // Returns something like "image/png"
+      final mimeType = lookupMimeType(rutaImagen);
 
       if (mimeType == null) {
         print("Could not determine file type");

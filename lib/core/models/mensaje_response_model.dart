@@ -1,15 +1,10 @@
-
-
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 
 class MensajeResponse {
   final List<Conversacion> content;
   final Pagina page;
 
-  MensajeResponse({
-    required this.content,
-    required this.page,
-  });
+  MensajeResponse({required this.content, required this.page});
 
   factory MensajeResponse.fromJson(Map<String, dynamic> json) {
     return MensajeResponse(
@@ -20,7 +15,6 @@ class MensajeResponse {
     );
   }
 }
-
 
 class Conversacion {
   final AnuncioResumen anuncio;
@@ -33,28 +27,24 @@ class Conversacion {
     required this.ultimoMensaje,
   });
 
-  Participante get otroParticipante =>
-      participantes.firstWhere((p) => !p.yo);
+  Participante get otroParticipante => participantes.firstWhere((p) => !p.yo);
 
-  Participante get usuarioLogueado =>
-      participantes.firstWhere((p) => p.yo);
+  Participante get usuarioLogueado => participantes.firstWhere((p) => p.yo);
 
-  bool get ultimoMensajeEsMio =>
-      ultimoMensaje.emisorId == usuarioLogueado.id;
+  bool get ultimoMensajeEsMio => ultimoMensaje.emisorId == usuarioLogueado.id;
 
   factory Conversacion.fromJson(Map<String, dynamic> json) {
     return Conversacion(
-      anuncio: AnuncioResumen.fromJson(
-          json['anuncio'] as Map<String, dynamic>),
+      anuncio: AnuncioResumen.fromJson(json['anuncio'] as Map<String, dynamic>),
       participantes: (json['participantes'] as List)
           .map((p) => Participante.fromJson(p as Map<String, dynamic>))
           .toList(),
       ultimoMensaje: Mensaje.fromJson(
-          json['ultimoMensaje'] as Map<String, dynamic>),
+        json['ultimoMensaje'] as Map<String, dynamic>,
+      ),
     );
   }
 }
-
 
 class AnuncioResumen {
   final int id;
@@ -74,7 +64,7 @@ class AnuncioResumen {
       id: json['id'] as int,
       titulo: json['titulo'] as String,
       imagen: json['imagen'] as String,
-      precio: (json['precio'] as num).toDouble(),
+      precio: json['precio'] != null ? (json['precio'] as num).toDouble() : 0.0,
     );
   }
 
@@ -94,17 +84,12 @@ class AnuncioResumen {
   }
 }
 
-
 class Participante {
   final String id;
   final String nombre;
   final bool yo;
 
-  Participante({
-    required this.id,
-    required this.nombre,
-    required this.yo,
-  });
+  Participante({required this.id, required this.nombre, required this.yo});
 
   factory Participante.fromJson(Map<String, dynamic> json) {
     return Participante(
@@ -114,8 +99,6 @@ class Participante {
     );
   }
 }
-
-
 
 class Mensaje {
   final int id;
@@ -145,7 +128,6 @@ class Mensaje {
     );
   }
 }
-
 
 class Pagina {
   final int size;

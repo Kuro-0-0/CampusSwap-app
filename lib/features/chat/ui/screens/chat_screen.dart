@@ -1,12 +1,14 @@
-// features/chat/ui/screens/chat_screen.dart
-
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/chat_mensaje_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
 import 'package:campusswap_app/features/chat/ui/widgets/char_input_bar.dart';
 import 'package:campusswap_app/features/chat/ui/widgets/chat_product_header.dart';
 import 'package:campusswap_app/features/chat/ui/widgets/message_bubble.dart';
+import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
+import 'package:campusswap_app/features/profile/bloc/public_profile_bloc.dart';
+import 'package:campusswap_app/features/profile/ui/screens/public_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,7 +20,7 @@ class ChatScreen extends StatefulWidget {
   final String tituloAnuncio;
   final String imagenAnuncio;
   final double precioAnuncio;
-  final Anuncio anuncio; // 👈 añadido
+  final Anuncio anuncio;
 
   const ChatScreen({
     super.key,
@@ -29,7 +31,7 @@ class ChatScreen extends StatefulWidget {
     required this.tituloAnuncio,
     required this.imagenAnuncio,
     required this.precioAnuncio,
-    required this.anuncio, // 👈 añadido
+    required this.anuncio,
   });
 
   @override
@@ -85,6 +87,14 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  String _imageUrl(String imagen) {
+    if (imagen.isEmpty)
+      return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
+
+    if (imagen.startsWith('http')) return imagen;
+    return '${TokenStorage.baseUrl}/api/v1/imagen/$imagen';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,27 +106,40 @@ class _ChatScreenState extends State<ChatScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: widget.fotoUsuario != null
-                  ? NetworkImage(widget.fotoUsuario!)
-                  : null,
-              child: widget.fotoUsuario == null
-                  ? const Icon(Icons.person, size: 16)
-                  : null,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              widget.userName,
-              style: const TextStyle(
-                color: AppColors.textDark,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+        title: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(create: (_) => PublicProfileBloc()),
+                    BlocProvider(create: (_) => ProfileBloc()..add(LoadProfile())),
+                  ],
+                  child: PublicProfileScreen(usuarioId: widget.idContrario),
+                ),
               ),
-            ),
-          ],
+            );
+          },
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundImage: NetworkImage(
+                  _imageUrl(widget.fotoUsuario ?? ''),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                widget.userName,
+                style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           IconButton(
@@ -127,18 +150,12 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
-          // 1. Cabecera del anuncio
           ChatProductHeader(
             tituloAnuncio: widget.tituloAnuncio,
             imagenAnuncio: widget.imagenAnuncio,
-            precioAnuncio: widget.precioAnuncio,
-            anuncio: widget.anuncio, 
-            onBuyTap: () {
-              // TODO: proceso de pago
-            },
+            anuncio: widget.anuncio,
+            onBuyTap: () {},
           ),
-
-          // 2. Lista de mensajes
           Expanded(
             child: BlocConsumer<ChatDetalleBloc, ChatDetalleState>(
               listener: (context, state) {
@@ -150,7 +167,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (state is ChatDetalleLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (state is ChatDetalleEnviado) { 
+                if (state is ChatDetalleEnviado) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (state is ChatDetalleFailure) {
@@ -158,8 +175,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline,
-                            size: 48, color: Colors.red),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           state.error,
@@ -203,11 +223,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
 
-          // 3. Input
-          ChatInputBar(
-            controller: _controller,
-            onSendTap: _enviarMensaje,
-          ),
+          ChatInputBar(controller: _controller, onSendTap: _enviarMensaje),
         ],
       ),
     );

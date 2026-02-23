@@ -1,4 +1,9 @@
+import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/services/profile_service.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/widgets/vendedor_card.dart';
+import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
+import 'package:campusswap_app/features/chat/ui/screens/chat_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
@@ -21,7 +26,7 @@ class AnuncioDetailScreen extends StatelessWidget {
       return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
 
     if (anuncio.imagen.startsWith('http')) return anuncio.imagen;
-    return 'http://10.0.2.2:8080/uploads/${anuncio.imagen}';
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}';
   }
 
   @override
@@ -231,15 +236,42 @@ class AnuncioDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  VendedorCard(
-                    name: isMine ? "Tú" : "Usuario del anuncio",
-                    rating: 5.0,
-                    date: isMine
-                        ? "Este es tu anuncio"
-                        : "Activo en la plataforma",
-                    usuarioId: isMine ? null : anuncio.usuarioId,
-                  ),
+                  
+                  FutureBuilder<UsuarioResponse>(
+                    future: ProfileService().getPublicUserProfile(anuncio.usuarioId),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: AppColors.primaryBlue),
+                        );
+                      }
+                      
+                      if (snapshot.hasError || !snapshot.hasData) {
+                        return VendedorCard(
+                          name: isMine ? "Tú" : "Usuario del anuncio",
+                          rating: null,
+                          date: isMine ? "Este es tu anuncio" : "Error al cargar datos",
+                          usuarioId: isMine ? null : anuncio.usuarioId,
+                          imagen: snapshot.data?.imageUrl ?? "https://via.placeholder.com/400x350.png?text=Sin+Imagen",
+                        );
+                      }
 
+                      final vendedor = snapshot.data!;
+                      
+                      final date = vendedor.fechaRegistro;
+                      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                      final dateString = "${monthNames[date.month - 1]} ${date.year}";
+
+                      return VendedorCard(
+                        name: isMine ? "Tú (${vendedor.nombre})" : vendedor.nombre,
+                        rating: vendedor.reputacionMedia ?? null,
+                        date: isMine ? "Este es tu anuncio" : "Miembro desde $dateString",
+                        usuarioId: isMine ? null : anuncio.usuarioId,
+                        imagen: vendedor.imageUrl,
+                      );
+                    },
+                  ),
+                  
                   const SizedBox(height: 100),
                 ],
               ),
@@ -353,8 +385,50 @@ class AnuncioDetailScreen extends StatelessWidget {
       ),
       child: SafeArea(
         child: ElevatedButton.icon(
-          onPressed: () {
-            print("Iniciar Chat");
+          onPressed: () async {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryBlue),
+              ),
+            );
+
+            try {
+              final vendedor = await ProfileService().getPublicUserProfile(anuncio.usuarioId);
+
+              if (context.mounted) {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => ChatDetalleBloc(),
+                      child: ChatScreen(
+                        userName: vendedor.nombre,
+                        fotoUsuario: vendedor.imageUrl.isNotEmpty ? vendedor.imageUrl : null,
+                        idAnuncio: anuncio.id,
+                        idContrario: anuncio.usuarioId,
+                        tituloAnuncio: anuncio.titulo,
+                        imagenAnuncio: anuncio.imagen,
+                        precioAnuncio: anuncio.precio ?? 0.0,
+                        anuncio: anuncio,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Error al intentar abrir el chat.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
           },
           icon: const Icon(Icons.chat_bubble_outline),
           label: const Text("Iniciar chat"),

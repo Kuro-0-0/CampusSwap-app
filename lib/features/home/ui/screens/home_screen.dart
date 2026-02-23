@@ -1,4 +1,5 @@
 import 'package:campusswap_app/features/home/ui/widgets/catalogo_anuncios.dart';
+import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
@@ -21,7 +22,17 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          HomeAppBar(userName: "Juan"),
+          BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, state) {
+              String nombreUsuario = "Usuario";
+
+              if (state is ProfileLoaded) {
+                nombreUsuario = state.usuario.nombre.split(' ')[0];
+              }
+
+              return HomeAppBar(userName: nombreUsuario);
+            },
+          ),
 
           Expanded(
             child: Builder(

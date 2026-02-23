@@ -2,6 +2,7 @@
 
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import '../../../../core/theme/app_colors.dart';
 class ChatProductHeader extends StatelessWidget {
   final String tituloAnuncio;
   final String imagenAnuncio;
-  final double precioAnuncio;
   final Anuncio anuncio;
   final VoidCallback onBuyTap;
 
@@ -19,10 +19,18 @@ class ChatProductHeader extends StatelessWidget {
     super.key,
     required this.tituloAnuncio,
     required this.imagenAnuncio,
-    required this.precioAnuncio,
     required this.anuncio,
     required this.onBuyTap,
   });
+  
+  String get _imageUrl {
+    if (imagenAnuncio.isEmpty)
+      return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
+
+    if (imagenAnuncio.startsWith('http')) return imagenAnuncio;
+    
+    return '${TokenStorage.baseUrl}/api/v1/imagen/$imagenAnuncio';
+  }
 
   Future<void> _verAnuncio(BuildContext context) async {
     showDialog(
@@ -77,7 +85,7 @@ class ChatProductHeader extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  imagenAnuncio,
+                  _imageUrl,
                   width: 50,
                   height: 50,
                   fit: BoxFit.cover,
@@ -102,7 +110,7 @@ class ChatProductHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "${precioAnuncio.toStringAsFixed(2)} €",
+                      anuncio.precio == 0.0 || anuncio.precio == null ? "Consultar condiciones" : "${anuncio.precio?.toStringAsFixed(2)} €",
                       style: const TextStyle(
                         color: AppColors.primaryBlue,
                         fontWeight: FontWeight.bold,
@@ -110,7 +118,7 @@ class ChatProductHeader extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => _verAnuncio(context), // 👈
+                      onTap: () => _verAnuncio(context),
                       child: const Text(
                         "Ver anuncio",
                         style: TextStyle(
