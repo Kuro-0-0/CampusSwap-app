@@ -90,25 +90,9 @@ class ConversationTile extends StatelessWidget {
           ],
         ),
       ),
-      title: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (ctx) => MultiBlocProvider(
-                providers: [
-                  BlocProvider(create: (_) => PublicProfileBloc()),
-                  BlocProvider.value(value: context.read<ProfileBloc>()),
-                ],
-                child: PublicProfileScreen(usuarioId: otro.id),
-              ),
-            ),
-          );
-        },
-        child: Text(
-          conversacion.anuncio.titulo,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+      title: Text(
+        conversacion.anuncio.titulo,
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
