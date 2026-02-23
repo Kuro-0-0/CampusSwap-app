@@ -1,3 +1,4 @@
+import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/public_profile_bloc.dart';
 import 'package:campusswap_app/features/profile/ui/screens/public_profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -20,14 +21,17 @@ class VendedorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: usuarioId != null
-          ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => PublicProfileBloc(),
+        return GestureDetector(
+        onTap: usuarioId != null
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(create: (_) => PublicProfileBloc()),
+                        BlocProvider.value(value: context.read<ProfileBloc>()),
+                    ],
                     child: PublicProfileScreen(usuarioId: usuarioId!),
                   ),
                 ),

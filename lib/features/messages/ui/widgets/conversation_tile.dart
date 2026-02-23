@@ -1,5 +1,6 @@
 import 'package:campusswap_app/core/models/mensaje_response_model.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
+import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/public_profile_bloc.dart';
 import 'package:campusswap_app/features/profile/ui/screens/public_profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -36,8 +37,12 @@ class ConversationTile extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BlocProvider(
-                create: (context) => PublicProfileBloc(),
+              builder: (ctx) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (_) => PublicProfileBloc()),
+                  // Pass the existing ProfileBloc to the new screen
+                  BlocProvider.value(value: context.read<ProfileBloc>()),
+                ],
                 child: PublicProfileScreen(usuarioId: otro.id),
               ),
             ),
@@ -79,12 +84,16 @@ class ConversationTile extends StatelessWidget {
         ),
       ),
       title: GestureDetector(
-        onTap: () {
+      onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BlocProvider(
-                create: (context) => PublicProfileBloc(),
+              builder: (ctx) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (_) => PublicProfileBloc()),
+                  // Pass the existing ProfileBloc to the new screen
+                  BlocProvider.value(value: context.read<ProfileBloc>()),
+                ],
                 child: PublicProfileScreen(usuarioId: otro.id),
               ),
             ),
