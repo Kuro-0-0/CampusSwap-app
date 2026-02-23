@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/buscador/ui/screens/search_screen.dart';
-import 'package:campusswap_app/features/home/ui/screens/home_screen.dart';
 import 'package:campusswap_app/features/profile/ui/screens/profile_screen.dart';
 import 'package:campusswap_app/features/anuncio_form/ui/screens/anuncio_form_screen.dart';
 
@@ -85,7 +84,7 @@ class _MainLayoutState extends State<MainLayout> {
                     _buildNavItem(icon: Icons.home, index: 0, label: "Inicio"),
                     _buildNavItem(icon: Icons.search, index: 1, label: "Buscar"),
                     const SizedBox(width: 48),
-                    _buildNavItem(icon: Icons.chat_bubble_outline, index: 2, label: "Msjes"),
+                    _buildNavItem(icon: Icons.chat_bubble_outline, index: 2, label: "Mensajes"),
                     _buildNavItem(icon: Icons.person_outline, index: 3, label: "Perfil"),
                   ],
                 ),

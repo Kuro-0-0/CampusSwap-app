@@ -49,3 +49,9 @@ final class FavoritoDeleteSuccess extends ProfileState {
   final int favoritoId;
   FavoritoDeleteSuccess({required this.message, required this.favoritoId});
 }
+
+final class FavoritoAddSuccess extends ProfileState {
+  final String message;
+  final int anuncioId;
+  FavoritoAddSuccess({required this.message, required this.anuncioId});
+}
