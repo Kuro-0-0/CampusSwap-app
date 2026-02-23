@@ -12,7 +12,6 @@ import '../../../../core/theme/app_colors.dart';
 class ChatProductHeader extends StatelessWidget {
   final String tituloAnuncio;
   final String imagenAnuncio;
-  final double precioAnuncio;
   final Anuncio anuncio;
   final VoidCallback onBuyTap;
 
@@ -20,7 +19,6 @@ class ChatProductHeader extends StatelessWidget {
     super.key,
     required this.tituloAnuncio,
     required this.imagenAnuncio,
-    required this.precioAnuncio,
     required this.anuncio,
     required this.onBuyTap,
   });
@@ -112,7 +110,7 @@ class ChatProductHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "${precioAnuncio.toStringAsFixed(2)} €",
+                      anuncio.precio == 0.0 || anuncio.precio == null ? "Consultar condiciones" : "${anuncio.precio?.toStringAsFixed(2)} €",
                       style: const TextStyle(
                         color: AppColors.primaryBlue,
                         fontWeight: FontWeight.bold,

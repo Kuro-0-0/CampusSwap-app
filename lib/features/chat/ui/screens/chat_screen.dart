@@ -153,7 +153,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ChatProductHeader(
             tituloAnuncio: widget.tituloAnuncio,
             imagenAnuncio: widget.imagenAnuncio,
-            precioAnuncio: widget.precioAnuncio,
             anuncio: widget.anuncio,
             onBuyTap: () {},
           ),
