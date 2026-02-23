@@ -1,4 +1,5 @@
 import 'package:campusswap_app/core/models/mensaje_response_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/public_profile_bloc.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ConversationTile extends StatelessWidget {
-  final Conversacion conversacion; 
+  final Conversacion conversacion;
   final VoidCallback onTap;
 
   const ConversationTile({
@@ -25,6 +26,16 @@ class ConversationTile extends StatelessWidget {
     return '${fecha.day}/${fecha.month}';
   }
 
+  String get _imageUrl {
+    if (conversacion.anuncio.imagen.isEmpty)
+      return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
+
+    if (conversacion.anuncio.imagen.startsWith('http'))
+      return conversacion.anuncio.imagen;
+
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${conversacion.anuncio.imagen}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final otro = conversacion.otroParticipante;
@@ -40,7 +51,6 @@ class ConversationTile extends StatelessWidget {
               builder: (ctx) => MultiBlocProvider(
                 providers: [
                   BlocProvider(create: (_) => PublicProfileBloc()),
-                  // Pass the existing ProfileBloc to the new screen
                   BlocProvider.value(value: context.read<ProfileBloc>()),
                 ],
                 child: PublicProfileScreen(usuarioId: otro.id),
@@ -53,9 +63,7 @@ class ConversationTile extends StatelessWidget {
             CircleAvatar(
               radius: 26,
               backgroundColor: Colors.grey[200],
-              backgroundImage: conversacion.anuncio.imagen.isNotEmpty
-                  ? NetworkImage(conversacion.anuncio.imagen)
-                  : null,
+              backgroundImage: NetworkImage(_imageUrl),
               child: conversacion.anuncio.imagen.isEmpty
                   ? Text(
                       otro.nombre[0].toUpperCase(),
@@ -66,7 +74,6 @@ class ConversationTile extends StatelessWidget {
                     )
                   : null,
             ),
-            // Badge naranja
             Positioned(
               right: 0,
               top: 0,
@@ -84,14 +91,13 @@ class ConversationTile extends StatelessWidget {
         ),
       ),
       title: GestureDetector(
-      onTap: () {
+        onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (ctx) => MultiBlocProvider(
                 providers: [
                   BlocProvider(create: (_) => PublicProfileBloc()),
-                  // Pass the existing ProfileBloc to the new screen
                   BlocProvider.value(value: context.read<ProfileBloc>()),
                 ],
                 child: PublicProfileScreen(usuarioId: otro.id),
@@ -100,7 +106,7 @@ class ConversationTile extends StatelessWidget {
           );
         },
         child: Text(
-          otro.nombre, 
+          conversacion.anuncio.titulo,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -108,11 +114,8 @@ class ConversationTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            conversacion.anuncio.titulo,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textGrey,
-            ),
+            otro.nombre,
+            style: const TextStyle(fontSize: 12, color: AppColors.textGrey),
             overflow: TextOverflow.ellipsis,
           ),
           Text(
@@ -123,7 +126,7 @@ class ConversationTile extends StatelessWidget {
         ],
       ),
       trailing: Text(
-        _timeAgo(conversacion.ultimoMensaje.fechaEnvio), 
+        _timeAgo(conversacion.ultimoMensaje.fechaEnvio),
         style: const TextStyle(fontSize: 11, color: AppColors.textGrey),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -13,6 +14,14 @@ class PublicProfileInfoCard extends StatelessWidget {
     required this.anunciosCount,
     required this.ventasCount,
   });
+
+   String get _imageUrl {
+    if (usuario.imageUrl.isEmpty)
+      return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
+
+    if (usuario.imageUrl.startsWith('http')) return usuario.imageUrl;
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${usuario.imageUrl}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +48,7 @@ class PublicProfileInfoCard extends StatelessWidget {
               CircleAvatar(
                 radius: 35,
                 backgroundImage: NetworkImage(
-                  "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg",
+                  _imageUrl,
                 ),
               ),
               const SizedBox(width: 16),

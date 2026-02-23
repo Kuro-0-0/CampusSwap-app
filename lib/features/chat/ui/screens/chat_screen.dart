@@ -1,5 +1,3 @@
-// features/chat/ui/screens/chat_screen.dart
-
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/chat_mensaje_model.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
@@ -18,7 +16,7 @@ class ChatScreen extends StatefulWidget {
   final String tituloAnuncio;
   final String imagenAnuncio;
   final double precioAnuncio;
-  final Anuncio anuncio; // 👈 añadido
+  final Anuncio anuncio;
 
   const ChatScreen({
     super.key,
@@ -29,7 +27,7 @@ class ChatScreen extends StatefulWidget {
     required this.tituloAnuncio,
     required this.imagenAnuncio,
     required this.precioAnuncio,
-    required this.anuncio, // 👈 añadido
+    required this.anuncio,
   });
 
   @override
@@ -127,18 +125,13 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
-          // 1. Cabecera del anuncio
           ChatProductHeader(
             tituloAnuncio: widget.tituloAnuncio,
             imagenAnuncio: widget.imagenAnuncio,
             precioAnuncio: widget.precioAnuncio,
-            anuncio: widget.anuncio, 
-            onBuyTap: () {
-              // TODO: proceso de pago
-            },
+            anuncio: widget.anuncio,
+            onBuyTap: () {},
           ),
-
-          // 2. Lista de mensajes
           Expanded(
             child: BlocConsumer<ChatDetalleBloc, ChatDetalleState>(
               listener: (context, state) {
@@ -150,7 +143,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (state is ChatDetalleLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (state is ChatDetalleEnviado) { 
+                if (state is ChatDetalleEnviado) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (state is ChatDetalleFailure) {
@@ -158,8 +151,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline,
-                            size: 48, color: Colors.red),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           state.error,
@@ -203,11 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
 
-          // 3. Input
-          ChatInputBar(
-            controller: _controller,
-            onSendTap: _enviarMensaje,
-          ),
+          ChatInputBar(controller: _controller, onSendTap: _enviarMensaje),
         ],
       ),
     );

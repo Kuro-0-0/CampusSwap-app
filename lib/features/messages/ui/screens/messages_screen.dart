@@ -37,7 +37,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Cabecera
             const Padding(
               padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
               child: Text(
@@ -50,7 +49,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
               ),
             ),
 
-            // 2. Buscador
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Container(
@@ -76,7 +74,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
             const Divider(height: 1, color: Color(0xFFEEEEEE)),
 
-            // 3. Lista
             Expanded(
               child: BlocBuilder<MensajeBloc, MensajeState>(
                 bloc: _mensajeBloc,
@@ -156,7 +153,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                                   create: (_) => ChatDetalleBloc(),
                                   child: ChatScreen(
                                     userName: otro.nombre,
-                                    fotoUsuario: null,
+                                    fotoUsuario: conversacion.anuncio.imagen,
                                     idAnuncio: conversacion.anuncio.id,
                                     idContrario: otro.id,
                                     tituloAnuncio: conversacion.anuncio.titulo,
