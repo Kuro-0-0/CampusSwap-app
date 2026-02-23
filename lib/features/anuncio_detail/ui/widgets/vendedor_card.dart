@@ -8,7 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 class VendedorCard extends StatelessWidget {
   final String name;
   final String date;
-  final double rating;
+  final double? rating;
   final String? usuarioId;
 
   const VendedorCard({
@@ -67,10 +67,12 @@ class VendedorCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 16, color: Colors.amber),
+                      if (rating != null)
+                        const Icon(Icons.star, size: 16, color: Colors.amber),
+                      if (rating != null)
                       const SizedBox(width: 4),
                       Text(
-                        rating.toString(),
+                        rating == null ? "Sin valoraciones" : rating.toString(),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(width: 8),

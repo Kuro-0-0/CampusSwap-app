@@ -260,7 +260,7 @@ class AnuncioDetailScreen extends StatelessWidget {
 
                       return VendedorCard(
                         name: isMine ? "Tú (${vendedor.nombre})" : vendedor.nombre,
-                        rating: vendedor.reputacionMedia ?? 0.0,
+                        rating: vendedor.reputacionMedia ?? null,
                         date: isMine ? "Este es tu anuncio" : "Miembro desde $dateString",
                         usuarioId: isMine ? null : anuncio.usuarioId,
                       );
