@@ -3,13 +3,33 @@ import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/panel_admin/bloc/panel_admin_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/ui/screens/manage_categorias_screen.dart';
+import 'package:campusswap_app/features/categorias/bloc/categoria_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 
-class AdminPanelScreen extends StatelessWidget {
+class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
+
+  @override
+  State<AdminPanelScreen> createState() => _AdminPanelScreenState();
+}
+
+class _AdminPanelScreenState extends State<AdminPanelScreen> {
+  late CategoriaBloc _categoriaBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriaBloc = CategoriaBloc();
+  }
+
+  @override
+  void dispose() {
+    _categoriaBloc.close();
+    super.dispose();
+  }
 
   String _imageUrl(Anuncio anuncio) {
     if (anuncio.imagen.isEmpty)
@@ -130,7 +150,12 @@ class AdminPanelScreen extends StatelessWidget {
                           _buildActionCard(Icons.folder_outlined, "Gestionar Categorías", "Crear, editar o eliminar categorías", Colors.blue.withOpacity(0.1), Colors.blue, onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (ctx) => const CategoriesScreen()),
+                              MaterialPageRoute(
+                                builder: (ctx) => BlocProvider.value(
+                                  value: _categoriaBloc,
+                                  child: const ManageCategoriesScreen(),
+                                ),
+                              ),
                             );
                           }),
                           _buildActionCard(Icons.warning_amber_rounded, "Moderar Anuncios", "Revisar anuncios reportados", Colors.orange.withOpacity(0.1), Colors.orange),
