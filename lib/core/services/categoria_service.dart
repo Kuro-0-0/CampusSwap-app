@@ -15,7 +15,7 @@ class CategoriaException implements Exception {
 }
 
 class CategoriaService implements ICategoriaResponse {
-  final String _baseUrl = "http://10.0.2.2:8080/api/v1/categorias";
+  final String _baseUrl = "${TokenStorage.baseUrl}/api/v1/categorias";
 
   @override
   Future<List<CategoriaResponseModel>> obtenerCategorias() async {
