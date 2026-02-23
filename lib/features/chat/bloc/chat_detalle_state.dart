@@ -7,6 +7,7 @@ final class ChatDetalleInitial extends ChatDetalleState {}
 
 final class ChatDetalleLoading extends ChatDetalleState {}
 
+final class ChatDetalleEnviado extends ChatDetalleState{}
 final class ChatDetalleSuccess extends ChatDetalleState {
   final List<ChatMensajeResponse> mensajes;
 
