@@ -1,5 +1,6 @@
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
 import 'package:campusswap_app/core/services/profile_service.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/widgets/vendedor_card.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class AnuncioDetailScreen extends StatelessWidget {
       return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
 
     if (anuncio.imagen.startsWith('http')) return anuncio.imagen;
-    return 'http://10.0.2.2:8080/uploads/${anuncio.imagen}';
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}';
   }
 
   @override
@@ -246,9 +247,10 @@ class AnuncioDetailScreen extends StatelessWidget {
                       if (snapshot.hasError || !snapshot.hasData) {
                         return VendedorCard(
                           name: isMine ? "Tú" : "Usuario del anuncio",
-                          rating: 0.0,
+                          rating: null,
                           date: isMine ? "Este es tu anuncio" : "Error al cargar datos",
                           usuarioId: isMine ? null : anuncio.usuarioId,
+                          imagen: snapshot.data?.imageUrl ?? "https://via.placeholder.com/400x350.png?text=Sin+Imagen",
                         );
                       }
 
@@ -263,6 +265,7 @@ class AnuncioDetailScreen extends StatelessWidget {
                         rating: vendedor.reputacionMedia ?? null,
                         date: isMine ? "Este es tu anuncio" : "Miembro desde $dateString",
                         usuarioId: isMine ? null : anuncio.usuarioId,
+                        imagen: vendedor.imageUrl,
                       );
                     },
                   ),
