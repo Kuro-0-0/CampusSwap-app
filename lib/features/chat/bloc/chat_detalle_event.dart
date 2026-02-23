@@ -12,3 +12,16 @@ final class GetChatEspecifico extends ChatDetalleEvent {
     required this.idContrario,
   });
 }
+
+  final class EnviarMensaje extends ChatDetalleEvent {
+    final String contenido;
+    final int anuncioId;
+    final String receptorId;
+
+    EnviarMensaje({
+      required this.contenido,
+      required this.anuncioId,
+      required this.receptorId,
+    });
+  
+}
