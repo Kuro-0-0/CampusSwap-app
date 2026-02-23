@@ -1,4 +1,5 @@
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -12,9 +13,17 @@ class ProfileInfoCard extends StatelessWidget {
     super.key,
     required this.usuario,
     required this.anunciosCount,
-    required this.favoritosCount,  
-    required this.ventasCount
+    required this.favoritosCount,
+    required this.ventasCount,
   });
+
+  String get _imageUrl {
+    if (usuario.imageUrl.isEmpty)
+      return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
+
+    if (usuario.imageUrl.startsWith('http')) return usuario.imageUrl;
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${usuario.imageUrl}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +49,7 @@ class ProfileInfoCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 35,
-                backgroundImage: NetworkImage(
-                  "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg",
-                ),
+                backgroundImage: NetworkImage(_imageUrl),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -63,33 +70,40 @@ class ProfileInfoCard extends StatelessWidget {
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (usuario.reputacionMedia != null) ...[
-                            const Icon(Icons.star, color: Colors.amber, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              usuario.reputacionMedia!.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.warningOrange,
-                              ),
-                            ),
-                          ] else ...[
-                            const Icon(Icons.star_border, color: Colors.grey, size: 16),
-                            const SizedBox(width: 4),
-                            const Text(
-                              "Sin valoraciones",
-                              style: TextStyle(fontSize: 10, color: Colors.grey),
-                            ),
-                          ],
-                          const SizedBox(width: 8),
+                    Row(
+                      children: [
+                        if (usuario.reputacionMedia != null) ...[
+                          const Icon(Icons.star, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
                           Text(
-                            "Desde $formattedDate",
-                            style: const TextStyle(fontSize: 10, color: Colors.grey),
+                            usuario.reputacionMedia!.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.warningOrange,
+                            ),
+                          ),
+                        ] else ...[
+                          const Icon(
+                            Icons.star_border,
+                            color: Colors.grey,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            "Sin valoraciones",
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                         ],
-                      )
+                        const SizedBox(width: 8),
+                        Text(
+                          "Desde $formattedDate",
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -124,10 +138,7 @@ class ProfileInfoCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-        ),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
       ],
     );
   }
@@ -145,7 +156,7 @@ class ProfileInfoCard extends StatelessWidget {
       'Septiembre',
       'Octubre',
       'Noviembre',
-      'Diciembre'
+      'Diciembre',
     ];
     return '${monthNames[date.month - 1]} ${date.year}';
   }
