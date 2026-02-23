@@ -241,4 +241,61 @@ class ProfileService implements IProfileService {
       throw ProfileException('Error inesperado: $e');
     }
   }
+
+  @override
+  Future<UsuarioResponse> getPublicUserProfile(String usuarioId) async {
+    try {
+      final token = await _storage.getToken();
+      final response = await http.get(
+        Uri.parse('${TokenStorage.baseUrl}/api/v1/usuarios/$usuarioId'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return UsuarioResponse.fromJson(body);
+      } else if (response.statusCode == 404) {
+        print(  'Usuario no encontrado: ${response.body}');
+        throw const ProfileException('Usuario no encontrado.');
+      } else {
+        throw ProfileException('Error al obtener perfil de usuario (${response.statusCode})');
+      }
+    } on SocketException {
+      throw const ProfileException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw ProfileException('Error inesperado: $e');
+    }
+  }
+
+  @override
+  Future<List<Anuncio>> getUserAnuncios(String usuarioId) async {
+    try {
+      final token = await _storage.getToken();
+      final response = await http.get(
+        Uri.parse('${TokenStorage.baseUrl}/api/v1/anuncios/$usuarioId'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        final anuncioResponse = AnuncioResponseModel.fromJson(body);
+        return anuncioResponse.content;
+      } else if (response.statusCode == 404) {
+        print('Usuario no encontrado: ${response.body}');
+        throw const ProfileException('Usuario no encontrado.');
+      } else {
+        throw ProfileException('Error al obtener anuncios (${response.statusCode})');
+      }
+    } on SocketException {
+      throw const ProfileException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw ProfileException('Error inesperado: $e');
+    }
+  }
 }

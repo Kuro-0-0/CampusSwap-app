@@ -2,18 +2,16 @@ import 'package:campusswap_app/core/models/usuario_response_model.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class ProfileInfoCard extends StatelessWidget {
+class PublicProfileInfoCard extends StatelessWidget {
   final UsuarioResponse usuario;
   final int anunciosCount;
-  final int favoritosCount;
   final int ventasCount;
 
-  const ProfileInfoCard({
+  const PublicProfileInfoCard({
     super.key,
     required this.usuario,
     required this.anunciosCount,
-    required this.favoritosCount,  
-    required this.ventasCount
+    required this.ventasCount,
   });
 
   @override
@@ -63,33 +61,33 @@ class ProfileInfoCard extends StatelessWidget {
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (usuario.reputacionMedia != null) ...[
-                            const Icon(Icons.star, color: Colors.amber, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              usuario.reputacionMedia!.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.warningOrange,
-                              ),
-                            ),
-                          ] else ...[
-                            const Icon(Icons.star_border, color: Colors.grey, size: 16),
-                            const SizedBox(width: 4),
-                            const Text(
-                              "Sin valoraciones",
-                              style: TextStyle(fontSize: 10, color: Colors.grey),
-                            ),
-                          ],
-                          const SizedBox(width: 8),
+                    Row(
+                      children: [
+                        if (usuario.reputacionMedia != null) ...[
+                          const Icon(Icons.star, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
                           Text(
-                            "Desde $formattedDate",
-                            style: const TextStyle(fontSize: 10, color: Colors.grey),
+                            usuario.reputacionMedia!.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.warningOrange,
+                            ),
+                          ),
+                        ] else ...[
+                          const Icon(Icons.star_border, color: Colors.grey, size: 16),
+                          const SizedBox(width: 4),
+                          const Text(
+                            "Sin valoraciones",
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                         ],
-                      )
+                        const SizedBox(width: 8),
+                        Text(
+                          "Desde $formattedDate",
+                          style: const TextStyle(fontSize: 10, color: Colors.grey),
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -98,12 +96,10 @@ class ProfileInfoCard extends StatelessWidget {
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 16),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem(anunciosCount.toString(), "Anuncios"),
-              _buildStatItem(favoritosCount.toString(), "Favoritos"),
               _buildStatItem(ventasCount.toString(), "Ventas"),
             ],
           ),
