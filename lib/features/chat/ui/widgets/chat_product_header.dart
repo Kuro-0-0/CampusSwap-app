@@ -1,12 +1,18 @@
 // features/chat/ui/widgets/chat_product_header.dart
 
+import 'package:campusswap_app/core/models/anuncio_response_model.dart';
+import 'package:campusswap_app/core/services/anuncio_service.dart';
+import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
+import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ChatProductHeader extends StatelessWidget {
   final String tituloAnuncio;
   final String imagenAnuncio;
   final double precioAnuncio;
+  final Anuncio anuncio;
   final VoidCallback onBuyTap;
 
   const ChatProductHeader({
@@ -14,8 +20,47 @@ class ChatProductHeader extends StatelessWidget {
     required this.tituloAnuncio,
     required this.imagenAnuncio,
     required this.precioAnuncio,
+    required this.anuncio,
     required this.onBuyTap,
   });
+
+  Future<void> _verAnuncio(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final anuncioCompleto = await AnuncioService().getAnuncioById(anuncio.id);
+
+      if (context.mounted) {
+        Navigator.pop(context); 
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => ProfileBloc()..add(LoadProfile()),
+              child: AnuncioDetailScreen(
+                anuncio: anuncioCompleto,
+                isMine: false,
+              ),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); 
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo cargar el anuncio'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +72,6 @@ class ChatProductHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Info del anuncio
           Row(
             children: [
               ClipRRect(
@@ -66,12 +110,14 @@ class ChatProductHeader extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        // TODO: Navigate to ProductDetail
-                      },
+                      onTap: () => _verAnuncio(context), // 👈
                       child: const Text(
                         "Ver anuncio",
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(
+                          color: AppColors.primaryBlue,
+                          fontSize: 12,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ],
@@ -80,7 +126,6 @@ class ChatProductHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          // Botón Comprar
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

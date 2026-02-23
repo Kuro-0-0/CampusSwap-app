@@ -1,5 +1,7 @@
 
 
+import 'package:campusswap_app/core/models/anuncio_response_model.dart';
+
 class MensajeResponse {
   final List<Conversacion> content;
   final Pagina page;
@@ -73,6 +75,21 @@ class AnuncioResumen {
       titulo: json['titulo'] as String,
       imagen: json['imagen'] as String,
       precio: (json['precio'] as num).toDouble(),
+    );
+  }
+
+  Anuncio toAnuncio() {
+    return Anuncio(
+      id: id,
+      titulo: titulo,
+      imagen: imagen,
+      precio: precio,
+      descripcion: '',
+      categoria: '',
+      tipoOperacion: '',
+      estado: '',
+      condicion: '',
+      usuarioId: '',
     );
   }
 }
