@@ -180,7 +180,7 @@ class ProductListCard extends StatelessWidget {
     if (item is Anuncio) {
       return (item as Anuncio).titulo;
     } else if (item is Favorito) {
-      return (item as Favorito).tituloAnuncio;
+      return (item as Favorito).anuncio.titulo;
     }
     return '';
   }
@@ -196,7 +196,7 @@ class ProductListCard extends StatelessWidget {
     double? precio;
     if (item is Anuncio) precio = (item as Anuncio).precio;
     if (item is Favorito) precio = (item as Favorito).precio;
-    return precio != null ? '\$${precio.toStringAsFixed(2)}' : 'Sin precio';
+    return precio != null ? '${precio.toStringAsFixed(2)} €' : 'Sin precio';
   }
 
   Color _getPriceColor() {

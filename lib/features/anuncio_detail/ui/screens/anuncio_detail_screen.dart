@@ -52,10 +52,10 @@ class AnuncioDetailScreen extends StatelessWidget {
                       int? favoritoId;
 
                       if (state is ProfileLoaded) {
-                        bool existe = state.favoritos.any((f) => f.tituloAnuncio == anuncio.titulo);
+                        bool existe = state.favoritos.any((f) => f.anuncio.titulo == anuncio.titulo);
                         
                         if (existe) {
-                          final fav = state.favoritos.firstWhere((f) => f.tituloAnuncio == anuncio.titulo);
+                          final fav = state.favoritos.firstWhere((f) => f.anuncio.titulo == anuncio.titulo);
                           isFavorited = true;
                           favoritoId = fav.id;
                         }
