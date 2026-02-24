@@ -106,7 +106,6 @@ class LoginScreen extends StatelessWidget {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailure) {
-            // 👇 detecta cuenta bloqueada y muestra diálogo, resto snackbar normal
             if (state.message.contains('bloqueada')) {
               _showBloqueadoDialog(context);
             } else {
