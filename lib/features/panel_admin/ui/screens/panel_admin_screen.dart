@@ -27,6 +27,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   void initState() {
     super.initState();
     _categoriaBloc = CategoriaBloc();
+    Future.microtask(() {
+      context.read<PanelAdminBloc>().add(CargarEstadisticas());
+    });
   }
 
   @override
@@ -99,8 +102,13 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             }
 
             if (state is PanelAdminLoaded) {
-              return SingleChildScrollView(
-                child: Column(
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<PanelAdminBloc>().add(CargarEstadisticas());
+                  await Future.delayed(const Duration(milliseconds: 500));
+                },
+                child: SingleChildScrollView(
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
@@ -252,7 +260,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     ),
                   ],
                 ),
-              );
+              ),
+            );
             }
             return const SizedBox();
           },
