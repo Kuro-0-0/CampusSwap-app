@@ -1,6 +1,7 @@
 import 'package:campusswap_app/features/home/ui/screens/home_screen.dart';
 import 'package:campusswap_app/features/messages/bloc/mensaje_bloc.dart';
 import 'package:campusswap_app/features/messages/ui/screens/messages_screen.dart';
+import 'package:campusswap_app/features/panel_admin/bloc/panel_admin_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/ui/screens/panel_admin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,6 +42,7 @@ class _MainLayoutState extends State<MainLayout> {
         BlocProvider(create: (_) => CategoriaBloc()..add(CargarCategorias())),
         BlocProvider(create: (_) => ProfileBloc()..add(LoadProfile())),
         BlocProvider(create: (_) => MensajeBloc()..add(GetChats())),
+        BlocProvider(create: (_) => PanelAdminBloc()..add(CargarEstadisticas())),
       ],
       child: Builder(
         builder: (innerContext) {
