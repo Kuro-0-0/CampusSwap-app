@@ -20,22 +20,26 @@ class FavoriteResponse {
 class AnuncioDto {
   final int id;
   final String titulo;
+  final String imagen;
 
   AnuncioDto({
     required this.id,
     required this.titulo,
+    required this.imagen,
   });
 
   factory AnuncioDto.fromJson(Map<String, dynamic> json) {
     return AnuncioDto(
       id: json['id'] as int,
       titulo: json['titulo'] as String,
+      imagen: json['imagen'] as String,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'titulo': titulo,
+    'imagen': imagen,
   };
 }
 
