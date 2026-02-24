@@ -75,6 +75,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   context.read<ProfileBloc>().add(LoadProfile());
                 }
 
+                if (state is ProfileImageUpdateSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+
                 if (state is ProfileFailure) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(state.message), backgroundColor: Colors.red),
