@@ -341,7 +341,6 @@ class AnuncioService implements IAnuncioResponse {
       if (response.statusCode == 200) {
         return;
       }else if (response.statusCode == 400){
-        print('Error al editar el anuncio (${response.body})');
         throw const AnuncioException(
           'Solicitud inválida, revise los campos'
         );
@@ -383,6 +382,7 @@ class AnuncioService implements IAnuncioResponse {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return;
       } else if (response.statusCode == 401) {
+        TokenStorage.triggerLogout();
         throw const AnuncioException(
           'No autorizado. Por favor, inicia sesión.',
         );
