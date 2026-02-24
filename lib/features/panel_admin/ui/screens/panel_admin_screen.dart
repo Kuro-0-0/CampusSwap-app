@@ -3,6 +3,7 @@ import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/bloc/panel_admin_bloc.dart';
+import 'package:campusswap_app/features/panel_admin/ui/screens/list_user.dart';
 import 'package:campusswap_app/features/panel_admin/ui/screens/manage_categorias_screen.dart';
 import 'package:campusswap_app/features/categorias/bloc/categoria_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
@@ -158,7 +159,21 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                             );
                           }),
                           _buildActionCard(Icons.warning_amber_rounded, "Moderar Anuncios", "Revisar anuncios reportados", Colors.orange.withOpacity(0.1), Colors.orange),
-                          _buildActionCard(Icons.people_outline, "Gestionar Usuarios", "Ver y administrar usuarios", Colors.green.withOpacity(0.1), Colors.green),
+                          _buildActionCard(
+                          Icons.people_outline,
+                          "Gestionar Usuarios",
+                          "Ver y administrar usuarios",
+                          Colors.green.withOpacity(0.1),
+                          Colors.green,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ListUserScreen(),
+                              ),
+                            );
+                          },
+                        ),
                           
                           const SizedBox(height: 24),
                           const Text("Últimos anuncios publicados", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark)),
