@@ -2,13 +2,34 @@ import 'package:campusswap_app/core/models/anuncio_response_model.dart' show Anu
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/panel_admin/bloc/panel_admin_bloc.dart';
+import 'package:campusswap_app/features/panel_admin/ui/screens/manage_categorias_screen.dart';
+import 'package:campusswap_app/features/categorias/bloc/categoria_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 
-class AdminPanelScreen extends StatelessWidget {
+class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
+
+  @override
+  State<AdminPanelScreen> createState() => _AdminPanelScreenState();
+}
+
+class _AdminPanelScreenState extends State<AdminPanelScreen> {
+  late CategoriaBloc _categoriaBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriaBloc = CategoriaBloc();
+  }
+
+  @override
+  void dispose() {
+    _categoriaBloc.close();
+    super.dispose();
+  }
 
   String _imageUrl(Anuncio anuncio) {
     if (anuncio.imagen.isEmpty)
@@ -126,7 +147,17 @@ class AdminPanelScreen extends StatelessWidget {
                         children: [
                           const Text("Acciones rápidas", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark)),
                           const SizedBox(height: 16),
-                          _buildActionCard(Icons.folder_outlined, "Gestionar Categorías", "Crear, editar o eliminar categorías", Colors.blue.withOpacity(0.1), Colors.blue),
+                          _buildActionCard(Icons.folder_outlined, "Gestionar Categorías", "Crear, editar o eliminar categorías", Colors.blue.withOpacity(0.1), Colors.blue, onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) => BlocProvider.value(
+                                  value: _categoriaBloc,
+                                  child: const ManageCategoriesScreen(),
+                                ),
+                              ),
+                            );
+                          }),
                           _buildActionCard(Icons.warning_amber_rounded, "Moderar Anuncios", "Revisar anuncios reportados", Colors.orange.withOpacity(0.1), Colors.orange),
                           _buildActionCard(Icons.people_outline, "Gestionar Usuarios", "Ver y administrar usuarios", Colors.green.withOpacity(0.1), Colors.green),
                           
@@ -187,29 +218,32 @@ class AdminPanelScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(IconData icon, String title, String subtitle, Color bgColor, Color iconColor) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
-            child: Icon(icon, color: iconColor),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
-                Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-              ],
+  Widget _buildActionCard(IconData icon, String title, String subtitle, Color bgColor, Color iconColor, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, color: iconColor),
             ),
-          )
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
+                  Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
