@@ -598,9 +598,6 @@ class AnuncioDetailScreen extends StatelessWidget {
 
                         if (context.mounted) {
                           Navigator.pop(context);
-                          Navigator.pop(context);
-
-                          context.read<HomeBloc>().add(CargarCatalogo());
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -610,6 +607,7 @@ class AnuncioDetailScreen extends StatelessWidget {
                               backgroundColor: Colors.green,
                             ),
                           );
+                          Navigator.pop(context, true);
                         }
                       } catch (e) {
                         if (context.mounted) {
