@@ -9,3 +9,8 @@ final class LoginRequested extends AuthEvent {
 
   LoginRequested({required this.email, required this.password});
 }
+
+class LogoutRequested extends AuthEvent {
+  final bool forced;
+  LogoutRequested({this.forced = false});
+}

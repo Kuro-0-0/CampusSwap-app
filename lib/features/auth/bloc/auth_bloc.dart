@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:campusswap_app/core/models/login_request_model.dart';
 import 'package:campusswap_app/core/models/login_response_model.dart';
 import 'package:campusswap_app/core/services/auth_service.dart';
@@ -10,11 +12,17 @@ part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthService _authService;
+  late StreamSubscription<void> _logoutSubscription;
 
   AuthBloc({AuthService? authService})
       : _authService = authService ?? AuthService(),
         super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
+    on<LogoutRequested>(_onLogoutRequested);
+
+    _logoutSubscription = TokenStorage.onLogout.listen((_) {
+      add(LogoutRequested(forced: true));
+    });
   }
 
   Future<void> _onLoginRequested(
@@ -40,5 +48,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       emit(AuthFailure(message: "Ocurrió un error inesperado. Intenta de nuevo."));
     }
+  }
+
+  Future<void> _onLogoutRequested(
+    LogoutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final storage = TokenStorage();
+    await storage.deleteToken();
+
+    emit(Unauthenticated(forced: event.forced));
+  }
+
+  @override
+  Future<void> close() {
+    _logoutSubscription.cancel();
+    return super.close();
   }
 }
