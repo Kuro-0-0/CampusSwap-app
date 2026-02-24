@@ -1,9 +1,9 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
-import 'package:campusswap_app/core/services/auth_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/anuncio_form/ui/screens/anuncio_form_screen.dart';
+import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
 import 'package:campusswap_app/features/auth/ui/screens/login_screen.dart';
 import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
@@ -159,39 +159,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            PopupMenuButton<String>(
-                              icon: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.settings,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              onSelected: (value) async {
-                                if (value == 'logout') {
-                                  await _handleLogout(context);
-                                }
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return [
-                                  const PopupMenuItem<String>(
-                                    value: 'logout',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.logout,
-                                          color: Colors.black54,
-                                        ),
-                                        SizedBox(width: 10),
-                                        Text('Cerrar Sesión'),
-                                      ],
-                                    ),
+                            IconButton(
+                              icon: const Icon(Icons.logout, color: Colors.white),
+                              tooltip: "Cerrar sesión",
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text("Cerrar sesión"),
+                                    content: const Text("¿Estás seguro de que deseas cerrar tu sesión?"),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(ctx),
+                                        child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(ctx);
+                                          context.read<AuthBloc>().add(LogoutRequested()); 
+                                        },
+                                        child: const Text("Cerrar Sesión", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ],
                                   ),
-                                ];
+                                );
                               },
                             ),
                           ],
@@ -418,28 +410,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       },
     );
-  }
-
-  Future<void> _handleLogout(BuildContext context) async {
-    final authService = AuthService();
-
-    try {
-      await authService.logout();
-
-      if (context.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-          (route) => false,
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
-      }
-    }
   }
 
   void _showConfirmDialog({
