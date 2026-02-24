@@ -1,5 +1,6 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -168,10 +169,10 @@ class ProductListCard extends StatelessWidget {
   String _getImageUrl() {
     if (item is Anuncio) {
       final anuncio = item as Anuncio;
-      return anuncio.imagen.isNotEmpty ? anuncio.imagen : '';
+      return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}?v=t';
     } else if (item is Favorito) {
       final favorito = item as Favorito;
-      return favorito.imagen?.isNotEmpty ?? false ? favorito.imagen! : '';
+      return '${TokenStorage.baseUrl}/api/v1/imagen/${favorito.anuncio.imagen}?v=t';
     }
     return '';
   }

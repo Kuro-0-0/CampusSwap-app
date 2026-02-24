@@ -23,6 +23,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<DeleteAnuncio>(_onDeleteAnuncio);
     on<DeleteFavorito>(_onDeleteFavorito);
     on<AddFavorito>(_onAddFavorito);
+    on<UpdateProfileImage>(_onUpdateProfileImage);
   }
 
   Future<void> _onLoadProfile(
@@ -185,6 +186,24 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           anuncioId: event.anuncioId,
         ),
       );
+      add(LoadProfile());
+    } catch (e) {
+      final errorMsg = e.toString();
+      if (errorMsg.contains('No autorizado')) {
+        emit(ProfileUnauthorized(message: errorMsg));
+      } else {
+        emit(ProfileFailure(message: errorMsg));
+      }
+    }
+  }
+
+  Future<void> _onUpdateProfileImage(
+    UpdateProfileImage event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      await _service.updateProfileImage(event.imagePath);
+      emit(ProfileImageUpdateSuccess(message: 'Foto de perfil actualizada correctamente'));
       add(LoadProfile());
     } catch (e) {
       final errorMsg = e.toString();

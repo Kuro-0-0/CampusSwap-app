@@ -1,6 +1,7 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart' show Anuncio;
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
+import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
 import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/bloc/panel_admin_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/ui/screens/list_user.dart';
@@ -41,7 +42,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     if (anuncio.imagen.startsWith('http'))
       return anuncio.imagen;
 
-    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}';
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}?v=t';
   }
 
   @override
@@ -111,14 +112,52 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Panel Admin",
-                            style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            "Gestión de CampusSwap",
-                            style: TextStyle(color: Colors.white70, fontSize: 14),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text(
+                                    "Panel Admin",
+                                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "Gestión de CampusSwap",
+                                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.logout, color: Colors.white),
+                                tooltip: "Cerrar sesión",
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text("Cerrar sesión"),
+                                      content: const Text("¿Estás seguro de que deseas cerrar tu sesión de administrador?"),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx),
+                                          child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(ctx);
+                                            context.read<AuthBloc>().add(LogoutRequested()); 
+                                          },
+                                          child: const Text("Cerrar Sesión", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              )
+                            ],
                           ),
                           const SizedBox(height: 24),
                           

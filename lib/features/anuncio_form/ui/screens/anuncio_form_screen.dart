@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
@@ -254,7 +255,6 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text("Máximo 5 fotos", style: TextStyle(color: Colors.grey, fontSize: 12)),
             const SizedBox(height: 24),
 
             const Text("Título del anuncio *", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
@@ -315,7 +315,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
     } else if (_imagenAntiguaUrl.isNotEmpty) {
       String fullUrl = _imagenAntiguaUrl;
       if (!fullUrl.startsWith('http')) {
-        fullUrl = 'http://10.0.2.2:8080/api/v1/imagen/$_imagenAntiguaUrl';
+        fullUrl = '${TokenStorage.baseUrl}/api/v1/imagen/$_imagenAntiguaUrl?v=t';
       }
       return DecorationImage(image: NetworkImage(fullUrl), fit: BoxFit.cover);
     }

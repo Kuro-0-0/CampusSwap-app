@@ -22,7 +22,7 @@ class AnuncioFormBloc extends Bloc<AnuncioFormEvent, AnuncioFormState> {
       if (event.anuncioId == null) {
         await _service.crearAnuncio(event.request, event.rutaImagen!);
       } else {
-        await _service.editarAnuncio(event.anuncioId!, event.request);
+        await _service.editarAnuncio(event.anuncioId!, event.request, event.rutaImagen);
       }
       emit(AnuncioFormSuccess());
     } on AnuncioException catch (e) {
