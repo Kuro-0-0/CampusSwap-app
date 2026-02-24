@@ -62,8 +62,8 @@ class AnuncioResumen {
   factory AnuncioResumen.fromJson(Map<String, dynamic> json) {
     return AnuncioResumen(
       id: json['id'] as int,
-      titulo: json['titulo'] as String,
-      imagen: json['imagen'] as String,
+      titulo: json['titulo'] ?? 'Sin título',
+      imagen: json['imagen'] ?? '',
       precio: json['precio'] != null ? (json['precio'] as num).toDouble() : 0.0,
     );
   }
