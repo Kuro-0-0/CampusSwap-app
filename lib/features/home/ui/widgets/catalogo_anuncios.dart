@@ -1,4 +1,5 @@
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
+import 'package:campusswap_app/features/panel_admin/bloc/panel_admin_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -180,7 +181,7 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                     itemBuilder: (context, index) {
                       return AnuncioCard(
                         anuncio: anuncios[index],
-                        onTap: () {
+                        onTap: () async {
                           final profileState = context
                               .read<ProfileBloc>()
                               .state;
@@ -196,7 +197,7 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                             );
                           }
 
-                          Navigator.push(
+                          final eliminado = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (ctx) => BlocProvider.value(
@@ -209,6 +210,15 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                               ),
                             ),
                           );
+
+                          if (eliminado == true && context.mounted) {
+                            context.read<HomeBloc>().add(CargarCatalogo());
+                            if (isAdmin) {
+                              context.read<PanelAdminBloc>().add(
+                                CargarEstadisticas(),
+                              );
+                            }
+                          }
                         },
                       );
                     },
