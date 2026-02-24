@@ -15,6 +15,6 @@ abstract class IProfileService {
   Future<UsuarioResponse> getPublicUserProfile(String usuarioId);
   Future<List<Anuncio>> getUserAnuncios(String usuarioId);
   Future<UsuarioPageResponse> getTotalUsuarios({int page = 0, int size = 10});
-
   Future<void> updateProfileImage(String imagePath);
+  Future<void> bloquearUsuario(String usuarioId);
 }

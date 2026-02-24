@@ -373,4 +373,36 @@ class ProfileService implements IProfileService {
       throw ProfileException('Error inesperado: $e');
     }
   }
+  
+  @override
+  Future<void> bloquearUsuario(String usuarioId) async {
+  try {
+    final token = await _storage.getToken();
+    final response = await http.put(
+      Uri.parse('${TokenStorage.baseUrl}/api/v1/admin/usuarios/$usuarioId/bloquear'),
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw const ProfileException('No tienes permisos de administrador.');
+    } else if (response.statusCode == 404) {
+      throw const ProfileException('Usuario no encontrado.');
+    } else {
+      throw ProfileException('Error al bloquear usuario (${response.statusCode})');
+    }
+  } on SocketException {
+    throw const ProfileException('No se pudo conectar al servidor.');
+  } catch (e) {
+    throw ProfileException('Error inesperado: $e');
+  }
+}
+
+
+
+  
 }
