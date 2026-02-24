@@ -271,7 +271,6 @@ class AnuncioService implements IAnuncioResponse {
       if (response.statusCode == 201) {
         return;
       }else if (response.statusCode == 400){
-        print('Error al editar el anuncio (${response.body})');
         throw const AnuncioException(
           'Solicitud inválida, revise los campos'
         );
@@ -321,9 +320,20 @@ class AnuncioService implements IAnuncioResponse {
       );
 
       if (rutaImagen != null && rutaImagen.isNotEmpty) {
-        request.files.add(
-          await http.MultipartFile.fromPath('file', rutaImagen),
-        );
+        final mimeType = lookupMimeType(rutaImagen);
+        
+        if (mimeType != null) {
+          final subTypePart = mimeType.split('/')[1];
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'file', 
+              rutaImagen, 
+              contentType: MediaType('image', subTypePart)
+            ),
+          );
+        } else {
+          request.files.add(await http.MultipartFile.fromPath('file', rutaImagen));
+        }
       }
 
       final streamedResponse = await request.send();
@@ -331,6 +341,7 @@ class AnuncioService implements IAnuncioResponse {
       if (response.statusCode == 200) {
         return;
       }else if (response.statusCode == 400){
+        print('Error al editar el anuncio (${response.body})');
         throw const AnuncioException(
           'Solicitud inválida, revise los campos'
         );
@@ -372,7 +383,6 @@ class AnuncioService implements IAnuncioResponse {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return;
       } else if (response.statusCode == 401) {
-        TokenStorage.triggerLogout();
         throw const AnuncioException(
           'No autorizado. Por favor, inicia sesión.',
         );
