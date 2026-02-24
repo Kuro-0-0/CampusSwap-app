@@ -22,7 +22,7 @@ class AnuncioDetailScreen extends StatelessWidget {
     super.key,
     required this.anuncio,
     this.isMine = false,
-    this.isAdmin = false
+    this.isAdmin = false,
   });
 
   String get _imageUrl {
@@ -61,10 +61,14 @@ class AnuncioDetailScreen extends StatelessWidget {
                       int? favoritoId;
 
                       if (state is ProfileLoaded) {
-                        bool existe = state.favoritos.any((f) => f.anuncio.titulo == anuncio.titulo);
-                        
+                        bool existe = state.favoritos.any(
+                          (f) => f.anuncio.titulo == anuncio.titulo,
+                        );
+
                         if (existe) {
-                          final fav = state.favoritos.firstWhere((f) => f.anuncio.titulo == anuncio.titulo);
+                          final fav = state.favoritos.firstWhere(
+                            (f) => f.anuncio.titulo == anuncio.titulo,
+                          );
                           isFavorited = true;
                           favoritoId = fav.id;
                         }
@@ -73,9 +77,13 @@ class AnuncioDetailScreen extends StatelessWidget {
                       return GestureDetector(
                         onTap: () {
                           if (isFavorited && favoritoId != null) {
-                            context.read<ProfileBloc>().add(DeleteFavorito(favoritoId: favoritoId));
+                            context.read<ProfileBloc>().add(
+                              DeleteFavorito(favoritoId: favoritoId),
+                            );
                           } else {
-                            context.read<ProfileBloc>().add(AddFavorito(anuncioId: anuncio.id));
+                            context.read<ProfileBloc>().add(
+                              AddFavorito(anuncioId: anuncio.id),
+                            );
                           }
                         },
                         child: Container(
@@ -84,12 +92,20 @@ class AnuncioDetailScreen extends StatelessWidget {
                             color: Colors.white,
                             shape: BoxShape.circle,
                             boxShadow: [
-                              BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2)),
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
                             ],
                           ),
                           child: Icon(
-                            isFavorited ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorited ? Colors.red : AppColors.textDark,
+                            isFavorited
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorited
+                                ? Colors.red
+                                : AppColors.textDark,
                             size: 20,
                           ),
                         ),
@@ -240,42 +256,68 @@ class AnuncioDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  
+
                   FutureBuilder<UsuarioResponse>(
-                    future: ProfileService().getPublicUserProfile(anuncio.usuarioId),
+                    future: ProfileService().getPublicUserProfile(
+                      anuncio.usuarioId,
+                    ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(
-                          child: CircularProgressIndicator(color: AppColors.primaryBlue),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryBlue,
+                          ),
                         );
                       }
-                      
+
                       if (snapshot.hasError || !snapshot.hasData) {
                         return VendedorCard(
                           name: isMine ? "Tú" : "Usuario del anuncio",
                           rating: null,
-                          date: isMine ? "Este es tu anuncio" : "Error al cargar datos",
+                          date: isMine
+                              ? "Este es tu anuncio"
+                              : "Error al cargar datos",
                           usuarioId: isMine ? null : anuncio.usuarioId,
-                          imagen: snapshot.data?.imageUrl ?? "https://via.placeholder.com/400x350.png?text=Sin+Imagen",
+                          imagen:
+                              snapshot.data?.imageUrl ??
+                              "https://via.placeholder.com/400x350.png?text=Sin+Imagen",
                         );
                       }
 
                       final vendedor = snapshot.data!;
-                      
+
                       final date = vendedor.fechaRegistro;
-                      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-                      final dateString = "${monthNames[date.month - 1]} ${date.year}";
+                      const monthNames = [
+                        'Ene',
+                        'Feb',
+                        'Mar',
+                        'Abr',
+                        'May',
+                        'Jun',
+                        'Jul',
+                        'Ago',
+                        'Sep',
+                        'Oct',
+                        'Nov',
+                        'Dic',
+                      ];
+                      final dateString =
+                          "${monthNames[date.month - 1]} ${date.year}";
 
                       return VendedorCard(
-                        name: isMine ? "Tú (${vendedor.nombre})" : vendedor.nombre,
+                        name: isMine
+                            ? "Tú (${vendedor.nombre})"
+                            : vendedor.nombre,
                         rating: vendedor.reputacionMedia ?? null,
-                        date: isMine ? "Este es tu anuncio" : "Miembro desde $dateString",
+                        date: isMine
+                            ? "Este es tu anuncio"
+                            : "Miembro desde $dateString",
                         usuarioId: isMine ? null : anuncio.usuarioId,
                         imagen: vendedor.imageUrl,
                       );
                     },
                   ),
-                  
+
                   const SizedBox(height: 100),
                 ],
               ),
@@ -284,11 +326,11 @@ class AnuncioDetailScreen extends StatelessWidget {
         ],
       ),
 
-      bottomSheet: isMine 
-          ? _buildOwnerActions(context) 
-          : isAdmin 
-              ? _buildAdminActions(context) 
-              : _buildBuyerActions(context),
+      bottomSheet: isMine
+          ? _buildOwnerActions(context)
+          : isAdmin
+          ? _buildAdminActions(context)
+          : _buildBuyerActions(context),
     );
   }
 
@@ -321,10 +363,7 @@ class AnuncioDetailScreen extends StatelessWidget {
                     ),
                   ).then((editado) {
                     if (editado == true) {
-                      Navigator.pop(
-                        context,
-                        'recargar',
-                      );
+                      Navigator.pop(context, 'recargar');
                     }
                   });
                 },
@@ -401,7 +440,9 @@ class AnuncioDetailScreen extends StatelessWidget {
             );
 
             try {
-              final vendedor = await ProfileService().getPublicUserProfile(anuncio.usuarioId);
+              final vendedor = await ProfileService().getPublicUserProfile(
+                anuncio.usuarioId,
+              );
 
               if (context.mounted) {
                 Navigator.pop(context);
@@ -412,7 +453,9 @@ class AnuncioDetailScreen extends StatelessWidget {
                       create: (_) => ChatDetalleBloc(),
                       child: ChatScreen(
                         userName: vendedor.nombre,
-                        fotoUsuario: vendedor.imageUrl.isNotEmpty ? vendedor.imageUrl : null,
+                        fotoUsuario: vendedor.imageUrl.isNotEmpty
+                            ? vendedor.imageUrl
+                            : null,
                         idAnuncio: anuncio.id,
                         idContrario: anuncio.usuarioId,
                         tituloAnuncio: anuncio.titulo,
@@ -471,10 +514,7 @@ class AnuncioDetailScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              Navigator.pop(
-                context,
-                'eliminar',
-              );
+              Navigator.pop(context, 'eliminar');
             },
             child: const Text("Eliminar", style: TextStyle(color: Colors.red)),
           ),
@@ -528,34 +568,45 @@ class AnuncioDetailScreen extends StatelessWidget {
               context: context,
               builder: (ctx) => AlertDialog(
                 title: const Text("Eliminar anuncio"),
-                content: const Text("¿Estás seguro de que deseas eliminar este anuncio como Administrador? Esta acción no se puede deshacer y el anuncio desaparecerá del catálogo."),
+                content: const Text(
+                  "¿Estás seguro de que deseas eliminar este anuncio como Administrador? Esta acción no se puede deshacer y el anuncio desaparecerá del catálogo.",
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+                    child: const Text(
+                      "Cancelar",
+                      style: TextStyle(color: Colors.grey),
+                    ),
                   ),
                   TextButton(
                     onPressed: () async {
                       Navigator.pop(ctx);
-                      
+
                       showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.red)),
+                        builder: (_) => const Center(
+                          child: CircularProgressIndicator(color: Colors.red),
+                        ),
                       );
-                      
+
+                      await Future.delayed(const Duration(milliseconds: 300));
+
                       try {
                         await AnuncioService().eliminarAnuncioAdmin(anuncio.id);
-                        
+
                         if (context.mounted) {
                           Navigator.pop(context);
                           Navigator.pop(context);
-                          
+
                           context.read<HomeBloc>().add(CargarCatalogo());
-                          
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Anuncio eliminado por moderación.'),
+                              content: Text(
+                                'Anuncio eliminado por moderación.',
+                              ),
                               backgroundColor: Colors.green,
                             ),
                           );
@@ -572,7 +623,13 @@ class AnuncioDetailScreen extends StatelessWidget {
                         }
                       }
                     },
-                    child: const Text("Eliminar", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      "Eliminar",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
