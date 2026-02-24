@@ -1,6 +1,7 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart' show Anuncio;
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
+import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/bloc/panel_admin_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/ui/screens/manage_categorias_screen.dart';
 import 'package:campusswap_app/features/categorias/bloc/categoria_bloc.dart';
@@ -43,9 +44,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => PanelAdminBloc()..add(CargarEstadisticas()),
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.background,
         body: BlocBuilder<PanelAdminBloc, PanelAdminState>(
           builder: (context, state) {
@@ -190,8 +189,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             return const SizedBox();
           },
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildStatCard(IconData icon, String value, String label, Color iconColor) {
@@ -250,19 +248,25 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   Widget _buildAnuncioRecienteItem(BuildContext context, Anuncio anuncio) {
     return InkWell(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final eliminado = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (ctx) => BlocProvider.value(
               value: context.read<ProfileBloc>(),
               child: AnuncioDetailScreen(
                 anuncio: anuncio,
-                isMine: false,
+                isMine: false, 
+                isAdmin: true,
               ),
             ),
           ),
         );
+
+        if (eliminado == true && context.mounted) {
+          context.read<PanelAdminBloc>().add(CargarEstadisticas());
+          context.read<HomeBloc>().add(CargarCatalogo());
+        }
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -274,14 +278,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               decoration: BoxDecoration(
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(_imageUrl(anuncio)),
-                  fit: BoxFit.cover,
-                )
               ),
-              child: anuncio.imagen.isEmpty 
-                  ? const Icon(Icons.image_not_supported, size: 20, color: Colors.grey) 
-                  : null,
+              child: Image(image: NetworkImage(_imageUrl(anuncio)), fit: BoxFit.cover,),
             ),
             const SizedBox(width: 12),
             Expanded(

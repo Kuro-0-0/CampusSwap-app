@@ -321,10 +321,6 @@ class AnuncioService implements IAnuncioResponse {
         );
       }
 
-      print(id);
-      print(anuncio.toJson());
-      print(rutaImagen.toString());
-
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
       if (response.statusCode == 200) {
@@ -352,6 +348,43 @@ class AnuncioService implements IAnuncioResponse {
       }
     } catch (e) {
       throw AnuncioException('Error de conexión al editar el anuncio: $e');
+    }
+  }
+
+  Future<void> eliminarAnuncioAdmin(int anuncioId) async{
+     try {
+      final token = await TokenStorage().getToken();
+      final response = await http
+          .delete(
+            Uri.parse('${TokenStorage.baseUrl}/api/v1/admin/anuncios/$anuncioId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 401) {
+        throw const AnuncioException(
+          'No autorizado. Por favor, inicia sesión.',
+        );
+      } else if (response.statusCode == 403) {
+        throw const AnuncioException(
+          'No tienes permiso para eliminar este anuncio.',
+        );
+      } else if (response.statusCode == 404) {
+        throw const AnuncioException('Anuncio no encontrado.');
+      } else {
+        throw AnuncioException(
+          'Error al eliminar anuncio (${response.statusCode})',
+        );
+      }
+    } on SocketException {
+      throw const AnuncioException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw AnuncioException('Error inesperado: $e');
     }
   }
 }

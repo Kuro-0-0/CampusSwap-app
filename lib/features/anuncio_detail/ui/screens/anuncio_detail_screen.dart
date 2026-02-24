@@ -1,9 +1,11 @@
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/services/anuncio_service.dart';
 import 'package:campusswap_app/core/services/profile_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/widgets/vendedor_card.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
 import 'package:campusswap_app/features/chat/ui/screens/chat_screen.dart';
+import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
@@ -14,11 +16,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AnuncioDetailScreen extends StatelessWidget {
   final Anuncio anuncio;
   final bool isMine;
+  final bool isAdmin;
 
   const AnuncioDetailScreen({
     super.key,
     required this.anuncio,
     this.isMine = false,
+    this.isAdmin = false,
   });
 
   String get _imageUrl {
@@ -48,7 +52,7 @@ class AnuncioDetailScreen extends StatelessWidget {
               ),
             ),
             actions: [
-              if (!isMine)
+              if (!isMine && !isAdmin)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: BlocBuilder<ProfileBloc, ProfileState>(
@@ -57,10 +61,14 @@ class AnuncioDetailScreen extends StatelessWidget {
                       int? favoritoId;
 
                       if (state is ProfileLoaded) {
-                        bool existe = state.favoritos.any((f) => f.anuncio.titulo == anuncio.titulo);
-                        
+                        bool existe = state.favoritos.any(
+                          (f) => f.anuncio.titulo == anuncio.titulo,
+                        );
+
                         if (existe) {
-                          final fav = state.favoritos.firstWhere((f) => f.anuncio.titulo == anuncio.titulo);
+                          final fav = state.favoritos.firstWhere(
+                            (f) => f.anuncio.titulo == anuncio.titulo,
+                          );
                           isFavorited = true;
                           favoritoId = fav.id;
                         }
@@ -69,9 +77,13 @@ class AnuncioDetailScreen extends StatelessWidget {
                       return GestureDetector(
                         onTap: () {
                           if (isFavorited && favoritoId != null) {
-                            context.read<ProfileBloc>().add(DeleteFavorito(favoritoId: favoritoId));
+                            context.read<ProfileBloc>().add(
+                              DeleteFavorito(favoritoId: favoritoId),
+                            );
                           } else {
-                            context.read<ProfileBloc>().add(AddFavorito(anuncioId: anuncio.id));
+                            context.read<ProfileBloc>().add(
+                              AddFavorito(anuncioId: anuncio.id),
+                            );
                           }
                         },
                         child: Container(
@@ -80,12 +92,20 @@ class AnuncioDetailScreen extends StatelessWidget {
                             color: Colors.white,
                             shape: BoxShape.circle,
                             boxShadow: [
-                              BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2)),
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
                             ],
                           ),
                           child: Icon(
-                            isFavorited ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorited ? Colors.red : AppColors.textDark,
+                            isFavorited
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorited
+                                ? Colors.red
+                                : AppColors.textDark,
                             size: 20,
                           ),
                         ),
@@ -236,42 +256,68 @@ class AnuncioDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  
+
                   FutureBuilder<UsuarioResponse>(
-                    future: ProfileService().getPublicUserProfile(anuncio.usuarioId),
+                    future: ProfileService().getPublicUserProfile(
+                      anuncio.usuarioId,
+                    ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(
-                          child: CircularProgressIndicator(color: AppColors.primaryBlue),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryBlue,
+                          ),
                         );
                       }
-                      
+
                       if (snapshot.hasError || !snapshot.hasData) {
                         return VendedorCard(
                           name: isMine ? "Tú" : "Usuario del anuncio",
                           rating: null,
-                          date: isMine ? "Este es tu anuncio" : "Error al cargar datos",
+                          date: isMine
+                              ? "Este es tu anuncio"
+                              : "Error al cargar datos",
                           usuarioId: isMine ? null : anuncio.usuarioId,
-                          imagen: snapshot.data?.imageUrl ?? "https://via.placeholder.com/400x350.png?text=Sin+Imagen",
+                          imagen:
+                              snapshot.data?.imageUrl ??
+                              "https://via.placeholder.com/400x350.png?text=Sin+Imagen",
                         );
                       }
 
                       final vendedor = snapshot.data!;
-                      
+
                       final date = vendedor.fechaRegistro;
-                      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-                      final dateString = "${monthNames[date.month - 1]} ${date.year}";
+                      const monthNames = [
+                        'Ene',
+                        'Feb',
+                        'Mar',
+                        'Abr',
+                        'May',
+                        'Jun',
+                        'Jul',
+                        'Ago',
+                        'Sep',
+                        'Oct',
+                        'Nov',
+                        'Dic',
+                      ];
+                      final dateString =
+                          "${monthNames[date.month - 1]} ${date.year}";
 
                       return VendedorCard(
-                        name: isMine ? "Tú (${vendedor.nombre})" : vendedor.nombre,
+                        name: isMine
+                            ? "Tú (${vendedor.nombre})"
+                            : vendedor.nombre,
                         rating: vendedor.reputacionMedia ?? null,
-                        date: isMine ? "Este es tu anuncio" : "Miembro desde $dateString",
+                        date: isMine
+                            ? "Este es tu anuncio"
+                            : "Miembro desde $dateString",
                         usuarioId: isMine ? null : anuncio.usuarioId,
                         imagen: vendedor.imageUrl,
                       );
                     },
                   ),
-                  
+
                   const SizedBox(height: 100),
                 ],
               ),
@@ -282,6 +328,8 @@ class AnuncioDetailScreen extends StatelessWidget {
 
       bottomSheet: isMine
           ? _buildOwnerActions(context)
+          : isAdmin
+          ? _buildAdminActions(context)
           : _buildBuyerActions(context),
     );
   }
@@ -315,10 +363,7 @@ class AnuncioDetailScreen extends StatelessWidget {
                     ),
                   ).then((editado) {
                     if (editado == true) {
-                      Navigator.pop(
-                        context,
-                        'recargar',
-                      );
+                      Navigator.pop(context, 'recargar');
                     }
                   });
                 },
@@ -395,7 +440,9 @@ class AnuncioDetailScreen extends StatelessWidget {
             );
 
             try {
-              final vendedor = await ProfileService().getPublicUserProfile(anuncio.usuarioId);
+              final vendedor = await ProfileService().getPublicUserProfile(
+                anuncio.usuarioId,
+              );
 
               if (context.mounted) {
                 Navigator.pop(context);
@@ -406,7 +453,9 @@ class AnuncioDetailScreen extends StatelessWidget {
                       create: (_) => ChatDetalleBloc(),
                       child: ChatScreen(
                         userName: vendedor.nombre,
-                        fotoUsuario: vendedor.imageUrl.isNotEmpty ? vendedor.imageUrl : null,
+                        fotoUsuario: vendedor.imageUrl.isNotEmpty
+                            ? vendedor.imageUrl
+                            : null,
                         idAnuncio: anuncio.id,
                         idContrario: anuncio.usuarioId,
                         tituloAnuncio: anuncio.titulo,
@@ -465,10 +514,7 @@ class AnuncioDetailScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              Navigator.pop(
-                context,
-                'eliminar',
-              );
+              Navigator.pop(context, 'eliminar');
             },
             child: const Text("Eliminar", style: TextStyle(color: Colors.red)),
           ),
@@ -497,6 +543,111 @@ class AnuncioDetailScreen extends StatelessWidget {
           ],
         ),
         child: Icon(icon, color: AppColors.textDark, size: 20),
+      ),
+    );
+  }
+
+  Widget _buildAdminActions(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: ElevatedButton.icon(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text("Eliminar anuncio"),
+                content: const Text(
+                  "¿Estás seguro de que deseas eliminar este anuncio como Administrador? Esta acción no se puede deshacer y el anuncio desaparecerá del catálogo.",
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text(
+                      "Cancelar",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => const Center(
+                          child: CircularProgressIndicator(color: Colors.red),
+                        ),
+                      );
+
+                      await Future.delayed(const Duration(milliseconds: 300));
+
+                      try {
+                        await AnuncioService().eliminarAnuncioAdmin(anuncio.id);
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Anuncio eliminado por moderación.',
+                              ),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          Navigator.pop(context, true);
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Error al eliminar el anuncio.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: const Text(
+                      "Eliminar",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+          icon: const Icon(Icons.delete_forever),
+          label: const Text("Eliminar Anuncio (Moderar)"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red.shade600,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
