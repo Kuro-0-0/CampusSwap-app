@@ -16,6 +16,87 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
+  void _showBloqueadoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.block, color: Colors.red.shade600, size: 48),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Cuenta bloqueada',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Tu cuenta ha sido bloqueada por un administrador. '
+              'Contacta con el soporte si crees que es un error.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade600,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Entendido'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showErrorSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text(message)),
+            ],
+          ),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -25,26 +106,11 @@ class LoginScreen extends StatelessWidget {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailure) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.white),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(state.message)),
-                    ],
-                  ),
-                  backgroundColor: Colors.red.shade600,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  margin: const EdgeInsets.all(16),
-                  duration: const Duration(seconds: 4),
-                ),
-              );
+            if (state.message.contains('bloqueada')) {
+              _showBloqueadoDialog(context);
+            } else {
+              _showErrorSnackbar(context, state.message);
+            }
           } else if (state is AuthSuccess) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
@@ -88,39 +154,34 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     SafeArea(
                       child: Column(
                         children: [
                           const LoginHeader(),
-
                           const SizedBox(height: 30),
-
                           LoginForm(
                             isLoading: isLoading,
                             onLoginTap: (email, password) {
                               context.read<AuthBloc>().add(
-                                LoginRequested(
-                                  email: email,
-                                  password: password,
-                                ),
-                              );
+                                    LoginRequested(
+                                      email: email,
+                                      password: password,
+                                    ),
+                                  );
                             },
                             onForgotPasswordTap: () {
                               print("Olvidé contraseña tap");
                             },
                             onRegisterTap: () {
-                               Navigator.push(
+                              Navigator.push(
                                 context,
-                                 MaterialPageRoute(
-                                   builder: (context) => const RegisterScreen(),
+                                MaterialPageRoute(
+                                  builder: (context) => const RegisterScreen(),
                                 ),
-                               );
+                              );
                             },
                           ),
-
                           const Spacer(),
-
                           Padding(
                             padding: const EdgeInsets.only(bottom: 24.0),
                             child: Text(

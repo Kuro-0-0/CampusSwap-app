@@ -46,6 +46,8 @@ class AuthService implements IAuthService {
       return LoginResponse.fromJson(body);
     } else if (response.statusCode == 401) {
       throw const AuthException("Credenciales incorrectas. Verifica tu email y contraseña.");
+    }else if (response.statusCode == 403) {
+      throw const AuthException("Tu cuenta ha sido bloqueada. Contacta al soporte.");
     } else if (response.statusCode == 400) {
       throw const AuthException("Datos de inicio de sesión inválidos.");
     } else {
