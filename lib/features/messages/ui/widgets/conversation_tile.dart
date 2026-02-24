@@ -33,7 +33,7 @@ class ConversationTile extends StatelessWidget {
     if (conversacion.anuncio.imagen.startsWith('http'))
       return conversacion.anuncio.imagen;
 
-    return '${TokenStorage.baseUrl}/api/v1/imagen/${conversacion.anuncio.imagen}';
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${conversacion.anuncio.imagen}?v=t';
   }
 
   @override

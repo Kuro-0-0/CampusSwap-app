@@ -39,7 +39,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     if (anuncio.imagen.startsWith('http'))
       return anuncio.imagen;
 
-    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}';
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}?v=t';
   }
 
   @override

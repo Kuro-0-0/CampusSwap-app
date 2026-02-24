@@ -22,7 +22,8 @@ class ProfileInfoCard extends StatelessWidget {
       return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
 
     if (usuario.imageUrl.startsWith('http')) return usuario.imageUrl;
-    return '${TokenStorage.baseUrl}/api/v1/imagen/${usuario.imageUrl}';
+    
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${usuario.imageUrl}?v=t';
   }
 
   @override

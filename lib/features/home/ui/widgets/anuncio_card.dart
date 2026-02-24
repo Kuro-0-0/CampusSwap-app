@@ -16,7 +16,7 @@ class AnuncioCard extends StatelessWidget {
     if (anuncio.imagen.startsWith('http'))
       return anuncio.imagen;
 
-    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}';
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}?v=m';
   }
 
   @override

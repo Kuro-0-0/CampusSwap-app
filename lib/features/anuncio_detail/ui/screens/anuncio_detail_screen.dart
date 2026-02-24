@@ -5,7 +5,6 @@ import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/widgets/vendedor_card.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
 import 'package:campusswap_app/features/chat/ui/screens/chat_screen.dart';
-import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
@@ -30,7 +29,7 @@ class AnuncioDetailScreen extends StatelessWidget {
       return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
 
     if (anuncio.imagen.startsWith('http')) return anuncio.imagen;
-    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}';
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${anuncio.imagen}?v=h';
   }
 
   @override

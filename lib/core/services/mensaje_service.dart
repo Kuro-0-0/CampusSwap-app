@@ -42,6 +42,7 @@ class MensajeService implements MensajesInterface {
       final Map<String, dynamic> body = jsonDecode(response.body);
       return MensajeResponse.fromJson(body);
     } else if (response.statusCode == 401) {
+      TokenStorage.triggerLogout();
       throw const MensajeException(
           "No autorizado. Por favor, inicia sesión.");
     } else if (response.statusCode == 403) {
