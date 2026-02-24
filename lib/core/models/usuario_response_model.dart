@@ -6,6 +6,7 @@ class UsuarioResponse {
   final String imageUrl;
   final DateTime fechaRegistro;
   final List<String> roles;
+  final bool bloqueado;
 
   UsuarioResponse({
     required this.id,
@@ -15,6 +16,7 @@ class UsuarioResponse {
     required this.imageUrl,
     required this.fechaRegistro,
     required this.roles,
+    required this.bloqueado,
   });
 
   factory UsuarioResponse.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class UsuarioResponse {
       imageUrl: json['imageUrl'] == null ? '' : json['imageUrl'] as String,
       fechaRegistro: DateTime.parse(json['fechaRegistro'] as String),
       roles: List<String>.from(json['roles']),
+      bloqueado: json['bloqueado'] as bool? ?? false,
     );
   }
 
@@ -38,6 +41,7 @@ class UsuarioResponse {
       'imageUrl': imageUrl,
       'fechaRegistro': fechaRegistro.toIso8601String(),
       'roles': roles,
+      'bloqueado': bloqueado,
     };
   }
 }
