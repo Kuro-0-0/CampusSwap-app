@@ -8,6 +8,7 @@ import 'package:campusswap_app/core/models/usuario_page_response_model.dart';
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:mime/mime.dart';
 
 class ProfileException implements Exception {
   final String message;
@@ -322,6 +323,49 @@ class ProfileService implements IProfileService {
         throw const ProfileException('No tienes permisos de administrador.');
       } else {
         throw ProfileException('Error al obtener total de usuarios (${response.statusCode})');
+      }
+    } on SocketException {
+      throw const ProfileException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw ProfileException('Error inesperado: $e');
+    }
+  }
+
+  @override
+  Future<void> updateProfileImage(String imagePath) async {
+    try {
+      final token = await _storage.getToken();
+      final uri = Uri.parse('${TokenStorage.baseUrl}/api/v1/usuarios/foto-perfil');
+      final request = http.MultipartRequest('PUT', uri);
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      final mimeType = lookupMimeType(imagePath);
+      if (mimeType != null) {
+        final subTypePart = mimeType.split('/')[1];
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'file',
+            imagePath,
+            contentType: http.MediaType('image', subTypePart),
+          ),
+        );
+      } else {
+        request.files.add(await http.MultipartFile.fromPath('file', imagePath));
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 401) {
+        TokenStorage.triggerLogout();
+        throw const ProfileException('No autorizado. Por favor, inicia sesión.');
+      } else {
+        throw ProfileException('Error al actualizar imagen (${response.statusCode})');
       }
     } on SocketException {
       throw const ProfileException('No se pudo conectar al servidor.');
