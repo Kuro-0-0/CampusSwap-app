@@ -185,10 +185,15 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                               .read<ProfileBloc>()
                               .state;
                           bool isMine = false;
+                          bool isAdmin = false;
 
                           if (profileState is ProfileLoaded) {
                             isMine =
-                                profileState.usuario.id == anuncios[index].usuarioId;
+                                profileState.usuario.id ==
+                                anuncios[index].usuarioId;
+                            isAdmin = profileState.usuario.roles.any(
+                              (rol) => rol.toUpperCase().contains('ADMIN'),
+                            );
                           }
 
                           Navigator.push(
@@ -199,6 +204,7 @@ class CatalogoAnunciosWidget extends StatelessWidget {
                                 child: AnuncioDetailScreen(
                                   anuncio: anuncios[index],
                                   isMine: isMine,
+                                  isAdmin: isAdmin,
                                 ),
                               ),
                             ),
