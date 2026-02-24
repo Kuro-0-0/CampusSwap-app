@@ -17,4 +17,7 @@ final class AuthFailure extends AuthState {
   AuthFailure({required this.message});
 }
 
-
+class Unauthenticated extends AuthState {
+  final bool forced;
+  Unauthenticated({this.forced = false});
+}

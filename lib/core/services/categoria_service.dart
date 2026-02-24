@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 class CategoriaException implements Exception {
   final String message;
   final String? code; // 'conflict', 'unauthorized', etc.
-  
+
   const CategoriaException(this.message, {this.code});
 
   @override
@@ -39,29 +39,34 @@ class CategoriaService implements ICategoriaResponse {
       );
     } on SocketException {
       throw const CategoriaException(
-          "No se pudo conectar al servidor. Verifica tu conexión.");
+        "No se pudo conectar al servidor. Verifica tu conexión.",
+      );
     } catch (e) {
       throw const CategoriaException("Error de conexión inesperado.");
     }
 
     if (response.statusCode == 200) {
       final List<dynamic> body = jsonDecode(response.body);
-      return body
-          .map((json) => CategoriaResponseModel.fromJson(json))
-          .toList();
+      return body.map((json) => CategoriaResponseModel.fromJson(json)).toList();
     } else if (response.statusCode == 401) {
-      throw const CategoriaException("No autorizado. Por favor, inicia sesión.");
+      TokenStorage.triggerLogout();
+      throw const CategoriaException(
+        "No autorizado. Por favor, inicia sesión.",
+      );
     } else if (response.statusCode == 403) {
       throw const CategoriaException("Acceso prohibido. No tienes permisos.");
     } else if (response.statusCode == 404) {
       throw const CategoriaException("Recurso no encontrado.");
     } else {
       throw CategoriaException(
-        "Error del servidor (${response.statusCode}). Intenta más tarde.");
+        "Error del servidor (${response.statusCode}). Intenta más tarde.",
+      );
     }
   }
 
-  Future<CategoriaResponseModel> crearCategoria(CategoriaRequestModel categoria) async {
+  Future<CategoriaResponseModel> crearCategoria(
+    CategoriaRequestModel categoria,
+  ) async {
     final Uri uri = Uri.parse(_adminUrl);
 
     final http.Response response;
@@ -79,7 +84,8 @@ class CategoriaService implements ICategoriaResponse {
       );
     } on SocketException {
       throw const CategoriaException(
-          "No se pudo conectar al servidor. Verifica tu conexión.");
+        "No se pudo conectar al servidor. Verifica tu conexión.",
+      );
     } catch (e) {
       throw const CategoriaException("Error de conexión inesperado.");
     }
@@ -89,19 +95,28 @@ class CategoriaService implements ICategoriaResponse {
       return CategoriaResponseModel.fromJson(body);
     } else if (response.statusCode == 400) {
       throw const CategoriaException(
-          "Solicitud inválida. Verifica que el nombre no exista.");
+        "Solicitud inválida. Verifica que el nombre no exista.",
+      );
     } else if (response.statusCode == 401) {
-      throw const CategoriaException("No autorizado. Por favor, inicia sesión.");
+      TokenStorage.triggerLogout();
+      throw const CategoriaException(
+        "No autorizado. Por favor, inicia sesión.",
+      );
     } else if (response.statusCode == 403) {
-      throw const CategoriaException("Acceso prohibido. No tienes permisos de administrador.");
+      throw const CategoriaException(
+        "Acceso prohibido. No tienes permisos de administrador.",
+      );
     } else {
       throw CategoriaException(
-        "Error del servidor (${response.statusCode}). Intenta más tarde.");
+        "Error del servidor (${response.statusCode}). Intenta más tarde.",
+      );
     }
   }
 
   Future<CategoriaResponseModel> actualizarCategoria(
-      int categoryId, CategoriaRequestModel categoria) async {
+    int categoryId,
+    CategoriaRequestModel categoria,
+  ) async {
     final Uri uri = Uri.parse('$_adminUrl/$categoryId');
 
     final http.Response response;
@@ -119,7 +134,8 @@ class CategoriaService implements ICategoriaResponse {
       );
     } on SocketException {
       throw const CategoriaException(
-          "No se pudo conectar al servidor. Verifica tu conexión.");
+        "No se pudo conectar al servidor. Verifica tu conexión.",
+      );
     } catch (e) {
       throw const CategoriaException("Error de conexión inesperado.");
     }
@@ -129,16 +145,23 @@ class CategoriaService implements ICategoriaResponse {
       return CategoriaResponseModel.fromJson(body);
     } else if (response.statusCode == 400) {
       throw const CategoriaException(
-          "Solicitud inválida. Verifica los datos de la categoría.");
+        "Solicitud inválida. Verifica los datos de la categoría.",
+      );
     } else if (response.statusCode == 401) {
-      throw const CategoriaException("No autorizado. Por favor, inicia sesión.");
+      TokenStorage.triggerLogout();
+      throw const CategoriaException(
+        "No autorizado. Por favor, inicia sesión.",
+      );
     } else if (response.statusCode == 403) {
-      throw const CategoriaException("Acceso prohibido. No tienes permisos de administrador.");
+      throw const CategoriaException(
+        "Acceso prohibido. No tienes permisos de administrador.",
+      );
     } else if (response.statusCode == 404) {
       throw const CategoriaException("Categoría no encontrada.");
     } else {
       throw CategoriaException(
-        "Error del servidor (${response.statusCode}). Intenta más tarde.");
+        "Error del servidor (${response.statusCode}). Intenta más tarde.",
+      );
     }
   }
 
@@ -159,25 +182,33 @@ class CategoriaService implements ICategoriaResponse {
       );
     } on SocketException {
       throw const CategoriaException(
-          "No se pudo conectar al servidor. Verifica tu conexión.");
+        "No se pudo conectar al servidor. Verifica tu conexión.",
+      );
     } catch (e) {
       throw const CategoriaException("Error de conexión inesperado.");
     }
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       if (response.statusCode == 401) {
-        throw const CategoriaException("No autorizado. Por favor, inicia sesión.");
+        TokenStorage.triggerLogout();
+        throw const CategoriaException(
+          "No autorizado. Por favor, inicia sesión.",
+        );
       } else if (response.statusCode == 403) {
-        throw const CategoriaException("Acceso prohibido. No tienes permisos de administrador.");
+        throw const CategoriaException(
+          "Acceso prohibido. No tienes permisos de administrador.",
+        );
       } else if (response.statusCode == 404) {
         throw const CategoriaException("Categoría no encontrada.");
       } else if (response.statusCode == 409) {
         throw CategoriaException(
-            "No se puede eliminar esta categoría porque está relacionada con anuncios existentes. Edita los anuncios para cambiar su categoría o elimina los anuncios primero.",
-            code: 'conflict');
+          "No se puede eliminar esta categoría porque está relacionada con anuncios existentes. Edita los anuncios para cambiar su categoría o elimina los anuncios primero.",
+          code: 'conflict',
+        );
       } else {
         throw CategoriaException(
-          "Error del servidor (${response.statusCode}). Intenta más tarde.");
+          "Error del servidor (${response.statusCode}). Intenta más tarde.",
+        );
       }
     }
   }

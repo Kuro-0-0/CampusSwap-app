@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
@@ -17,5 +19,13 @@ class TokenStorage {
 
   Future<void> deleteToken() async {
     await _storage.delete(key: _keyToken);
+  }
+
+  static final StreamController<void> _logoutController = StreamController.broadcast(); 
+
+  static Stream<void> get onLogout => _logoutController.stream;
+
+  static void triggerLogout() {
+    _logoutController.add(null);
   }
 }

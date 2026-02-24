@@ -1,3 +1,5 @@
+import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
+import 'package:campusswap_app/features/auth/ui/screens/login_screen.dart';
 import 'package:campusswap_app/features/home/ui/screens/home_screen.dart';
 import 'package:campusswap_app/features/messages/bloc/mensaje_bloc.dart';
 import 'package:campusswap_app/features/messages/ui/screens/messages_screen.dart';
@@ -28,7 +30,7 @@ class _MainLayoutState extends State<MainLayout> {
     setState(() {
       _currentIndex = index;
     });
-    
+
     if (!isAdmin && index == 2) {
       innerContext.read<MensajeBloc>().add(GetChats());
     }
@@ -42,97 +44,182 @@ class _MainLayoutState extends State<MainLayout> {
         BlocProvider(create: (_) => CategoriaBloc()..add(CargarCategorias())),
         BlocProvider(create: (_) => ProfileBloc()..add(LoadProfile())),
         BlocProvider(create: (_) => MensajeBloc()..add(GetChats())),
-        BlocProvider(create: (_) => PanelAdminBloc()..add(CargarEstadisticas())),
+        BlocProvider(
+          create: (_) => PanelAdminBloc()..add(CargarEstadisticas()),
+        ),
       ],
       child: Builder(
         builder: (innerContext) {
           return BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, profileState) {
-              
               bool isAdmin = false;
               if (profileState is ProfileLoaded) {
-                isAdmin = profileState.usuario.roles.any((rol) => rol.toUpperCase().contains('ADMIN'));
+                isAdmin = profileState.usuario.roles.any(
+                  (rol) => rol.toUpperCase().contains('ADMIN'),
+                );
               }
 
-              final List<Widget> activeScreens = isAdmin 
-                ? [
-                    const HomeScreen(),
-                    const SearchScreen(),
-                    const AdminPanelScreen(),
-                  ]
-                : [
-                    const HomeScreen(),
-                    const SearchScreen(),
-                    const MessagesScreen(),
-                    const ProfileScreen(),
-                  ];
+              final List<Widget> activeScreens = isAdmin
+                  ? [
+                      const HomeScreen(),
+                      const SearchScreen(),
+                      const AdminPanelScreen(),
+                    ]
+                  : [
+                      const HomeScreen(),
+                      const SearchScreen(),
+                      const MessagesScreen(),
+                      const ProfileScreen(),
+                    ];
 
-              final safeIndex = _currentIndex >= activeScreens.length ? 0 : _currentIndex;
+              final safeIndex = _currentIndex >= activeScreens.length
+                  ? 0
+                  : _currentIndex;
 
-              return Scaffold(
-                backgroundColor: AppColors.background,
-                
-                body: IndexedStack(
-                  index: safeIndex,
-                  children: activeScreens,
-                ),
+              return BlocListener<AuthBloc, AuthState>(
+                listener: (context, authState) {
+                  if (authState is Unauthenticated) {
+                    
+                    if (authState.forced) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Tu sesión ha expirado. Por favor, inicia sesión de nuevo."),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    }
+                    
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false,
+                    );
+                  }
+                },
+                child: Scaffold(
+                  backgroundColor: AppColors.background,
 
-                floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-                floatingActionButton: isAdmin ? null : FloatingActionButton(
-                  onPressed: () {
-                    Navigator.push(
-                      innerContext,
-                      MaterialPageRoute(builder: (context) => const AnuncioFormScreen()),
-                    ).then((creadoConExito) {
-                      if (creadoConExito == true) {
-                        innerContext.read<HomeBloc>().add(CargarCatalogo());
-                        innerContext.read<ProfileBloc>().add(LoadProfile());
-                      }
-                    });
-                  },
-                  backgroundColor: AppColors.primaryBlue,
-                  elevation: 4,
-                  shape: const CircleBorder(),
-                  child: const Icon(Icons.add, color: Colors.white, size: 30),
-                ),
-                
-                bottomNavigationBar: BottomAppBar(
-                  shape: const CircularNotchedRectangle(),
-                  notchMargin: 8,
-                  color: Colors.white,
-                  elevation: 10,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      mainAxisAlignment: isAdmin ? MainAxisAlignment.spaceAround : MainAxisAlignment.spaceBetween,
-                      children: isAdmin 
-                        ? [
-                            _buildNavItem(innerContext, icon: Icons.home, index: 0, label: "Inicio", isAdmin: isAdmin),
-                            _buildNavItem(innerContext, icon: Icons.search, index: 1, label: "Buscar", isAdmin: isAdmin),
-                            _buildNavItem(innerContext, icon: Icons.admin_panel_settings, index: 2, label: "Admin", isAdmin: isAdmin),
-                          ]
-                        : [
-                            _buildNavItem(innerContext, icon: Icons.home, index: 0, label: "Inicio", isAdmin: isAdmin),
-                            _buildNavItem(innerContext, icon: Icons.search, index: 1, label: "Buscar", isAdmin: isAdmin),
-                            const SizedBox(width: 48),
-                            _buildNavItem(innerContext, icon: Icons.chat_bubble_outline, index: 2, label: "Mensajes", isAdmin: isAdmin),
-                            _buildNavItem(innerContext, icon: Icons.person_outline, index: 3, label: "Perfil", isAdmin: isAdmin),
-                          ],
+                  body: IndexedStack(index: safeIndex, children: activeScreens),
+
+                  floatingActionButtonLocation:
+                      FloatingActionButtonLocation.centerDocked,
+                  floatingActionButton: isAdmin
+                      ? null
+                      : FloatingActionButton(
+                          onPressed: () {
+                            Navigator.push(
+                              innerContext,
+                              MaterialPageRoute(
+                                builder: (context) => const AnuncioFormScreen(),
+                              ),
+                            ).then((creadoConExito) {
+                              if (creadoConExito == true) {
+                                innerContext.read<HomeBloc>().add(
+                                  CargarCatalogo(),
+                                );
+                                innerContext.read<ProfileBloc>().add(
+                                  LoadProfile(),
+                                );
+                              }
+                            });
+                          },
+                          backgroundColor: AppColors.primaryBlue,
+                          elevation: 4,
+                          shape: const CircleBorder(),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+
+                  bottomNavigationBar: BottomAppBar(
+                    shape: const CircularNotchedRectangle(),
+                    notchMargin: 8,
+                    color: Colors.white,
+                    elevation: 10,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: isAdmin
+                            ? MainAxisAlignment.spaceAround
+                            : MainAxisAlignment.spaceBetween,
+                        children: isAdmin
+                            ? [
+                                _buildNavItem(
+                                  innerContext,
+                                  icon: Icons.home,
+                                  index: 0,
+                                  label: "Inicio",
+                                  isAdmin: isAdmin,
+                                ),
+                                _buildNavItem(
+                                  innerContext,
+                                  icon: Icons.search,
+                                  index: 1,
+                                  label: "Buscar",
+                                  isAdmin: isAdmin,
+                                ),
+                                _buildNavItem(
+                                  innerContext,
+                                  icon: Icons.admin_panel_settings,
+                                  index: 2,
+                                  label: "Admin",
+                                  isAdmin: isAdmin,
+                                ),
+                              ]
+                            : [
+                                _buildNavItem(
+                                  innerContext,
+                                  icon: Icons.home,
+                                  index: 0,
+                                  label: "Inicio",
+                                  isAdmin: isAdmin,
+                                ),
+                                _buildNavItem(
+                                  innerContext,
+                                  icon: Icons.search,
+                                  index: 1,
+                                  label: "Buscar",
+                                  isAdmin: isAdmin,
+                                ),
+                                const SizedBox(width: 48),
+                                _buildNavItem(
+                                  innerContext,
+                                  icon: Icons.chat_bubble_outline,
+                                  index: 2,
+                                  label: "Mensajes",
+                                  isAdmin: isAdmin,
+                                ),
+                                _buildNavItem(
+                                  innerContext,
+                                  icon: Icons.person_outline,
+                                  index: 3,
+                                  label: "Perfil",
+                                  isAdmin: isAdmin,
+                                ),
+                              ],
+                      ),
                     ),
                   ),
                 ),
               );
-            }
+            },
           );
-        }
+        },
       ),
     );
   }
 
-  Widget _buildNavItem(BuildContext innerContext, {required IconData icon, required int index, required String label, required bool isAdmin}) {
+  Widget _buildNavItem(
+    BuildContext innerContext, {
+    required IconData icon,
+    required int index,
+    required String label,
+    required bool isAdmin,
+  }) {
     final safeIndex = _currentIndex >= (isAdmin ? 3 : 4) ? 0 : _currentIndex;
     final isSelected = safeIndex == index;
-    
+
     return InkWell(
       onTap: () => _onTabTapped(index, innerContext, isAdmin),
       borderRadius: BorderRadius.circular(30),
@@ -153,7 +240,7 @@ class _MainLayoutState extends State<MainLayout> {
                 color: isSelected ? AppColors.primaryBlue : AppColors.textGrey,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -58,6 +58,7 @@ class ChatDetalleService implements ChatDetalleInterface{
     } else if (response.statusCode == 403 || response.statusCode == 404) {
       return [];
     }else if (response.statusCode == 401) {
+      TokenStorage.triggerLogout();
       throw const ChatDetalleException(
           "No autorizado. Por favor, inicia sesión.");
     } else {
@@ -97,6 +98,7 @@ class ChatDetalleService implements ChatDetalleInterface{
         jsonDecode(response.body) as Map<String, dynamic>,
       );
     } else if (response.statusCode == 401) {
+      TokenStorage.triggerLogout();
       throw const ChatDetalleException(
           "No autorizado. Por favor, inicia sesión.");
     } else if (response.statusCode == 403) {

@@ -133,6 +133,7 @@ class ProfileService implements IProfileService {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return;
       } else if (response.statusCode == 401) {
+        TokenStorage.triggerLogout();
         throw const ProfileException('No autorizado. Por favor, inicia sesión.');
       } else if (response.statusCode == 403) {
         throw const ProfileException('No tienes permiso para realizar esta acción.');
@@ -164,7 +165,7 @@ class ProfileService implements IProfileService {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return;
       } else if (response.statusCode == 401) {
-        _storage.deleteToken();
+        TokenStorage.triggerLogout();
         throw const ProfileException('No autorizado. Por favor, inicia sesión.');
       } else if (response.statusCode == 403) {
         throw const ProfileException('No tienes permiso para eliminar este anuncio.');
@@ -196,7 +197,7 @@ class ProfileService implements IProfileService {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return;
       } else if (response.statusCode == 401) {
-        _storage.deleteToken();
+        TokenStorage.triggerLogout();
         throw const ProfileException('No autorizado. Por favor, inicia sesión.');
       } else if (response.statusCode == 403) {
         throw const ProfileException('No tienes permiso para eliminar este favorito.');
@@ -231,7 +232,7 @@ class ProfileService implements IProfileService {
       if (response.statusCode == 201 || response.statusCode == 200) {
         return;
       } else if (response.statusCode == 401) {
-        _storage.deleteToken();
+        TokenStorage.triggerLogout();
         throw const ProfileException('No autorizado. Por favor, inicia sesión.');
       } else {
         throw ProfileException('Error al añadir favorito (${response.statusCode})');
@@ -317,6 +318,7 @@ class ProfileService implements IProfileService {
         final Map<String, dynamic> body = jsonDecode(response.body);
         return UsuarioPageResponse.fromJson(body);
       } else if (response.statusCode == 401 || response.statusCode == 403) {
+        TokenStorage.triggerLogout();
         throw const ProfileException('No tienes permisos de administrador.');
       } else {
         throw ProfileException('Error al obtener total de usuarios (${response.statusCode})');
