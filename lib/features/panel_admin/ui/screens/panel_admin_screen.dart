@@ -5,6 +5,7 @@ import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/bloc/panel_admin_bloc.dart';
 import 'package:campusswap_app/features/panel_admin/ui/screens/manage_categorias_screen.dart';
 import 'package:campusswap_app/features/categorias/bloc/categoria_bloc.dart';
+import 'package:campusswap_app/features/panel_admin/ui/screens/manage_reports_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -157,7 +158,17 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                               ),
                             );
                           }),
-                          _buildActionCard(Icons.warning_amber_rounded, "Moderar Anuncios", "Revisar anuncios reportados", Colors.orange.withOpacity(0.1), Colors.orange),
+                          _buildActionCard(Icons.warning_amber_rounded, "Moderar Anuncios", "Revisar anuncios reportados", Colors.orange.withOpacity(0.1), Colors.orange, onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) => BlocProvider.value(
+                                  value: context.read<PanelAdminBloc>(),
+                                  child: const ModerationScreen(),
+                                ),
+                              ),
+                            );
+                          }),
                           _buildActionCard(Icons.people_outline, "Gestionar Usuarios", "Ver y administrar usuarios", Colors.green.withOpacity(0.1), Colors.green),
                           
                           const SizedBox(height: 24),
