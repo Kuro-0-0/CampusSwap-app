@@ -39,3 +39,8 @@ final class AddFavorito extends ProfileEvent {
   final int anuncioId;
   AddFavorito({required this.anuncioId});
 }
+
+final class UpdateProfileImage extends ProfileEvent {
+  final String imagePath;
+  UpdateProfileImage({required this.imagePath});
+}

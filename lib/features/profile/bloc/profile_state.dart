@@ -55,3 +55,8 @@ final class FavoritoAddSuccess extends ProfileState {
   final int anuncioId;
   FavoritoAddSuccess({required this.message, required this.anuncioId});
 }
+
+final class ProfileImageUpdateSuccess extends ProfileState {
+  final String message;
+  ProfileImageUpdateSuccess({required this.message});
+}
