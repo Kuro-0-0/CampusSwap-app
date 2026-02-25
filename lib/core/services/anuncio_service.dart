@@ -472,16 +472,44 @@ class AnuncioService implements IAnuncioResponse {
         return;
       } else if (response.statusCode == 401) {
         TokenStorage.triggerLogout();
-        throw const AnuncioException(
-          'No autorizado. Por favor, inicia sesión.',
-        );
+        throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
+      } else if (response.statusCode == 409) {
+        throw AnuncioException(response.body.isNotEmpty ? jsonDecode(response.body)['detail'] : 'Conflicto al comprar el anuncio.');
       } else {
         throw AnuncioException(
           'Error al comprar anuncio (${response.statusCode})',
         );
       }
     } catch (e) {
-      throw AnuncioException('Error inesperado: $e');
+      throw AnuncioException('$e');
+    }
+  }
+
+  /// Returns true if the currently logged-in user is the buyer of the anuncio.
+  Future<bool> comprobarComprador(int anuncioId) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl/$anuncioId/comprobar-comprador'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) == true;
+      } else if (response.statusCode == 401) {
+        TokenStorage.triggerLogout();
+        return false;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
     }
   }
 }

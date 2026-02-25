@@ -629,25 +629,64 @@ class _AnuncioDetailScreenState extends State<AnuncioDetailScreen> {
       if (mounted) {
         setState(() => anuncio = refreshed);
 
-        // Notify the app-wide event bus so every screen refreshes reliably,
-        // regardless of which BLoCs are available in this route's context.
-        PurchaseEventBus.instance.notifyPurchase(anuncio.id);
+        // Get seller info for navigating to chat
+        final seller = await ProfileService().getPublicUserProfile(anuncio.usuarioId);
+        
+        // Navigate to chat screen after purchase
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (ctx) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (_) => ChatDetalleBloc()),
+                  BlocProvider(create: (_) => ProfileBloc()..add(LoadProfile())),
+                ],
+                child: ChatScreen(
+                  userName: seller.nombre,
+                  fotoUsuario: seller.imageUrl.isNotEmpty ? seller.imageUrl : null,
+                  idAnuncio: anuncio.id,
+                  idContrario: anuncio.usuarioId,
+                  tituloAnuncio: anuncio.titulo,
+                  imagenAnuncio: anuncio.imagen,
+                  precioAnuncio: anuncio.precio ?? 0.0,
+                  anuncio: anuncio,
+                  justPurchased: true,
+                ),
+              ),
+            ),
+          );
+        }
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('¡Compra realizada con éxito!'),
+            content: Text('¡Compra realizada! Navegando al chat...'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final errorMessage = e.toString();
+        final isAlreadyPurchased = errorMessage.contains('ya ha sido comprado');
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al realizar la compra: ${e.toString()}'),
+            content: Text('Error al realizar la compra: $errorMessage'),
             backgroundColor: Colors.red,
           ),
         );
+
+        // If already purchased, refresh the page to update the button
+        if (isAlreadyPurchased) {
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            final refreshed = await AnuncioService().getAnuncioById(anuncio.id);
+            if (mounted) {
+              setState(() => anuncio = refreshed);
+              PurchaseEventBus.instance.notifyPurchase(anuncio.id);
+            }
+          }
+        }
       }
     } finally {
       if (mounted) setState(() => _isProcessingPurchase = false);
