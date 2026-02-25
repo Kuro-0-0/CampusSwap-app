@@ -45,17 +45,33 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   late Anuncio _currentAnuncio;
   bool _isLoading = false;
+  bool _isLoadingAnuncio = true;
 
   @override
   void initState() {
     super.initState();
     _currentAnuncio = widget.anuncio;
+    _loadAnuncio();
     context.read<ChatDetalleBloc>().add(
       GetChatEspecifico(
         idAnuncio: widget.idAnuncio,
         idContrario: widget.idContrario,
       ),
     );
+  }
+
+  Future<void> _loadAnuncio() async {
+    try {
+      final anuncio = await AnuncioService().getAnuncioById(widget.idAnuncio);
+      if (mounted) {
+        setState(() {
+          _currentAnuncio = anuncio;
+          _isLoadingAnuncio = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingAnuncio = false);
+    }
   }
 
   @override
@@ -156,13 +172,16 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           if (_isLoading) const LinearProgressIndicator(),
-          ChatProductHeader(
-            tituloAnuncio: widget.tituloAnuncio,
-            imagenAnuncio: widget.imagenAnuncio,
-            anuncio: _currentAnuncio,
-            onBuyTap: _handleBuy,
-            isOwner: _currentAnuncio.usuarioId != widget.idContrario,
-          ),
+          if (_isLoadingAnuncio)
+            const LinearProgressIndicator()
+          else
+            ChatProductHeader(
+              tituloAnuncio: _currentAnuncio.titulo,
+              imagenAnuncio: _currentAnuncio.imagen,
+              anuncio: _currentAnuncio,
+              onBuyTap: _handleBuy,
+              isOwner: _currentAnuncio.usuarioId != widget.idContrario,
+            ),
           Expanded(
             child: BlocConsumer<ChatDetalleBloc, ChatDetalleState>(
               listener: (context, state) {
@@ -254,63 +273,25 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _handleBuy() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirmar compra'),
-        content: Text(
-          '¿Deseas comprar "${widget.tituloAnuncio}"'
-          '${widget.precioAnuncio != 0.0 ? " por ${widget.precioAnuncio.toStringAsFixed(2)}€" : ""}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlue,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Confirmar compra'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !mounted) return;
-
     setState(() => _isLoading = true);
     try {
       await AnuncioService().comprarAnuncio(widget.idAnuncio);
 
       final refreshedAnuncio = await AnuncioService().getAnuncioById(widget.idAnuncio);
 
-      if (mounted) {
-        setState(() {
-          _currentAnuncio = refreshedAnuncio;
-        });
+      if (!mounted) return;
+      setState(() => _currentAnuncio = refreshedAnuncio);
 
-        // Notify the app-wide event bus so every screen refreshes reliably.
-        PurchaseEventBus.instance.notifyPurchase(widget.idAnuncio);
+      PurchaseEventBus.instance.notifyPurchase(widget.idAnuncio);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('¡Compra realizada con éxito!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('¡Compra realizada con éxito!'), backgroundColor: Colors.green),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al realizar la compra: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

@@ -25,6 +25,7 @@ class AnuncioResponseModel {
   }
 }
 
+
 class Anuncio {
   final int id;
   final String titulo;
@@ -36,6 +37,11 @@ class Anuncio {
   final String estado;
   final String condicion;
   final String usuarioId;
+
+  @override
+  toString() {
+    return 'Anuncio{id: $id, titulo: $titulo, descripcion: $descripcion, precio: $precio, categoria: $categoria, imagen: $imagen, tipoOperacion: $tipoOperacion, estado: $estado, condicion: $condicion, usuarioId: $usuarioId}';
+  }
 
   Anuncio({
     required this.id,
