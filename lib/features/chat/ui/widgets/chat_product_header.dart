@@ -3,6 +3,7 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
+import 'package:campusswap_app/core/services/valoracion_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:campusswap_app/features/valoracion/bloc/valoracion_bloc.dart';
@@ -11,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class ChatProductHeader extends StatelessWidget {
+class ChatProductHeader extends StatefulWidget {
   final String tituloAnuncio;
   final String imagenAnuncio;
   final Anuncio anuncio;
@@ -26,14 +27,47 @@ class ChatProductHeader extends StatelessWidget {
     required this.onBuyTap,
     this.isOwner = false,
   });
+
+  @override
+  State<ChatProductHeader> createState() => _ChatProductHeaderState();
+}
+
+class _ChatProductHeaderState extends State<ChatProductHeader> {
+  bool _hasAlreadyRated = false;
+  bool _isCheckingRating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfAlreadyRated();
+  }
+
+  Future<void> _checkIfAlreadyRated() async {
+    setState(() => _isCheckingRating = true);
+    try {
+      final hasRated = await ValoracionService().haValorizado(widget.anuncio.id);
+      if (mounted) {
+        setState(() => _hasAlreadyRated = hasRated);
+      }
+    } catch (e) {
+      // If there's an error, assume they haven't rated
+      if (mounted) {
+        setState(() => _hasAlreadyRated = false);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isCheckingRating = false);
+      }
+    }
+  }
   
   String get _imageUrl {
-    if (imagenAnuncio.isEmpty)
+    if (widget.imagenAnuncio.isEmpty)
       return 'https://via.placeholder.com/400x350.png?text=Sin+Imagen';
 
-    if (imagenAnuncio.startsWith('http')) return imagenAnuncio;
+    if (widget.imagenAnuncio.startsWith('http')) return widget.imagenAnuncio;
     
-    return '${TokenStorage.baseUrl}/api/v1/imagen/$imagenAnuncio';
+    return '${TokenStorage.baseUrl}/api/v1/imagen/${widget.imagenAnuncio}';
   }
 
   Future<void> _verAnuncio(BuildContext context) async {
@@ -44,7 +78,7 @@ class ChatProductHeader extends StatelessWidget {
     );
 
     try {
-      final anuncioCompleto = await AnuncioService().getAnuncioById(anuncio.id);
+      final anuncioCompleto = await AnuncioService().getAnuncioById(widget.anuncio.id);
 
       if (context.mounted) {
         Navigator.pop(context); 
@@ -79,9 +113,17 @@ class ChatProductHeader extends StatelessWidget {
       context: context,
       builder: (_) => BlocProvider(
         create: (_) => ValoracionBloc(),
-        child: RatingModal(anuncio: anuncio),
+        child: RatingModal(
+          anuncio: widget.anuncio,
+          hasAlreadyRated: _hasAlreadyRated,
+        ),
       ),
-    );
+    ).then((result) {
+      // If valoración was successfully created, update the state
+      if (result == true && mounted) {
+        setState(() => _hasAlreadyRated = true);
+      }
+    });
   }
 
   @override
@@ -117,14 +159,14 @@ class ChatProductHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      tituloAnuncio,
+                      widget.tituloAnuncio,
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      anuncio.precio == 0.0 || anuncio.precio == null ? "Consultar condiciones" : "${anuncio.precio?.toStringAsFixed(2)} €",
+                      widget.anuncio.precio == 0.0 || widget.anuncio.precio == null ? "Consultar condiciones" : "${widget.anuncio.precio?.toStringAsFixed(2)} €",
                       style: const TextStyle(
                         color: AppColors.primaryBlue,
                         fontWeight: FontWeight.bold,
@@ -147,16 +189,18 @@ class ChatProductHeader extends StatelessWidget {
               ),
             ],
           ),
-          if (!isOwner) ...[  
+          if (!widget.isOwner) ...[  
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: anuncio.estado == 'CERRADO' 
-                    ? () => _showRatingModal(context)
-                    : onBuyTap,
+                onPressed: widget.anuncio.estado == 'CERRADO' 
+                    ? (_hasAlreadyRated ? null : () => _showRatingModal(context))
+                    : widget.onBuyTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: anuncio.estado == 'CERRADO' ? Colors.green : AppColors.primaryBlue,
+                  backgroundColor: widget.anuncio.estado == 'CERRADO' 
+                      ? (_hasAlreadyRated ? Colors.grey : Colors.green)
+                      : AppColors.primaryBlue,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -164,7 +208,9 @@ class ChatProductHeader extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  anuncio.estado == 'CERRADO' ? "Valorar" : "Comprar",
+                  widget.anuncio.estado == 'CERRADO' 
+                      ? (_hasAlreadyRated ? "Ya valorado" : "Valorar")
+                      : "Comprar",
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),

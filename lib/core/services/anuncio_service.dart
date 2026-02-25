@@ -471,7 +471,7 @@ class AnuncioService implements IAnuncioResponse {
         TokenStorage.triggerLogout();
         throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
       } else if (response.statusCode == 409) {
-        throw const AnuncioException('Este anuncio ya ha sido comprado.');
+        throw AnuncioException(response.body.isNotEmpty ? jsonDecode(response.body)['detail'] : 'Conflicto al comprar el anuncio.');
       } else {
         throw AnuncioException('Error al comprar anuncio (${response.statusCode})');
       }

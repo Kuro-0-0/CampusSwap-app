@@ -282,6 +282,16 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!mounted) return;
       setState(() => _currentAnuncio = refreshedAnuncio);
 
+      // Send automatic purchase message to seller
+      final purchaseMessage = "He comprado tu producto: ${widget.tituloAnuncio}";
+      context.read<ChatDetalleBloc>().add(
+        EnviarMensaje(
+          contenido: purchaseMessage,
+          anuncioId: widget.idAnuncio,
+          receptorId: widget.idContrario,
+        ),
+      );
+
       PurchaseEventBus.instance.notifyPurchase(widget.idAnuncio);
 
       ScaffoldMessenger.of(context).showSnackBar(

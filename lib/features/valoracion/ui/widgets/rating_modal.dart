@@ -7,10 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RatingModal extends StatefulWidget {
   final Anuncio anuncio;
+  final bool hasAlreadyRated;
 
   const RatingModal({
     super.key,
     required this.anuncio,
+    this.hasAlreadyRated = false,
   });
 
   @override
@@ -29,6 +31,13 @@ class _RatingModalState extends State<RatingModal> {
   }
 
   void _submitRating() {
+    if (widget.hasAlreadyRated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ya has valorado este anuncio')),
+      );
+      return;
+    }
+
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, selecciona una calificación')),
@@ -74,7 +83,7 @@ class _RatingModalState extends State<RatingModal> {
           setState(() => _isSubmitting = true);
         } else if (state is ValoracionSuccess) {
           setState(() => _isSubmitting = false);
-          Navigator.pop(context);
+          Navigator.pop(context, true);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('¡Valoración creada exitosamente!')),
           );
@@ -122,6 +131,33 @@ class _RatingModalState extends State<RatingModal> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (widget.hasAlreadyRated) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info, color: Colors.amber.shade700, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Ya has valorado este anuncio',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.amber.shade800,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 // Rating stars
                 Column(
@@ -140,7 +176,7 @@ class _RatingModalState extends State<RatingModal> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(5, (index) {
                           return GestureDetector(
-                            onTap: () {
+                            onTap: widget.hasAlreadyRated ? null : () {
                               setState(() => _rating = (index + 1).toDouble());
                             },
                             child: Padding(
@@ -148,9 +184,11 @@ class _RatingModalState extends State<RatingModal> {
                               child: Icon(
                                 Icons.star,
                                 size: 32,
-                                color: index < _rating
-                                    ? Colors.amber
-                                    : Colors.grey.shade300,
+                                color: widget.hasAlreadyRated
+                                    ? Colors.grey.shade300
+                                    : (index < _rating
+                                        ? Colors.amber
+                                        : Colors.grey.shade300),
                               ),
                             ),
                           );
@@ -187,7 +225,7 @@ class _RatingModalState extends State<RatingModal> {
                       maxLines: 4,
                       minLines: 3,
                       maxLength: 500,
-                      enabled: !_isSubmitting,
+                      enabled: !_isSubmitting && !widget.hasAlreadyRated,
                       decoration: InputDecoration(
                         hintText: 'Comparte tu experiencia (mínimo 10 caracteres)',
                         hintStyle: TextStyle(
@@ -223,7 +261,9 @@ class _RatingModalState extends State<RatingModal> {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                        onPressed: (_isSubmitting || widget.hasAlreadyRated)
+                            ? null
+                            : () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey.shade200,
                           foregroundColor: Colors.black,
@@ -232,33 +272,35 @@ class _RatingModalState extends State<RatingModal> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text('Cancelar'),
+                        child: Text(widget.hasAlreadyRated ? 'Cerrar' : 'Cancelar'),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submitRating,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryBlue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                    if (!widget.hasAlreadyRated) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _isSubmitting ? null : _submitRating,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
+                          child: _isSubmitting
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : const Text('Enviar'),
                         ),
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Text('Enviar'),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],

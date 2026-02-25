@@ -58,4 +58,34 @@ class ValoracionService {
       throw const ValoracionException("Error al crear la valoración. Intenta más tarde.");
     }
   }
+
+  Future<bool> haValorizado(int idAnuncio) async {
+    final token = await TokenStorage().getToken();
+    
+    if (token == null) {
+      return false;
+    }
+
+    final http.Response response;
+
+    try {
+      response = await http.get(
+        Uri.parse("$_baseUrl/check/$idAnuncio"),
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+    } on SocketException {
+      return false;
+    } catch (e) {
+      return false;
+    }
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      return body['existe'] ?? false;
+    }
+    
+    return false;
+  }
 }
