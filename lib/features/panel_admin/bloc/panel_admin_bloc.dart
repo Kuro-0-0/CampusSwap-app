@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
+import 'package:campusswap_app/core/services/admin_report_service.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
 import 'package:campusswap_app/core/services/categoria_service.dart';
 import 'package:campusswap_app/core/services/profile_service.dart';
@@ -12,6 +13,7 @@ class PanelAdminBloc extends Bloc<PanelAdminEvent, PanelAdminState> {
   final AnuncioService _anuncioService = AnuncioService();
   final CategoriaService _categoriaService = CategoriaService();
   final ProfileService _profileService = ProfileService();
+  final AdminReportService _adminReportService = AdminReportService();
   PanelAdminBloc() : super(PanelAdminLoading()) {
     on<CargarEstadisticas>(_onCargarEstadisticas);
   }
@@ -29,7 +31,8 @@ class PanelAdminBloc extends Bloc<PanelAdminEvent, PanelAdminState> {
       final usuariosPage = await _profileService.getTotalUsuarios(page: 0, size: 1); 
       final totalUsuarios = usuariosPage.totalElements;
 
-      final totalReportesPendientes = 3;
+      final reportesPage = await _adminReportService.obtenerReportes(page: 0, size: 1);
+      final totalReportesPendientes = reportesPage.page.totalElements;
 
       emit(PanelAdminLoaded(
         totalAnuncios: totalAnuncios,
