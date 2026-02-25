@@ -40,7 +40,7 @@ class ConversationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final otro = conversacion.otroParticipante;
     final esMio = conversacion.ultimoMensajeEsMio;
-
+    
     return ListTile(
       onTap: onTap,
       leading: GestureDetector(

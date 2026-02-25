@@ -23,4 +23,6 @@ abstract class IAnuncioResponse {
   Future<void> editarAnuncio(int id, AnuncioRequestModel request, [String? rutaImagen]);
 
   Future<void> eliminarAnuncioAdmin(int anuncioId);
+
+  Future<void> comprarAnuncio(int anuncioId);
 }

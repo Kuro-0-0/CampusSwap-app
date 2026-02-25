@@ -1,5 +1,7 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/chat_mensaje_model.dart';
+import 'package:campusswap_app/core/services/anuncio_service.dart';
+import 'package:campusswap_app/core/services/purchase_event_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
@@ -41,16 +43,35 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late Anuncio _currentAnuncio;
+  bool _isLoading = false;
+  bool _isLoadingAnuncio = true;
 
   @override
   void initState() {
     super.initState();
+    _currentAnuncio = widget.anuncio;
+    _loadAnuncio();
     context.read<ChatDetalleBloc>().add(
       GetChatEspecifico(
         idAnuncio: widget.idAnuncio,
         idContrario: widget.idContrario,
       ),
     );
+  }
+
+  Future<void> _loadAnuncio() async {
+    try {
+      final anuncio = await AnuncioService().getAnuncioById(widget.idAnuncio);
+      if (mounted) {
+        setState(() {
+          _currentAnuncio = anuncio;
+          _isLoadingAnuncio = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingAnuncio = false);
+    }
   }
 
   @override
@@ -150,12 +171,17 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
-          ChatProductHeader(
-            tituloAnuncio: widget.tituloAnuncio,
-            imagenAnuncio: widget.imagenAnuncio,
-            anuncio: widget.anuncio,
-            onBuyTap: () {},
-          ),
+          if (_isLoading) const LinearProgressIndicator(),
+          if (_isLoadingAnuncio)
+            const LinearProgressIndicator()
+          else
+            ChatProductHeader(
+              tituloAnuncio: _currentAnuncio.titulo,
+              imagenAnuncio: _currentAnuncio.imagen,
+              anuncio: _currentAnuncio,
+              onBuyTap: _handleBuy,
+              isOwner: _currentAnuncio.usuarioId != widget.idContrario,
+            ),
           Expanded(
             child: BlocConsumer<ChatDetalleBloc, ChatDetalleState>(
               listener: (context, state) {
@@ -244,5 +270,30 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       },
     );
+  }
+
+  Future<void> _handleBuy() async {
+    setState(() => _isLoading = true);
+    try {
+      await AnuncioService().comprarAnuncio(widget.idAnuncio);
+
+      final refreshedAnuncio = await AnuncioService().getAnuncioById(widget.idAnuncio);
+
+      if (!mounted) return;
+      setState(() => _currentAnuncio = refreshedAnuncio);
+
+      PurchaseEventBus.instance.notifyPurchase(widget.idAnuncio);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('¡Compra realizada con éxito!'), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 }

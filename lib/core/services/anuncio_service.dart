@@ -450,4 +450,31 @@ class AnuncioService implements IAnuncioResponse {
       throw AnuncioException('Error inesperado: $e');
     }
   }
+
+  @override
+  Future<void> comprarAnuncio(int anuncioId) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final response = await http
+          .put(
+            Uri.parse('$_baseUrl/$anuncioId/comprar'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 401) {
+        TokenStorage.triggerLogout();
+        throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
+      } else {
+        throw AnuncioException('Error al comprar anuncio (${response.statusCode})');
+      }
+    } catch (e) {
+      throw AnuncioException('Error inesperado: $e');
+    }
+  }
 }
