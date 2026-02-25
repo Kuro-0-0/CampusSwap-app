@@ -23,6 +23,8 @@ final class ListUserBloqueoLoading extends ListUserState {
 }
 
 final class ListUserBloqueoSuccess extends ListUserState {
+final UsuarioResponse usuarioActualizado;
+  ListUserBloqueoSuccess(this.usuarioActualizado);
 
 }
 

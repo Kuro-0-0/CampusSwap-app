@@ -374,8 +374,8 @@ class ProfileService implements IProfileService {
     }
   }
   
-  @override
-  Future<void> bloquearUsuario(String usuarioId) async {
+ @override
+Future<UsuarioResponse> bloquearUsuario(String usuarioId) async {
   try {
     final token = await _storage.getToken();
     final response = await http.put(
@@ -386,8 +386,8 @@ class ProfileService implements IProfileService {
       },
     ).timeout(const Duration(seconds: 10));
 
-    if (response.statusCode == 200 || response.statusCode == 204) {
-      return;
+    if (response.statusCode == 200) {
+      return UsuarioResponse.fromJson(jsonDecode(response.body)); // ← devuelve el usuario actualizado
     } else if (response.statusCode == 401 || response.statusCode == 403) {
       throw const ProfileException('No tienes permisos de administrador.');
     } else if (response.statusCode == 404) {

@@ -32,7 +32,6 @@ class _ListUserViewState extends State<_ListUserView> {
     super.dispose();
   }
 
-  // Filtra admins de cualquier lista antes de usarla
   List<UsuarioResponse> _soloUsuarios(List<UsuarioResponse> todos) =>
       todos.where((u) => !u.roles.contains('ADMIN')).toList();
 
@@ -52,10 +51,15 @@ class _ListUserViewState extends State<_ListUserView> {
               );
             }
             if (state is ListUserBloqueoSuccess) {
+              final esBloqueado = state.usuarioActualizado.bloqueado;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Usuario bloqueado correctamente'),
-                  backgroundColor: Colors.green,
+                SnackBar(
+                  content: Text(
+                    esBloqueado
+                        ? 'Usuario bloqueado correctamente'
+                        : 'Usuario desbloqueado correctamente',
+                  ),
+                  backgroundColor: esBloqueado ? Colors.red : Colors.green,
                 ),
               );
             }
@@ -87,8 +91,6 @@ class _ListUserViewState extends State<_ListUserView> {
     );
   }
 
-  // ── Header ───────────────────────────────────────────────────────────────────
-
   Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 16, 16, 0),
@@ -109,10 +111,7 @@ class _ListUserViewState extends State<_ListUserView> {
                 children: [
                   const Text(
                     'Usuarios',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     '$total registrados',
@@ -126,8 +125,6 @@ class _ListUserViewState extends State<_ListUserView> {
       ),
     );
   }
-
-  // ── Buscador ──────────────────────────────────────────────────────────────────
 
   Widget _buildSearchBar() {
     return Padding(
@@ -149,8 +146,6 @@ class _ListUserViewState extends State<_ListUserView> {
     );
   }
 
-  // ── Stats ─────────────────────────────────────────────────────────────────────
-
   Widget _buildStats(List<UsuarioResponse> usuarios) {
     final total = usuarios.length;
     final bloqueados = usuarios.where((u) => u.bloqueado).length;
@@ -161,30 +156,16 @@ class _ListUserViewState extends State<_ListUserView> {
       child: IntrinsicHeight(
         child: Row(
           children: [
-            _StatChip(
-              value: activos.toString(),
-              label: 'Activos',
-              valueColor: Colors.blue,
-            ),
+            _StatChip(value: activos.toString(), label: 'Activos', valueColor: Colors.blue),
             const SizedBox(width: 10),
-            _StatChip(
-              value: bloqueados.toString(),
-              label: 'Bloqueados',
-              valueColor: Colors.red,
-            ),
+            _StatChip(value: bloqueados.toString(), label: 'Bloqueados', valueColor: Colors.red),
             const SizedBox(width: 10),
-            _StatChip(
-              value: total.toString(),
-              label: 'Total',
-              valueColor: Colors.black87,
-            ),
+            _StatChip(value: total.toString(), label: 'Total', valueColor: Colors.black87),
           ],
         ),
       ),
     );
   }
-
-  // ── Body ──────────────────────────────────────────────────────────────────────
 
   Widget _buildBody(BuildContext context, ListUserState state) {
     return switch (state) {
@@ -196,12 +177,8 @@ class _ListUserViewState extends State<_ListUserView> {
                                     context.read<ListUserBloc>().ultimaLista,
                                     bloqueandoId: state.usuarioId,
                                   ),
-      ListUserBloqueoSuccess() => _buildList(
-                                    context.read<ListUserBloc>().ultimaLista,
-                                  ),
-      ListUserBloqueoFailure() => _buildList(
-                                    context.read<ListUserBloc>().ultimaLista,
-                                  ),
+      ListUserBloqueoSuccess() => _buildList(context.read<ListUserBloc>().ultimaLista),
+      ListUserBloqueoFailure() => _buildList(context.read<ListUserBloc>().ultimaLista),
     };
   }
 
@@ -212,11 +189,7 @@ class _ListUserViewState extends State<_ListUserView> {
         children: [
           const Icon(Icons.error_outline, color: Colors.red, size: 48),
           const SizedBox(height: 12),
-          Text(
-            message,
-            style: const TextStyle(color: Colors.red),
-            textAlign: TextAlign.center,
-          ),
+          Text(message, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () => context.read<ListUserBloc>().add(GetUsuarios()),
@@ -229,7 +202,6 @@ class _ListUserViewState extends State<_ListUserView> {
   }
 
   Widget _buildList(List<UsuarioResponse> usuarios, {String? bloqueandoId}) {
-    // 👇 filtra admins y aplica búsqueda
     final filtrados = _soloUsuarios(usuarios)
         .where(
           (u) =>
@@ -240,10 +212,7 @@ class _ListUserViewState extends State<_ListUserView> {
 
     if (filtrados.isEmpty) {
       return const Center(
-        child: Text(
-          'No se encontraron usuarios.',
-          style: TextStyle(color: Colors.grey),
-        ),
+        child: Text('No se encontraron usuarios.', style: TextStyle(color: Colors.grey)),
       );
     }
 
@@ -265,11 +234,7 @@ class _StatChip extends StatelessWidget {
   final String label;
   final Color valueColor;
 
-  const _StatChip({
-    required this.value,
-    required this.label,
-    required this.valueColor,
-  });
+  const _StatChip({required this.value, required this.label, required this.valueColor});
 
   @override
   Widget build(BuildContext context) {
@@ -283,18 +248,8 @@ class _StatChip extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: valueColor,
-              ),
-            ),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
+            Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: valueColor)),
+            Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
       ),
@@ -308,10 +263,7 @@ class _UsuarioCard extends StatelessWidget {
   final UsuarioResponse usuario;
   final String? bloqueandoId;
 
-  const _UsuarioCard({
-    required this.usuario,
-    this.bloqueandoId,
-  });
+  const _UsuarioCard({required this.usuario, this.bloqueandoId});
 
   bool get _isCargando => bloqueandoId == usuario.id;
 
@@ -356,12 +308,9 @@ class _UsuarioCard extends StatelessWidget {
   Widget _buildAvatar() {
     return CircleAvatar(
       radius: 26,
-      backgroundImage:
-          usuario.imageUrl.isNotEmpty ? NetworkImage(usuario.imageUrl) : null,
+      backgroundImage: usuario.imageUrl.isNotEmpty ? NetworkImage(usuario.imageUrl) : null,
       backgroundColor: Colors.grey.shade200,
-      child: usuario.imageUrl.isEmpty
-          ? const Icon(Icons.person, color: Colors.grey)
-          : null,
+      child: usuario.imageUrl.isEmpty ? const Icon(Icons.person, color: Colors.grey) : null,
     );
   }
 
@@ -374,10 +323,7 @@ class _UsuarioCard extends StatelessWidget {
             Flexible(
               child: Text(
                 usuario.nombre,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -388,28 +334,17 @@ class _UsuarioCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 2),
-        Text(
-          usuario.email,
-          style: const TextStyle(color: Colors.grey, fontSize: 13),
-          overflow: TextOverflow.ellipsis,
-        ),
+        Text(usuario.email, style: const TextStyle(color: Colors.grey, fontSize: 13), overflow: TextOverflow.ellipsis),
         const SizedBox(height: 8),
         Row(
           children: [
             const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
             const SizedBox(width: 2),
-            Text(
-              usuario.reputacionMedia?.toStringAsFixed(1) ?? 'N/A',
-              style: const TextStyle(fontSize: 13),
-            ),
+            Text(usuario.reputacionMedia?.toStringAsFixed(1) ?? 'N/A', style: const TextStyle(fontSize: 13)),
             const SizedBox(width: 16),
-            const Icon(Icons.calendar_today_outlined,
-                size: 13, color: Colors.grey),
+            const Icon(Icons.calendar_today_outlined, size: 13, color: Colors.grey),
             const SizedBox(width: 4),
-            Text(
-              _fechaFormateada,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
+            Text(_fechaFormateada, style: const TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
       ],
@@ -417,14 +352,14 @@ class _UsuarioCard extends StatelessWidget {
   }
 
   Widget _buildBotonBloqueo(BuildContext context) {
+    final esBloqueado = usuario.bloqueado;
+
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: _isCargando || usuario.bloqueado
+        onPressed: _isCargando
             ? null
-            : () => context
-                .read<ListUserBloc>()
-                .add(BloquearUsuario(usuario.id)),
+            : () => context.read<ListUserBloc>().add(BloquearUsuario(usuario.id)),
         icon: _isCargando
             ? const SizedBox(
                 width: 14,
@@ -432,23 +367,18 @@ class _UsuarioCard extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : Icon(
-                usuario.bloqueado ? Icons.block : Icons.block_outlined,
+                esBloqueado ? Icons.lock_open_outlined : Icons.block_outlined,
                 size: 18,
-                color: usuario.bloqueado ? Colors.grey : Colors.red,
+                color: esBloqueado ? Colors.green : Colors.red,
               ),
         label: Text(
-          usuario.bloqueado ? 'Bloqueado' : 'Bloquear',
-          style: TextStyle(
-            color: usuario.bloqueado ? Colors.grey : Colors.red,
-          ),
+          esBloqueado ? 'Desbloquear' : 'Bloquear',
+          style: TextStyle(color: esBloqueado ? Colors.green : Colors.red),
         ),
         style: OutlinedButton.styleFrom(
-          backgroundColor:
-              usuario.bloqueado ? Colors.grey.shade100 : Colors.red.shade50,
+          backgroundColor: esBloqueado ? Colors.green.shade50 : Colors.red.shade50,
           side: BorderSide.none,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
     );
