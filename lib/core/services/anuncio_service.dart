@@ -470,11 +470,13 @@ class AnuncioService implements IAnuncioResponse {
       } else if (response.statusCode == 401) {
         TokenStorage.triggerLogout();
         throw const AnuncioException('No autorizado. Por favor, inicia sesión.');
+      } else if (response.statusCode == 409) {
+        throw const AnuncioException('Este anuncio ya ha sido comprado.');
       } else {
         throw AnuncioException('Error al comprar anuncio (${response.statusCode})');
       }
     } catch (e) {
-      throw AnuncioException('Error inesperado: $e');
+      throw AnuncioException('$e');
     }
   }
 }

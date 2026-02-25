@@ -289,9 +289,23 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      final errorMessage = e.toString();
+      final isAlreadyPurchased = errorMessage.contains('ya ha sido comprado');
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
       );
+
+      // If already purchased, refresh the page to update the button
+      if (isAlreadyPurchased) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (!mounted) return;
+        final refreshedAnuncio = await AnuncioService().getAnuncioById(widget.idAnuncio);
+        if (mounted) {
+          setState(() => _currentAnuncio = refreshedAnuncio);
+          PurchaseEventBus.instance.notifyPurchase(widget.idAnuncio);
+        }
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

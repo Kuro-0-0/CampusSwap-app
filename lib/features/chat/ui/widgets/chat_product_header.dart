@@ -5,6 +5,8 @@ import 'package:campusswap_app/core/services/anuncio_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
+import 'package:campusswap_app/features/valoracion/bloc/valoracion_bloc.dart';
+import 'package:campusswap_app/features/valoracion/ui/widgets/rating_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -70,6 +72,16 @@ class ChatProductHeader extends StatelessWidget {
         );
       }
     }
+  }
+
+  void _showRatingModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => BlocProvider(
+        create: (_) => ValoracionBloc(),
+        child: RatingModal(anuncio: anuncio),
+      ),
+    );
   }
 
   @override
@@ -141,11 +153,7 @@ class ChatProductHeader extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: anuncio.estado == 'CERRADO' 
-                    ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Valorar')),
-                        );
-                      } 
+                    ? () => _showRatingModal(context)
                     : onBuyTap,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: anuncio.estado == 'CERRADO' ? Colors.green : AppColors.primaryBlue,
