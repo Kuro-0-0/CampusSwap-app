@@ -82,8 +82,7 @@ class ValoracionService {
     }
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> body = jsonDecode(response.body);
-      return body['existe'] ?? false;
+      return response.body.toLowerCase() == 'true';
     }
     
     return false;

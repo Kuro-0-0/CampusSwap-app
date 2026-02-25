@@ -58,7 +58,7 @@ class _ChatProductHeaderState extends State<ChatProductHeader> {
       if (mounted) {
         setState(() => _isCheckingRating = false);
       }
-    }
+    } 
   }
   
   String get _imageUrl {

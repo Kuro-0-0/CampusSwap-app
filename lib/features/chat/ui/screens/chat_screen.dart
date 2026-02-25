@@ -23,6 +23,7 @@ class ChatScreen extends StatefulWidget {
   final String imagenAnuncio;
   final double precioAnuncio;
   final Anuncio anuncio;
+  final bool justPurchased;
 
   const ChatScreen({
     super.key,
@@ -34,6 +35,7 @@ class ChatScreen extends StatefulWidget {
     required this.imagenAnuncio,
     required this.precioAnuncio,
     required this.anuncio,
+    this.justPurchased = false,
   });
 
   @override
@@ -58,6 +60,37 @@ class _ChatScreenState extends State<ChatScreen> {
         idContrario: widget.idContrario,
       ),
     );
+    
+    // Send purchase notification message if purchase was just made
+    if (widget.justPurchased) {
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (mounted) {
+          final purchaseMessage = "He comprado tu producto: ${widget.tituloAnuncio}";
+          context.read<ChatDetalleBloc>().add(
+            EnviarMensaje(
+              contenido: purchaseMessage,
+              anuncioId: widget.idAnuncio,
+              receptorId: widget.idContrario,
+            ),
+          );
+          
+          // Reload messages after sending and notify purchase
+          Future.delayed(const Duration(milliseconds: 800), () {
+            if (mounted) {
+              context.read<ChatDetalleBloc>().add(
+                GetChatEspecifico(
+                  idAnuncio: widget.idAnuncio,
+                  idContrario: widget.idContrario,
+                ),
+              );
+              
+              // Notify the app about purchase completion
+              PurchaseEventBus.instance.notifyPurchase(widget.idAnuncio);
+            }
+          });
+        }
+      });
+    }
   }
 
   Future<void> _loadAnuncio() async {
@@ -289,6 +322,19 @@ class _ChatScreenState extends State<ChatScreen> {
           contenido: purchaseMessage,
           anuncioId: widget.idAnuncio,
           receptorId: widget.idContrario,
+        ),
+      );
+
+      // Wait a moment for the message to be processed, then reload chat messages
+      await Future.delayed(const Duration(milliseconds: 800));
+      
+      if (!mounted) return;
+      
+      // Reload chat messages to show the purchase message
+      context.read<ChatDetalleBloc>().add(
+        GetChatEspecifico(
+          idAnuncio: widget.idAnuncio,
+          idContrario: widget.idContrario,
         ),
       );
 
