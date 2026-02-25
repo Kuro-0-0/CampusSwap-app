@@ -37,20 +37,23 @@ class ListUserBloc extends Bloc<ListUserEvent, ListUserState> {
   }
 
   Future<void> _onBloquearUsuario(
-    BloquearUsuario event,
-    Emitter<ListUserState> emit,
-  ) async {
-    emit(ListUserBloqueoLoading(event.usuarioId));
-    try {
-      await _profileService.bloquearUsuario(event.usuarioId);
-      emit(ListUserBloqueoSuccess());
-      add(GetUsuarios()); 
-    } on ProfileException catch (e) {
-      emit(ListUserBloqueoFailure(e.message));
-      add(GetUsuarios()); 
-    } catch (e) {
-      emit(ListUserBloqueoFailure('Error inesperado: ${e.toString()}'));
-      add(GetUsuarios());
-    }
+  BloquearUsuario event,
+  Emitter<ListUserState> emit,
+) async {
+  emit(ListUserBloqueoLoading(event.usuarioId));
+  try {
+    final usuarioActualizado = await _profileService.bloquearUsuario(event.usuarioId);
+
+    _ultimaLista = _ultimaLista.map((u) {
+      return u.id == event.usuarioId ? usuarioActualizado : u;
+    }).toList();
+
+    emit(ListUserBloqueoSuccess(usuarioActualizado));
+    emit(ListUserSuccess(_ultimaLista)); 
+  } on ProfileException catch (e) {
+    emit(ListUserBloqueoFailure(e.message));
+  } catch (e) {
+    emit(ListUserBloqueoFailure('Error inesperado: ${e.toString()}'));
   }
+}
 }
