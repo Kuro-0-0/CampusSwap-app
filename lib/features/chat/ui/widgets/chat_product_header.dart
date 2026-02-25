@@ -137,18 +137,24 @@ class ChatProductHeader extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: onBuyTap,
+              onPressed: anuncio.estado == 'CERRADO' 
+                  ? () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Valorar')),
+                      );
+                    } 
+                  : onBuyTap,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
+                backgroundColor: anuncio.estado == 'CERRADO' ? Colors.green : AppColors.primaryBlue,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                "Comprar",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              child: Text(
+                anuncio.estado == 'CERRADO' ? "Valorar" : "Comprar",
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ),

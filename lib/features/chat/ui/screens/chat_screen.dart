@@ -1,5 +1,6 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/chat_mensaje_model.dart';
+import 'package:campusswap_app/core/services/anuncio_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
@@ -41,10 +42,13 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late Anuncio _currentAnuncio;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _currentAnuncio = widget.anuncio;
     context.read<ChatDetalleBloc>().add(
       GetChatEspecifico(
         idAnuncio: widget.idAnuncio,
@@ -150,11 +154,12 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
+          if (_isLoading) const LinearProgressIndicator(),
           ChatProductHeader(
             tituloAnuncio: widget.tituloAnuncio,
             imagenAnuncio: widget.imagenAnuncio,
-            anuncio: widget.anuncio,
-            onBuyTap: () {},
+            anuncio: _currentAnuncio,
+            onBuyTap: _handleBuy,
           ),
           Expanded(
             child: BlocConsumer<ChatDetalleBloc, ChatDetalleState>(
@@ -244,5 +249,28 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       },
     );
+  }
+
+  Future<void> _handleBuy() async {
+    setState(() => _isLoading = true);
+    try {
+      await AnuncioService().comprarAnuncio(widget.idAnuncio);
+
+      // Refresh the anuncio after purchase
+      final refreshedAnuncio = await AnuncioService().getAnuncioById(widget.idAnuncio);
+      setState(() {
+        _currentAnuncio = refreshedAnuncio;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('¡Compra realizada con éxito!'), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 }
