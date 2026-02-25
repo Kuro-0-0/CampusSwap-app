@@ -58,7 +58,7 @@ class AnuncioService implements IAnuncioResponse {
     }
     if (estado != null && estado.isNotEmpty) {
       queryParams['estado'] = estado;
-    } else{
+    } else {
       queryParams['estado'] = 'ACTIVO';
     }
 
@@ -71,13 +71,13 @@ class AnuncioService implements IAnuncioResponse {
     try {
       var token = await TokenStorage().getToken();
 
-      response = await http.get(
-        uri,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
+      Map<String, String> headers = {"Content-Type": "application/json"};
+
+      if (token != null && token.isNotEmpty) {
+        headers["Authorization"] = "Bearer $token";
+      }
+
+      response = await http.get(uri, headers: headers);
     } on SocketException {
       throw const AnuncioException(
         "No se pudo conectar al servidor. Verifica tu conexión.",
@@ -108,14 +108,20 @@ class AnuncioService implements IAnuncioResponse {
   @override
   Future<Anuncio> getAnuncioById(int anuncioId) async {
     try {
-      final token = await TokenStorage().getToken();
+      var token = await TokenStorage().getToken();
+      
+      Map<String, String> headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token != null && token.isNotEmpty) {
+        headers["Authorization"] = "Bearer $token";
+      }
+
       final response = await http
           .get(
             Uri.parse('$_baseUrl/unique/$anuncioId'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
+            headers: headers,
           )
           .timeout(const Duration(seconds: 10));
 
@@ -160,9 +166,7 @@ class AnuncioService implements IAnuncioResponse {
       final token = await TokenStorage().getToken();
       final response = await http
           .put(
-            Uri.parse(
-              '$_baseUrl/$anuncioId/alternar-estado',
-            ),
+            Uri.parse('$_baseUrl/$anuncioId/alternar-estado'),
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
@@ -263,7 +267,13 @@ class AnuncioService implements IAnuncioResponse {
 
       final subTypePart = mimeType.split('/')[1];
 
-      request.files.add(await http.MultipartFile.fromPath('file', rutaImagen, contentType: MediaType('image', subTypePart)));
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          rutaImagen,
+          contentType: MediaType('image', subTypePart),
+        ),
+      );
 
       final streamedResponse = await request.send();
 
@@ -271,20 +281,15 @@ class AnuncioService implements IAnuncioResponse {
 
       if (response.statusCode == 201) {
         return;
-      }else if (response.statusCode == 400){
-        throw const AnuncioException(
-          'Solicitud inválida, revise los campos'
-        );
-
+      } else if (response.statusCode == 400) {
+        throw const AnuncioException('Solicitud inválida, revise los campos');
       } else if (response.statusCode == 401) {
         TokenStorage.triggerLogout();
         throw const AnuncioException(
           'No autorizado. Por favor, inicia sesión.',
         );
       } else if (response.statusCode == 403) {
-        throw const AnuncioException(
-          'No tienes permiso para crear anuncios.',
-        );
+        throw const AnuncioException('No tienes permiso para crear anuncios.');
       } else if (response.statusCode == 404) {
         throw const AnuncioException('Entidad no encontrada.');
       } else {
@@ -322,18 +327,20 @@ class AnuncioService implements IAnuncioResponse {
 
       if (rutaImagen != null && rutaImagen.isNotEmpty) {
         final mimeType = lookupMimeType(rutaImagen);
-        
+
         if (mimeType != null) {
           final subTypePart = mimeType.split('/')[1];
           request.files.add(
             await http.MultipartFile.fromPath(
-              'file', 
-              rutaImagen, 
-              contentType: MediaType('image', subTypePart)
+              'file',
+              rutaImagen,
+              contentType: MediaType('image', subTypePart),
             ),
           );
         } else {
-          request.files.add(await http.MultipartFile.fromPath('file', rutaImagen));
+          request.files.add(
+            await http.MultipartFile.fromPath('file', rutaImagen),
+          );
         }
       }
 
@@ -341,20 +348,15 @@ class AnuncioService implements IAnuncioResponse {
       final response = await http.Response.fromStream(streamedResponse);
       if (response.statusCode == 200) {
         return;
-      }else if (response.statusCode == 400){
-        throw const AnuncioException(
-          'Solicitud inválida, revise los campos'
-        );
-
+      } else if (response.statusCode == 400) {
+        throw const AnuncioException('Solicitud inválida, revise los campos');
       } else if (response.statusCode == 401) {
         TokenStorage.triggerLogout();
         throw const AnuncioException(
           'No autorizado. Por favor, inicia sesión.',
         );
       } else if (response.statusCode == 403) {
-        throw const AnuncioException(
-          'No tienes permiso para crear anuncios.',
-        );
+        throw const AnuncioException('No tienes permiso para crear anuncios.');
       } else if (response.statusCode == 404) {
         throw const AnuncioException('Entidad no encontrada.');
       } else {
@@ -367,12 +369,14 @@ class AnuncioService implements IAnuncioResponse {
     }
   }
 
-  Future<void> eliminarAnuncioAdmin(int anuncioId) async{
-     try {
+  Future<void> eliminarAnuncioAdmin(int anuncioId) async {
+    try {
       final token = await TokenStorage().getToken();
       final response = await http
           .delete(
-            Uri.parse('${TokenStorage.baseUrl}/api/v1/admin/anuncios/$anuncioId'),
+            Uri.parse(
+              '${TokenStorage.baseUrl}/api/v1/admin/anuncios/$anuncioId',
+            ),
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
@@ -405,7 +409,6 @@ class AnuncioService implements IAnuncioResponse {
     }
   }
 
-  /// Reporta un anuncio por un motivo específico
   Future<void> reportarAnuncio(int anuncioId, String motivo) async {
     try {
       final token = await TokenStorage().getToken();
@@ -473,7 +476,9 @@ class AnuncioService implements IAnuncioResponse {
       } else if (response.statusCode == 409) {
         throw AnuncioException(response.body.isNotEmpty ? jsonDecode(response.body)['detail'] : 'Conflicto al comprar el anuncio.');
       } else {
-        throw AnuncioException('Error al comprar anuncio (${response.statusCode})');
+        throw AnuncioException(
+          'Error al comprar anuncio (${response.statusCode})',
+        );
       }
     } catch (e) {
       throw AnuncioException('$e');
@@ -494,11 +499,8 @@ class AnuncioService implements IAnuncioResponse {
           )
           .timeout(const Duration(seconds: 10));
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        print(jsonDecode(response.body));
         return jsonDecode(response.body) == true;
       } else if (response.statusCode == 401) {
         TokenStorage.triggerLogout();

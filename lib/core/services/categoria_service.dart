@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 
 class CategoriaException implements Exception {
   final String message;
-  final String? code; // 'conflict', 'unauthorized', etc.
+  final String? code;
 
   const CategoriaException(this.message, {this.code});
 
@@ -29,13 +29,18 @@ class CategoriaService implements ICategoriaResponse {
 
     try {
       var token = await TokenStorage().getToken();
+      
+      Map<String, String> headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token != null && token.isNotEmpty) {
+        headers["Authorization"] = "Bearer $token";
+      }
 
       response = await http.get(
         uri,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
+        headers: headers,
       );
     } on SocketException {
       throw const CategoriaException(

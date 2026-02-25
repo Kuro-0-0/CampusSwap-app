@@ -24,13 +24,15 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, state) {
-              String nombreUsuario = "Usuario";
+              String nombreUsuario = "Invitado";
+              bool isGuest = true;
 
               if (state is ProfileLoaded) {
                 nombreUsuario = state.usuario.nombre.split(' ')[0];
+                isGuest = false;
               }
 
-              return HomeAppBar(userName: nombreUsuario);
+              return HomeAppBar(userName: nombreUsuario, isGuest: isGuest);
             },
           ),
 
