@@ -35,11 +35,14 @@ class ChatProductHeader extends StatefulWidget {
 class _ChatProductHeaderState extends State<ChatProductHeader> {
   bool _hasAlreadyRated = false;
   bool _isCheckingRating = false;
+  bool _isComprador = false;
+  bool _isCheckingComprador = false;
 
   @override
   void initState() {
     super.initState();
     _checkIfAlreadyRated();
+    _checkIfComprador();
   }
 
   Future<void> _checkIfAlreadyRated() async {
@@ -59,6 +62,24 @@ class _ChatProductHeaderState extends State<ChatProductHeader> {
         setState(() => _isCheckingRating = false);
       }
     } 
+  }
+
+  Future<void> _checkIfComprador() async {
+    setState(() => _isCheckingComprador = true);
+    try {
+      final isComprador = await AnuncioService().comprobarComprador(widget.anuncio.id);
+      if (mounted) {
+        setState(() => _isComprador = isComprador);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isComprador = false);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isCheckingComprador = false);
+      }
+    }
   }
   
   String get _imageUrl {
@@ -189,32 +210,51 @@ class _ChatProductHeaderState extends State<ChatProductHeader> {
               ),
             ],
           ),
-          if (!widget.isOwner) ...[  
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: widget.anuncio.estado == 'CERRADO' 
-                    ? (_hasAlreadyRated ? null : () => _showRatingModal(context))
-                    : widget.onBuyTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: widget.anuncio.estado == 'CERRADO' 
-                      ? (_hasAlreadyRated ? Colors.grey : Colors.green)
-                      : AppColors.primaryBlue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+          if (!widget.isOwner) ...[
+            if (widget.anuncio.estado != 'CERRADO') ...[  
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: widget.onBuyTap,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "Comprar",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
-                child: Text(
-                  widget.anuncio.estado == 'CERRADO' 
-                      ? (_hasAlreadyRated ? "Ya valorado" : "Valorar")
-                      : "Comprar",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ] else if (_isCheckingComprador) ...[  
+              const SizedBox(height: 12),
+              const Center(child: CircularProgressIndicator()),
+            ] else if (_isComprador) ...[  
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _hasAlreadyRated ? null : () => _showRatingModal(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _hasAlreadyRated ? Colors.grey : Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    _hasAlreadyRated ? "Ya valorado" : "Valorar",
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ],
       ),

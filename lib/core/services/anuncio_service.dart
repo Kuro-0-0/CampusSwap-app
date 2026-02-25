@@ -479,4 +479,35 @@ class AnuncioService implements IAnuncioResponse {
       throw AnuncioException('$e');
     }
   }
+
+  /// Returns true if the currently logged-in user is the buyer of the anuncio.
+  Future<bool> comprobarComprador(int anuncioId) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl/$anuncioId/comprobar-comprador'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print(jsonDecode(response.body));
+        return jsonDecode(response.body) == true;
+      } else if (response.statusCode == 401) {
+        TokenStorage.triggerLogout();
+        return false;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
 }
