@@ -2,6 +2,7 @@ import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
 import 'package:campusswap_app/core/models/usuario_page_response_model.dart';
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/models/valoracion_response_model.dart';
 
 abstract class IProfileService {
   Future<UsuarioResponse> getCurrentUser();
@@ -17,4 +18,5 @@ abstract class IProfileService {
   Future<UsuarioPageResponse> getTotalUsuarios({int page = 0, int size = 10});
   Future<void> updateProfileImage(String imagePath);
   Future<UsuarioResponse> bloquearUsuario(String usuarioId);
+  Future<List<Valoracion>> getValoraciones(String usuarioId);
 }
