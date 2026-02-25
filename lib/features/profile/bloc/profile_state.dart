@@ -11,11 +11,14 @@ final class ProfileLoaded extends ProfileState {
   final UsuarioResponse usuario;
   final List<Anuncio> anuncios;
   final List<Favorito> favoritos;
+  final List<Valoracion> valoraciones;
 
   ProfileLoaded({
     required this.usuario,
     required this.anuncios,
     required this.favoritos,
+    required this.valoraciones,
+
   });
 }
 

@@ -1,6 +1,8 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
+import 'package:campusswap_app/core/models/valoracion_response_model.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/anuncio_form/ui/screens/anuncio_form_screen.dart';
 import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
@@ -34,9 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 280,
             decoration: const BoxDecoration(
               color: AppColors.primaryBlue,
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(32),
-              ),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
             ),
           ),
 
@@ -87,7 +87,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 if (state is ProfileFailure) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               },
@@ -122,7 +125,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton.icon(
-                          onPressed: () => context.read<ProfileBloc>().add(LoadProfile()),
+                          onPressed: () =>
+                              context.read<ProfileBloc>().add(LoadProfile()),
                           icon: const Icon(Icons.refresh),
                           label: const Text('Reintentar'),
                           style: ElevatedButton.styleFrom(
@@ -170,26 +174,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.logout, color: Colors.white),
+                              icon: const Icon(
+                                Icons.logout,
+                                color: Colors.white,
+                              ),
                               tooltip: "Cerrar sesión",
                               onPressed: () {
                                 showDialog(
                                   context: context,
                                   builder: (ctx) => AlertDialog(
                                     title: const Text("Cerrar sesión"),
-                                    content: const Text("¿Estás seguro de que deseas cerrar tu sesión?"),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    content: const Text(
+                                      "¿Estás seguro de que deseas cerrar tu sesión?",
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(ctx),
-                                        child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+                                        child: const Text(
+                                          "Cancelar",
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
                                       ),
                                       TextButton(
                                         onPressed: () {
                                           Navigator.pop(ctx);
-                                          context.read<AuthBloc>().add(LogoutRequested()); 
+                                          context.read<AuthBloc>().add(
+                                            LogoutRequested(),
+                                          );
                                         },
-                                        child: const Text("Cerrar Sesión", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                        child: const Text(
+                                          "Cerrar Sesión",
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -216,6 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 24),
 
                       ProfileTabToggle(
+                        tabs: const ["Anuncios", "Favoritos", "Valoraciones"],
                         selectedIndex: _selectedTab,
                         onTabChanged: (index) {
                           setState(() => _selectedTab = index);
@@ -227,7 +250,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Expanded(
                         child: _selectedTab == 0
                             ? _buildAnunciosList(context, misAnuncios)
-                            : _buildFavoritosList(context, misFavoritos),
+                            : _selectedTab == 1
+                            ? _buildFavoritosList(context, misFavoritos)
+                            : _buildValoracionesList(
+                                context,
+                                state.valoraciones,
+                              ),
                       ),
                     ],
                   );
@@ -277,16 +305,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return ProductListCard(
           item: anuncio,
-         onTap: () {
+          onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (ctx) => BlocProvider.value(
                   value: context.read<ProfileBloc>(),
-                  child: AnuncioDetailScreen(
-                    anuncio: anuncio,
-                    isMine: true, 
-                  ),
+                  child: AnuncioDetailScreen(anuncio: anuncio, isMine: true),
                 ),
               ),
             ).then((resultado) {
@@ -294,11 +319,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 context.read<HomeBloc>().add(CargarCatalogo());
                 context.read<ProfileBloc>().add(LoadProfile());
               } else if (resultado == 'pausar') {
-                context.read<ProfileBloc>().add(PauseAnuncio(anuncioId: anuncio.id));
+                context.read<ProfileBloc>().add(
+                  PauseAnuncio(anuncioId: anuncio.id),
+                );
               } else if (resultado == 'reactivar') {
-                context.read<ProfileBloc>().add(ReactivateAnuncio(anuncioId: anuncio.id));
+                context.read<ProfileBloc>().add(
+                  ReactivateAnuncio(anuncioId: anuncio.id),
+                );
               } else if (resultado == 'eliminar') {
-                context.read<ProfileBloc>().add(DeleteAnuncio(anuncioId: anuncio.id));
+                context.read<ProfileBloc>().add(
+                  DeleteAnuncio(anuncioId: anuncio.id),
+                );
               }
             });
           },
@@ -325,9 +356,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   : '¿Deseas pausar este anuncio temporalmente?',
               onConfirm: () {
                 if (isPaused) {
-                  context.read<ProfileBloc>().add(ReactivateAnuncio(anuncioId: anuncio.id));
+                  context.read<ProfileBloc>().add(
+                    ReactivateAnuncio(anuncioId: anuncio.id),
+                  );
                 } else {
-                  context.read<ProfileBloc>().add(PauseAnuncio(anuncioId: anuncio.id));
+                  context.read<ProfileBloc>().add(
+                    PauseAnuncio(anuncioId: anuncio.id),
+                  );
                 }
               },
             );
@@ -339,7 +374,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   '¿Estás seguro que deseas eliminar este anuncio? Esta acción no se puede deshacer.',
               isDestructive: true,
               onConfirm: () {
-                context.read<ProfileBloc>().add(DeleteAnuncio(anuncioId: anuncio.id));
+                context.read<ProfileBloc>().add(
+                  DeleteAnuncio(anuncioId: anuncio.id),
+                );
               },
             );
           },
@@ -374,12 +411,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return ProductListCard(
           item: favorito,
-        onTap: () async {
+          onTap: () async {
             _showLoadingDialog(context);
             try {
               final anuncioService = AnuncioService();
-              final anuncioCompleto = await anuncioService.getAnuncioById(favorito.anuncio.id);
-              
+              final anuncioCompleto = await anuncioService.getAnuncioById(
+                favorito.anuncio.id,
+              );
+
               if (context.mounted) {
                 Navigator.pop(context);
                 Navigator.push(
@@ -390,9 +429,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         BlocProvider.value(value: context.read<ProfileBloc>()),
                         BlocProvider.value(value: context.read<HomeBloc>()),
                       ],
-                      child: AnuncioDetailScreen(
-                        anuncio: anuncioCompleto,
-                      ),
+                      child: AnuncioDetailScreen(anuncio: anuncioCompleto),
                     ),
                   ),
                 );
@@ -416,7 +453,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               message: '¿Deseas eliminar este anuncio de tus favoritos?',
               isDestructive: true,
               onConfirm: () {
-                context.read<ProfileBloc>().add(DeleteFavorito(favoritoId: favorito.id));
+                context.read<ProfileBloc>().add(
+                  DeleteFavorito(favoritoId: favorito.id),
+                );
               },
             );
           },
@@ -464,10 +503,121 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primaryBlue,
-        ),
+        child: CircularProgressIndicator(color: AppColors.primaryBlue),
       ),
+    );
+  }
+
+  Widget _buildValoracionesList(
+    BuildContext context,
+    List<Valoracion> valoraciones,
+  ) {
+    if (valoraciones.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.star_outline, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Aún no has recibido valoraciones',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      itemCount: valoraciones.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final val = valoraciones[index];
+
+        final imageUrl =
+            val.fotoPerfilEvaluador != null &&
+                val.fotoPerfilEvaluador!.isNotEmpty
+            ? '${TokenStorage.baseUrl}/api/v1/imagen/${val.fotoPerfilEvaluador}'
+            : null;
+
+        return Card(
+          color: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                      backgroundImage: imageUrl != null
+                          ? NetworkImage(imageUrl)
+                          : null,
+                      child: imageUrl == null
+                          ? const Icon(
+                              Icons.person,
+                              color: AppColors.primaryBlue,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            val.evaluadorNombre,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            val.fecha,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: List.generate(5, (starIndex) {
+                        return Icon(
+                          starIndex < val.puntuacion.round()
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: Colors.amber,
+                          size: 18,
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(val.comentario, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 8),
+                Text(
+                  'Sobre: ${val.anuncioTitulo}',
+                  style: const TextStyle(
+                    color: AppColors.primaryBlue,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
