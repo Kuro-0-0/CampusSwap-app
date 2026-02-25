@@ -45,6 +45,16 @@ class _ChatProductHeaderState extends State<ChatProductHeader> {
     _checkIfComprador();
   }
 
+  @override
+  void didUpdateWidget(ChatProductHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Re-check buyer/rating status when the anuncio estado changes (e.g. after purchase)
+    if (oldWidget.anuncio.estado != widget.anuncio.estado) {
+      _checkIfComprador();
+      _checkIfAlreadyRated();
+    }
+  }
+
   Future<void> _checkIfAlreadyRated() async {
     setState(() => _isCheckingRating = true);
     try {
