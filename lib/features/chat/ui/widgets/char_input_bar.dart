@@ -1,10 +1,13 @@
+import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class ChatInputBar extends StatelessWidget {
-  final TextEditingController? controller;
+  final TextEditingController controller;
   final VoidCallback onSendTap;
 
-  const ChatInputBar({super.key, this.controller, required this.onSendTap});
+  const ChatInputBar({super.key, 
+  required this.controller,
+  required this.onSendTap});
 
   @override
   Widget build(BuildContext context) {
@@ -33,17 +36,27 @@ class ChatInputBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            GestureDetector(
-              onTap: onSendTap,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Colors.grey, // O AppColors.primaryBlue si hay texto
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.send, color: Colors.white, size: 20),
-              ),
-            ),
+
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context,value, _){
+                final hasText= value.text.trim().isNotEmpty;
+                return GestureDetector(
+                  onTap: hasText ? onSendTap : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: hasText
+                      ? AppColors.primaryBlue
+                      : Colors.grey.shade400,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.send,color: Colors.white,size: 20),
+                  ),
+                );
+              },
+            )
           ],
         ),
       ),
