@@ -245,7 +245,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                       providers: [
                         BlocProvider.value(value: context.read<PublicProfileBloc>()),
                         // Pass ProfileBloc down so the detail screen also stays synced
-                        BlocProvider.value(value: context.read<ProfileBloc>()), 
+                        BlocProvider.value(value: context.read<ProfileBloc>()),
                       ],
                       child: AnuncioDetailScreen(
                         anuncio: anuncio,

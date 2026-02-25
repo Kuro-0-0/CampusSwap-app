@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:campusswap_app/core/services/purchase_event_service.dart';
 import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
 import 'package:campusswap_app/features/auth/ui/screens/login_screen.dart';
 import 'package:campusswap_app/features/home/ui/screens/home_screen.dart';
@@ -26,13 +29,49 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
 
+  // BLoC instances owned by this state so we can dispatch to them
+  // from the PurchaseEventBus subscription without needing a BuildContext.
+  late final HomeBloc _homeBloc;
+  late final CategoriaBloc _categoriaBloc;
+  late final ProfileBloc _profileBloc;
+  late final MensajeBloc _mensajeBloc;
+  late final StreamSubscription<int> _purchaseSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeBloc = HomeBloc()..add(CargarCatalogo());
+    _categoriaBloc = CategoriaBloc()..add(CargarCategorias());
+    _profileBloc = ProfileBloc()..add(LoadProfile());
+    _mensajeBloc = MensajeBloc()..add(GetChats());
+    // NOTE: PanelAdminBloc is intentionally NOT created here.
+
+    // Subscribe to purchase events from any screen in the app.
+    // This is the single source of truth for post-purchase refresh.
+    _purchaseSub = PurchaseEventBus.instance.onPurchase.listen((_) {
+      _homeBloc.add(CargarCatalogo());
+      _profileBloc.add(LoadProfile());
+      _mensajeBloc.add(GetChats());
+    });
+  }
+
+  @override
+  void dispose() {
+    _purchaseSub.cancel();
+    _homeBloc.close();
+    _categoriaBloc.close();
+    _profileBloc.close();
+    _mensajeBloc.close();
+    super.dispose();
+  }
+
   void _onTabTapped(int index, BuildContext innerContext, bool isAdmin) {
     setState(() {
       _currentIndex = index;
     });
 
     if (!isAdmin && index == 2) {
-      innerContext.read<MensajeBloc>().add(GetChats());
+      _mensajeBloc.add(GetChats());
     }
   }
 
@@ -40,13 +79,13 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => HomeBloc()..add(CargarCatalogo())),
-        BlocProvider(create: (_) => CategoriaBloc()..add(CargarCategorias())),
-        BlocProvider(create: (_) => ProfileBloc()..add(LoadProfile())),
-        BlocProvider(create: (_) => MensajeBloc()..add(GetChats())),
-        BlocProvider(
-          create: (_) => PanelAdminBloc()..add(CargarEstadisticas()),
-        ),
+        BlocProvider.value(value: _homeBloc),
+        BlocProvider.value(value: _categoriaBloc),
+        BlocProvider.value(value: _profileBloc),
+        BlocProvider.value(value: _mensajeBloc),
+        // PanelAdminBloc is lazy: only created when AdminPanelScreen first reads it.
+        // This prevents it from firing admin-only API calls for regular users on login.
+        BlocProvider(create: (_) => PanelAdminBloc()..add(CargarEstadisticas())),
       ],
       child: Builder(
         builder: (innerContext) {

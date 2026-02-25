@@ -2,6 +2,7 @@ import 'package:campusswap_app/core/models/usuario_response_model.dart';
 import 'package:campusswap_app/core/models/reporte_request_model.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
 import 'package:campusswap_app/core/services/profile_service.dart';
+import 'package:campusswap_app/core/services/purchase_event_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/widgets/vendedor_card.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
@@ -13,7 +14,7 @@ import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/anuncio_form/ui/screens/anuncio_form_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AnuncioDetailScreen extends StatelessWidget {
+class AnuncioDetailScreen extends StatefulWidget {
   final Anuncio anuncio;
   final bool isMine;
   final bool isAdmin;
@@ -24,6 +25,23 @@ class AnuncioDetailScreen extends StatelessWidget {
     this.isMine = false,
     this.isAdmin = false,
   });
+
+  @override
+  State<AnuncioDetailScreen> createState() => _AnuncioDetailScreenState();
+}
+
+class _AnuncioDetailScreenState extends State<AnuncioDetailScreen> {
+  late Anuncio anuncio;
+  bool _isProcessingPurchase = false;
+
+  bool get isMine => widget.isMine;
+  bool get isAdmin => widget.isAdmin;
+
+  @override
+  void initState() {
+    super.initState();
+    anuncio = widget.anuncio;
+  }
 
   String get _imageUrl {
     if (anuncio.imagen.isEmpty)
@@ -420,6 +438,8 @@ class AnuncioDetailScreen extends StatelessWidget {
   }
 
   Widget _buildBuyerActions(BuildContext context) {
+    final isClosed = anuncio.estado == 'CERRADO';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -434,73 +454,204 @@ class AnuncioDetailScreen extends StatelessWidget {
         ],
       ),
       child: SafeArea(
-        child: ElevatedButton.icon(
-          onPressed: () async {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryBlue),
-              ),
-            );
-
-            try {
-              final vendedor = await ProfileService().getPublicUserProfile(
-                anuncio.usuarioId,
-              );
-
-              if (context.mounted) {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider(
-                      create: (_) => ChatDetalleBloc(),
-                      child: ChatScreen(
-                        userName: vendedor.nombre,
-                        fotoUsuario: vendedor.imageUrl.isNotEmpty
-                            ? vendedor.imageUrl
-                            : null,
-                        idAnuncio: anuncio.id,
-                        idContrario: anuncio.usuarioId,
-                        tituloAnuncio: anuncio.titulo,
-                        imagenAnuncio: anuncio.imagen,
-                        precioAnuncio: anuncio.precio ?? 0.0,
-                        anuncio: anuncio,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isClosed) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green.shade600, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Este anuncio ya ha sido vendido',
+                      style: TextStyle(
+                        color: Colors.green.shade700,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (!isClosed) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isProcessingPurchase ? null : () => _handlePurchase(context),
+                  icon: _isProcessingPurchase
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Icon(Icons.shopping_bag_outlined),
+                  label: Text(
+                    _isProcessingPurchase ? 'Procesando...' : 'Comprar',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Error al intentar abrir el chat.'),
-                    backgroundColor: Colors.red,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                );
-              }
-            }
-          },
-          icon: const Icon(Icons.chat_bubble_outline),
-          label: const Text("Iniciar chat"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryBlue,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: isClosed ? null : () => _openChat(context),
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: const Text(
+                  'Iniciar chat',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isClosed
+                      ? Colors.grey.shade200
+                      : AppColors.primaryBlue.withOpacity(0.12),
+                  foregroundColor: isClosed ? Colors.grey : AppColors.primaryBlue,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+              ),
             ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> _openChat(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: AppColors.primaryBlue),
+      ),
+    );
+
+    try {
+      final vendedor = await ProfileService().getPublicUserProfile(
+        anuncio.usuarioId,
+      );
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => ChatDetalleBloc(),
+              child: ChatScreen(
+                userName: vendedor.nombre,
+                fotoUsuario: vendedor.imageUrl.isNotEmpty
+                    ? vendedor.imageUrl
+                    : null,
+                idAnuncio: anuncio.id,
+                idContrario: anuncio.usuarioId,
+                tituloAnuncio: anuncio.titulo,
+                imagenAnuncio: anuncio.imagen,
+                precioAnuncio: anuncio.precio ?? 0.0,
+                anuncio: anuncio,
+              ),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al intentar abrir el chat.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handlePurchase(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar compra'),
+        content: Text(
+          '¿Deseas comprar "${anuncio.titulo}"'
+          '${anuncio.precio != null ? " por ${anuncio.precio!.toStringAsFixed(2)}€" : ""}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirmar compra'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isProcessingPurchase = true);
+
+    try {
+      await AnuncioService().comprarAnuncio(anuncio.id);
+      final refreshed = await AnuncioService().getAnuncioById(anuncio.id);
+
+      if (mounted) {
+        setState(() => anuncio = refreshed);
+
+        // Notify the app-wide event bus so every screen refreshes reliably,
+        // regardless of which BLoCs are available in this route's context.
+        PurchaseEventBus.instance.notifyPurchase(anuncio.id);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('¡Compra realizada con éxito!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al realizar la compra: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessingPurchase = false);
+    }
   }
 
   void _mostrarConfirmacionEliminar(BuildContext context) {

@@ -1,6 +1,7 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/chat_mensaje_model.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
+import 'package:campusswap_app/core/services/purchase_event_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/chat/bloc/chat_detalle_bloc.dart';
@@ -252,25 +253,65 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _handleBuy() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar compra'),
+        content: Text(
+          '¿Deseas comprar "${widget.tituloAnuncio}"'
+          '${widget.precioAnuncio != 0.0 ? " por ${widget.precioAnuncio.toStringAsFixed(2)}€" : ""}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirmar compra'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
     setState(() => _isLoading = true);
     try {
       await AnuncioService().comprarAnuncio(widget.idAnuncio);
 
-      // Refresh the anuncio after purchase
       final refreshedAnuncio = await AnuncioService().getAnuncioById(widget.idAnuncio);
-      setState(() {
-        _currentAnuncio = refreshedAnuncio;
-      });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Compra realizada con éxito!'), backgroundColor: Colors.green),
-      );
+      if (mounted) {
+        setState(() {
+          _currentAnuncio = refreshedAnuncio;
+        });
+
+        // Notify the app-wide event bus so every screen refreshes reliably.
+        PurchaseEventBus.instance.notifyPurchase(widget.idAnuncio);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('¡Compra realizada con éxito!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al realizar la compra: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 }

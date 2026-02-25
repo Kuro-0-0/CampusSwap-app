@@ -385,8 +385,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (ctx) => BlocProvider.value(
-                      value: context.read<ProfileBloc>(),
+                    builder: (ctx) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(value: context.read<ProfileBloc>()),
+                        BlocProvider.value(value: context.read<HomeBloc>()),
+                      ],
                       child: AnuncioDetailScreen(
                         anuncio: anuncioCompleto,
                       ),
