@@ -1,5 +1,5 @@
 import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
-import 'package:campusswap_app/features/auth/ui/screens/login_screen.dart';
+import 'package:campusswap_app/main_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,7 +17,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: Scaffold(
-        body: LoginScreen(),
+        body: MainLayout(),
       ),
     );
   }

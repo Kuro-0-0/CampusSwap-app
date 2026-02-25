@@ -181,6 +181,18 @@ class LoginScreen extends StatelessWidget {
                               );
                             },
                           ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () => _navigateToHome(context),
+                            child: const Text(
+                              "Continuar como invitado",
+                              style: TextStyle(
+                                color: AppColors.primaryBlue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
                           const Spacer(),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 24.0),

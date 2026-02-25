@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:campusswap_app/core/services/purchase_event_service.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/auth/bloc/auth_bloc.dart';
 import 'package:campusswap_app/features/auth/ui/screens/login_screen.dart';
 import 'package:campusswap_app/features/home/ui/screens/home_screen.dart';
@@ -29,8 +30,6 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
 
-  // BLoC instances owned by this state so we can dispatch to them
-  // from the PurchaseEventBus subscription without needing a BuildContext.
   late final HomeBloc _homeBloc;
   late final CategoriaBloc _categoriaBloc;
   late final ProfileBloc _profileBloc;
@@ -42,12 +41,11 @@ class _MainLayoutState extends State<MainLayout> {
     super.initState();
     _homeBloc = HomeBloc()..add(CargarCatalogo());
     _categoriaBloc = CategoriaBloc()..add(CargarCategorias());
-    _profileBloc = ProfileBloc()..add(LoadProfile());
-    _mensajeBloc = MensajeBloc()..add(GetChats());
-    // NOTE: PanelAdminBloc is intentionally NOT created here.
+    _profileBloc = ProfileBloc();
+    _mensajeBloc = MensajeBloc();
 
-    // Subscribe to purchase events from any screen in the app.
-    // This is the single source of truth for post-purchase refresh.
+    _comprobarSesion();
+
     _purchaseSub = PurchaseEventBus.instance.onPurchase.listen((_) {
       _homeBloc.add(CargarCatalogo());
       _profileBloc.add(LoadProfile());
@@ -65,13 +63,32 @@ class _MainLayoutState extends State<MainLayout> {
     super.dispose();
   }
 
-  void _onTabTapped(int index, BuildContext innerContext, bool isAdmin) {
+  void _requerirLogin(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Debes iniciar sesión para usar esta función."),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
+  void _onTabTapped(int index, BuildContext innerContext, bool isAdmin, bool isGuest) {
     setState(() {
       _currentIndex = index;
     });
 
     if (!isAdmin && index == 2) {
       _mensajeBloc.add(GetChats());
+    }
+
+    if (isGuest && (index == 2 || index == 3)) {
+      _requerirLogin(innerContext);
+      return;
     }
   }
 
@@ -83,8 +100,6 @@ class _MainLayoutState extends State<MainLayout> {
         BlocProvider.value(value: _categoriaBloc),
         BlocProvider.value(value: _profileBloc),
         BlocProvider.value(value: _mensajeBloc),
-        // PanelAdminBloc is lazy: only created when AdminPanelScreen first reads it.
-        // This prevents it from firing admin-only API calls for regular users on login.
         BlocProvider(create: (_) => PanelAdminBloc()..add(CargarEstadisticas())),
       ],
       child: Builder(
@@ -92,7 +107,9 @@ class _MainLayoutState extends State<MainLayout> {
           return BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, profileState) {
               bool isAdmin = false;
+              bool isGuest = true;
               if (profileState is ProfileLoaded) {
+                isGuest = false;
                 isAdmin = profileState.usuario.roles.any(
                   (rol) => rol.toUpperCase().contains('ADMIN'),
                 );
@@ -145,6 +162,11 @@ class _MainLayoutState extends State<MainLayout> {
                       ? null
                       : FloatingActionButton(
                           onPressed: () {
+                            if (isGuest) {
+                              _requerirLogin(innerContext);
+                              return;
+                            }
+
                             Navigator.push(
                               innerContext,
                               MaterialPageRoute(
@@ -190,6 +212,7 @@ class _MainLayoutState extends State<MainLayout> {
                                   index: 0,
                                   label: "Inicio",
                                   isAdmin: isAdmin,
+                                  isGuest: isGuest,
                                 ),
                                 _buildNavItem(
                                   innerContext,
@@ -197,6 +220,7 @@ class _MainLayoutState extends State<MainLayout> {
                                   index: 1,
                                   label: "Buscar",
                                   isAdmin: isAdmin,
+                                  isGuest: isGuest,
                                 ),
                                 _buildNavItem(
                                   innerContext,
@@ -204,6 +228,7 @@ class _MainLayoutState extends State<MainLayout> {
                                   index: 2,
                                   label: "Admin",
                                   isAdmin: isAdmin,
+                                  isGuest: isGuest,
                                 ),
                               ]
                             : [
@@ -213,6 +238,7 @@ class _MainLayoutState extends State<MainLayout> {
                                   index: 0,
                                   label: "Inicio",
                                   isAdmin: isAdmin,
+                                  isGuest: isGuest,
                                 ),
                                 _buildNavItem(
                                   innerContext,
@@ -220,6 +246,7 @@ class _MainLayoutState extends State<MainLayout> {
                                   index: 1,
                                   label: "Buscar",
                                   isAdmin: isAdmin,
+                                  isGuest: isGuest,
                                 ),
                                 const SizedBox(width: 48),
                                 _buildNavItem(
@@ -228,6 +255,7 @@ class _MainLayoutState extends State<MainLayout> {
                                   index: 2,
                                   label: "Mensajes",
                                   isAdmin: isAdmin,
+                                  isGuest: isGuest,
                                 ),
                                 _buildNavItem(
                                   innerContext,
@@ -235,6 +263,7 @@ class _MainLayoutState extends State<MainLayout> {
                                   index: 3,
                                   label: "Perfil",
                                   isAdmin: isAdmin,
+                                  isGuest: isGuest,
                                 ),
                               ],
                       ),
@@ -255,12 +284,13 @@ class _MainLayoutState extends State<MainLayout> {
     required int index,
     required String label,
     required bool isAdmin,
+    required bool isGuest,
   }) {
     final safeIndex = _currentIndex >= (isAdmin ? 3 : 4) ? 0 : _currentIndex;
     final isSelected = safeIndex == index;
 
     return InkWell(
-      onTap: () => _onTabTapped(index, innerContext, isAdmin),
+      onTap: () => _onTabTapped(index, innerContext, isAdmin, isGuest),
       borderRadius: BorderRadius.circular(30),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -285,4 +315,14 @@ class _MainLayoutState extends State<MainLayout> {
       ),
     );
   }
+
+  Future<void> _comprobarSesion() async {
+  final token = await TokenStorage().getToken();
+  if (token != null && token.isNotEmpty) {
+    _profileBloc.add(LoadProfile());
+    _mensajeBloc.add(GetChats());
+  }
 }
+}
+
+
