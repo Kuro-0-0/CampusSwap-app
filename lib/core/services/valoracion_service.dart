@@ -17,7 +17,7 @@ class ValoracionException implements Exception {
 class ValoracionService {
   final String _baseUrl = "${TokenStorage.baseUrl}/api/v1/valoraciones";
 
-  Future<ValoracionResponse> crearValoracion(ValoracionRequest request) async {
+  Future<Valoracion> crearValoracion(ValoracionRequest request) async {
     final token = await TokenStorage().getToken();
     
     if (token == null) {
@@ -45,7 +45,7 @@ class ValoracionService {
 
     if (response.statusCode == 201 || response.statusCode == 200) {
       final Map<String, dynamic> body = jsonDecode(response.body);
-      return ValoracionResponse.fromJson(body);
+      return Valoracion.fromJson(body);
     } else if (response.statusCode == 401) {
       throw const ValoracionException("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
     } else if (response.statusCode == 400) {
