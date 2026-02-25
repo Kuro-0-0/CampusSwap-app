@@ -1,4 +1,5 @@
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/models/reporte_request_model.dart';
 import 'package:campusswap_app/core/services/anuncio_service.dart';
 import 'package:campusswap_app/core/services/profile_service.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
@@ -111,6 +112,11 @@ class AnuncioDetailScreen extends StatelessWidget {
                       );
                     },
                   ),
+                ),
+              if (!isMine && !isAdmin)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _buildReportDropdown(context),
                 ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -544,6 +550,97 @@ class AnuncioDetailScreen extends StatelessWidget {
         child: Icon(icon, color: AppColors.textDark, size: 20),
       ),
     );
+  }
+
+  Widget _buildReportDropdown(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: PopupMenuButton<String>(
+        padding: EdgeInsets.zero,
+        icon: const Icon(Icons.more_vert, color: AppColors.textDark, size: 20),
+        onSelected: (String motivo) {
+          _mostrarConfirmacionReporte(context, motivo);
+        },
+        itemBuilder: (BuildContext context) =>
+            motivosDisponibles.map((MotivoOption motivo) {
+          return PopupMenuItem<String>(
+            value: motivo.valor,
+            child: Text(motivo.label),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  void _mostrarConfirmacionReporte(BuildContext context, String motivo) {
+    final motivoOption = motivosDisponibles.firstWhere(
+      (m) => m.valor == motivo,
+      orElse: () => MotivoOption(valor: motivo, label: motivo),
+    );
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reportar anuncio'),
+        content: Text(
+          '¿Estás seguro de que deseas reportar este anuncio por: ${motivoOption.label}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _enviarReporte(context, motivo);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Reportar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _enviarReporte(BuildContext context, String motivo) async {
+    try {
+      final anuncioService = AnuncioService();
+      await anuncioService.reportarAnuncio(anuncio.id, motivo);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Anuncio reportado correctamente'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al reportar: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildAdminActions(BuildContext context) {

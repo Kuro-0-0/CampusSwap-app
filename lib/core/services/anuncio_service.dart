@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:campusswap_app/core/interfaces/anuncio_interface.dart';
 import 'package:campusswap_app/core/models/anuncio_request_model.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
+import 'package:campusswap_app/core/models/reporte_request_model.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -395,6 +396,52 @@ class AnuncioService implements IAnuncioResponse {
       } else {
         throw AnuncioException(
           'Error al eliminar anuncio (${response.statusCode})',
+        );
+      }
+    } on SocketException {
+      throw const AnuncioException('No se pudo conectar al servidor.');
+    } catch (e) {
+      throw AnuncioException('Error inesperado: $e');
+    }
+  }
+
+  /// Reporta un anuncio por un motivo específico
+  Future<void> reportarAnuncio(int anuncioId, String motivo) async {
+    try {
+      final token = await TokenStorage().getToken();
+      final reporteRequest = ReporteRequestModel(motivo: motivo);
+
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/$anuncioId/reportar'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode(reporteRequest.toJson()),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      } else if (response.statusCode == 401) {
+        TokenStorage.triggerLogout();
+        throw const AnuncioException(
+          'No autorizado. Por favor, inicia sesión.',
+        );
+      } else if (response.statusCode == 403) {
+        throw const AnuncioException(
+          'No tienes permiso para reportar este anuncio.',
+        );
+      } else if (response.statusCode == 404) {
+        throw const AnuncioException('Anuncio no encontrado.');
+      } else if (response.statusCode == 400) {
+        throw const AnuncioException('Datos de reporte inválidos.');
+      } else if (response.statusCode == 409) {
+        throw const AnuncioException('Ya has reportado este anuncio.');
+      } else {
+        throw AnuncioException(
+          'Error al reportar anuncio (${response.statusCode})',
         );
       }
     } on SocketException {
