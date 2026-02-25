@@ -14,6 +14,7 @@ class ChatProductHeader extends StatelessWidget {
   final String imagenAnuncio;
   final Anuncio anuncio;
   final VoidCallback onBuyTap;
+  final bool isOwner;
 
   const ChatProductHeader({
     super.key,
@@ -21,6 +22,7 @@ class ChatProductHeader extends StatelessWidget {
     required this.imagenAnuncio,
     required this.anuncio,
     required this.onBuyTap,
+    this.isOwner = false,
   });
   
   String get _imageUrl {
@@ -133,31 +135,33 @@ class ChatProductHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: anuncio.estado == 'CERRADO' 
-                  ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Valorar')),
-                      );
-                    } 
-                  : onBuyTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: anuncio.estado == 'CERRADO' ? Colors.green : AppColors.primaryBlue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          if (!isOwner) ...[  
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: anuncio.estado == 'CERRADO' 
+                    ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Valorar')),
+                        );
+                      } 
+                    : onBuyTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: anuncio.estado == 'CERRADO' ? Colors.green : AppColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  anuncio.estado == 'CERRADO' ? "Valorar" : "Comprar",
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
-              child: Text(
-                anuncio.estado == 'CERRADO' ? "Valorar" : "Comprar",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
             ),
-          ),
+          ],
         ],
       ),
     );

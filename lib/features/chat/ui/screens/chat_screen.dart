@@ -161,6 +161,7 @@ class _ChatScreenState extends State<ChatScreen> {
             imagenAnuncio: widget.imagenAnuncio,
             anuncio: _currentAnuncio,
             onBuyTap: _handleBuy,
+            isOwner: _currentAnuncio.usuarioId != widget.idContrario,
           ),
           Expanded(
             child: BlocConsumer<ChatDetalleBloc, ChatDetalleState>(
