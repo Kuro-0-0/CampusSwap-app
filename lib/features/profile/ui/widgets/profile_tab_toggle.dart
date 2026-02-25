@@ -4,11 +4,13 @@ import '../../../../core/theme/app_colors.dart';
 class ProfileTabToggle extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabChanged;
+  final List<String> tabs;
 
   const ProfileTabToggle({
     super.key,
     required this.selectedIndex,
     required this.onTabChanged,
+    required this.tabs,
   });
 
   @override
@@ -16,11 +18,15 @@ class ProfileTabToggle extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
-        children: [
-          Expanded(child: _buildButton(0, "Mis Anuncios")),
-          const SizedBox(width: 16),
-          Expanded(child: _buildButton(1, "Favoritos")),
-        ],
+        children: tabs.asMap().entries.map((entry) {
+          final isLast = entry.key == tabs.length - 1;
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: isLast ? 0 : 8.0),
+              child: _buildButton(entry.key, entry.value),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -35,9 +41,12 @@ class ProfileTabToggle extends StatelessWidget {
         elevation: isSelected ? 2 : 0,
         side: isSelected ? null : BorderSide(color: Colors.grey.shade300),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       ),
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+      ),
     );
   }
 }

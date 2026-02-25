@@ -3,6 +3,7 @@ import 'package:campusswap_app/core/interfaces/profile_interface.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/models/valoracion_response_model.dart';
 import 'package:campusswap_app/core/services/profile_service.dart';
 import 'package:meta/meta.dart';
 
@@ -35,11 +36,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final usuario = await _service.getCurrentUser();
       final anuncios = await _service.getMisAnuncios(usuario.id);
       final favoritos = await _service.getFavoritos(usuario.id);
+      final valoraciones = await _service.getValoraciones(usuario.id);
       emit(
         ProfileLoaded(
           usuario: usuario,
           anuncios: anuncios,
           favoritos: favoritos,
+          valoraciones: valoraciones,
         ),
       );
     } catch (e) {

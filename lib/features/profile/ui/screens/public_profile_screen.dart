@@ -1,9 +1,12 @@
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
+import 'package:campusswap_app/core/models/valoracion_response_model.dart';
+import 'package:campusswap_app/core/services/token_storage_service.dart';
 import 'package:campusswap_app/features/anuncio_detail/ui/screens/anuncio_detail_screen.dart';
 import 'package:campusswap_app/features/profile/bloc/profile_bloc.dart';
 import 'package:campusswap_app/features/profile/bloc/public_profile_bloc.dart';
 import 'package:campusswap_app/features/profile/ui/widgets/product_list_card.dart';
+import 'package:campusswap_app/features/profile/ui/widgets/profile_tab_toggle.dart';
 import 'package:campusswap_app/features/profile/ui/widgets/public_profile_info_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +25,8 @@ class PublicProfileScreen extends StatefulWidget {
 }
 
 class _PublicProfileScreenState extends State<PublicProfileScreen> {
+  int _selectedTab = 0;
+
   @override
   void initState() {
     super.initState();
@@ -122,6 +127,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                   final usuario = state.usuario;
                   final anuncios = state.anuncios;
                   final myFavoritos = state.myFavoritos;
+                  final valoraciones = state.valoraciones;
 
                   return Column(
                     children: [
@@ -170,8 +176,21 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                             .length,
                       ),
                       const SizedBox(height: 24),
+                      
+                      ProfileTabToggle(
+                        tabs: const ["Anuncios", "Valoraciones"],
+                        selectedIndex: _selectedTab,
+                        onTabChanged: (index) {
+                          setState(() => _selectedTab = index);
+                        },
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
                       Expanded(
-                        child: _buildAnunciosList(context, anuncios, myFavoritos),
+                        child: _selectedTab == 0
+                            ? _buildAnunciosList(context, anuncios, myFavoritos)
+                            : _buildValoracionesList(context, valoraciones),
                       ),
                     ],
                   );
@@ -191,11 +210,23 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     List<Anuncio> anuncios,
     List<Favorito> myFavoritos,
   ) {
-    if (anuncios.isEmpty) {
-      // ... keep your empty state code
-    }
-
     final activeAnuncios = anuncios.where((a) => a.estado != "CERRADO").toList();
+
+    if (activeAnuncios.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.shopping_bag_outlined, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Este usuario no tiene anuncios activos',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
 
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -204,7 +235,6 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
       itemBuilder: (context, index) {
         final anuncio = activeAnuncios[index];
 
-        // Wrap with ProfileBloc to listen to the global favorites state
         return BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, profileState) {
             bool isFav = false;
@@ -215,7 +245,6 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               isFav = fav != null;
               favoritoId = fav?.id;
             } else {
-              // Fallback to initial local favorites while ProfileBloc loads
               final fav = myFavoritos.where((f) => f.anuncio.id == anuncio.id).firstOrNull;
               isFav = fav != null;
               favoritoId = fav?.id;
@@ -229,7 +258,6 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                   color: isFav ? Colors.red : Colors.grey,
                 ),
                 onPressed: () {
-                  // Dispatch directly to the global ProfileBloc
                   if (isFav && favoritoId != null) {
                     context.read<ProfileBloc>().add(DeleteFavorito(favoritoId: favoritoId));
                   } else {
@@ -244,7 +272,6 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                     builder: (ctx) => MultiBlocProvider(
                       providers: [
                         BlocProvider.value(value: context.read<PublicProfileBloc>()),
-                        // Pass ProfileBloc down so the detail screen also stays synced
                         BlocProvider.value(value: context.read<ProfileBloc>()),
                       ],
                       child: AnuncioDetailScreen(
@@ -262,4 +289,84 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     );
   }
 
+  Widget _buildValoracionesList(BuildContext context, List<Valoracion> valoraciones) {
+    if (valoraciones.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.star_outline, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Este usuario aún no tiene valoraciones',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      itemCount: valoraciones.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final val = valoraciones[index];
+        
+        final imageUrl = val.fotoPerfilEvaluador != null && val.fotoPerfilEvaluador!.isNotEmpty
+            ? '${TokenStorage.baseUrl}/api/v1/imagen/${val.fotoPerfilEvaluador}'
+            : null;
+
+        return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                      backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+                      child: imageUrl == null ? const Icon(Icons.person, color: AppColors.primaryBlue) : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(val.evaluadorNombre, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(val.fecha, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: List.generate(5, (starIndex) {
+                        return Icon(
+                          starIndex < val.puntuacion.round() ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                          size: 18,
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(val.comentario, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 8),
+                Text(
+                  'Sobre: ${val.anuncioTitulo}',
+                  style: const TextStyle(color: AppColors.primaryBlue, fontSize: 12, fontStyle: FontStyle.italic),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

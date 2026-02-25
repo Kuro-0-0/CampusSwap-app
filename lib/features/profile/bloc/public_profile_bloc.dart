@@ -3,6 +3,7 @@ import 'package:campusswap_app/core/interfaces/profile_interface.dart';
 import 'package:campusswap_app/core/models/anuncio_response_model.dart';
 import 'package:campusswap_app/core/models/favorito_response_model.dart';
 import 'package:campusswap_app/core/models/usuario_response_model.dart';
+import 'package:campusswap_app/core/models/valoracion_response_model.dart';
 import 'package:campusswap_app/core/services/profile_service.dart';
 import 'package:meta/meta.dart';
 
@@ -25,7 +26,6 @@ class PublicProfileBloc extends Bloc<PublicProfileEvent, PublicProfileState> {
   ) async {
     emit(PublicProfileLoading());
     try {
-      // Check if user is visiting their own profile and load their favorites
       List<Favorito> myFavoritos = [];
       try {
         final currentUser = await _service.getCurrentUser();
@@ -35,16 +35,17 @@ class PublicProfileBloc extends Bloc<PublicProfileEvent, PublicProfileState> {
         }
         myFavoritos = await _service.getFavoritos(currentUser.id);
       } catch (_) {
-        // Not logged in or error — proceed without favorites
       }
 
       final usuario = await _service.getPublicUserProfile(event.usuarioId);
       final anuncios = await _service.getUserAnuncios(usuario.id);
+      final valoraciones = await _service.getValoraciones(usuario.id);
       emit(
         PublicProfileLoaded(
           usuario: usuario,
           anuncios: anuncios,
           myFavoritos: myFavoritos,
+          valoraciones: valoraciones,
         ),
       );
     } catch (e) {
