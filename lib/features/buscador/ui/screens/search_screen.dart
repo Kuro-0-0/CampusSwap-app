@@ -5,8 +5,7 @@ import 'package:campusswap_app/core/theme/app_colors.dart';
 import 'package:campusswap_app/features/home/bloc/home_bloc.dart';
 import 'package:campusswap_app/features/categorias/bloc/categoria_bloc.dart';
 import 'package:campusswap_app/features/home/ui/widgets/catalogo_anuncios.dart';
-import 'package:campusswap_app/features/buscador/ui/widgets/filtros_busqueda.dart'; // Ajusta el import si tu archivo se llama distinto
-
+import 'package:campusswap_app/features/buscador/ui/widgets/filtros_busqueda.dart'; 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
@@ -23,20 +22,18 @@ class _SearchScreenState extends State<SearchScreen> {
   double? _maxPrecio;
   String? _tipoOperacion;
 
-  // 1. CREAMOS UN BLOC PRIVADO SOLO PARA LAS BÚSQUEDAS
   late HomeBloc _localSearchBloc;
 
   @override
   void initState() {
     super.initState();
-    // Lo iniciamos pidiendo todos los anuncios por defecto
     _localSearchBloc = HomeBloc()..add(CargarCatalogo());
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-    _localSearchBloc.close(); // Importante cerrarlo para no consumir memoria
+    _localSearchBloc.close(); 
     super.dispose();
   }
 
@@ -53,7 +50,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _ejecutarBusqueda() {
-    // IMPORTANTE: Disparamos la búsqueda en el BLOC LOCAL
     _localSearchBloc.add(
       CargarCatalogo(
         q: _currentQuery.isNotEmpty ? _currentQuery : null,
@@ -74,10 +70,8 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       builder: (_) {
         return BlocProvider.value(
-          // Le pasamos el BLoC de categorías global para que dibuje el modal
           value: context.read<CategoriaBloc>(),
           child: FiltrosBusqueda(
-            // Comprueba si tu clase se llama FiltrosBusqueda o FiltrosBusquedaModal
             categoriaIdInicial: _categoriaId,
             minPrecioInicial: _minPrecio,
             maxPrecioInicial: _maxPrecio,
@@ -100,16 +94,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 2. EL ESPÍA: Escuchamos al HomeBloc GLOBAL (el del MainLayout)
     return BlocListener<HomeBloc, HomeState>(
       listener: (context, globalState) {
-        // Si el catálogo global se actualiza (porque borraste, creaste o editaste)...
         if (globalState is HomeSuccess) {
-          // ...obligamos a nuestra búsqueda a recargarse en segundo plano
           _ejecutarBusqueda();
         }
       },
-      // 3. PROVEEDOR LOCAL: Los widgets de esta pantalla usarán el BLoC privado
       child: BlocProvider.value(
         value: _localSearchBloc,
         child: Scaffold(
@@ -120,7 +110,7 @@ class _SearchScreenState extends State<SearchScreen> {
             iconTheme: const IconThemeData(color: AppColors.textDark),
             title: TextField(
               autofocus:
-                  false, // Mejor false para que no salte el teclado al navegar por las pestañas
+                  false, 
               onChanged: _onSearchChanged,
               decoration: const InputDecoration(
                 hintText: "Buscar anuncios...",

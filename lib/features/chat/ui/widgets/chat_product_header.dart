@@ -48,7 +48,6 @@ class _ChatProductHeaderState extends State<ChatProductHeader> {
   @override
   void didUpdateWidget(ChatProductHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Re-check buyer/rating status when the anuncio estado changes (e.g. after purchase)
     if (oldWidget.anuncio.estado != widget.anuncio.estado) {
       _checkIfComprador();
       _checkIfAlreadyRated();
@@ -63,7 +62,6 @@ class _ChatProductHeaderState extends State<ChatProductHeader> {
         setState(() => _hasAlreadyRated = hasRated);
       }
     } catch (e) {
-      // If there's an error, assume they haven't rated
       if (mounted) {
         setState(() => _hasAlreadyRated = false);
       }
@@ -150,7 +148,6 @@ class _ChatProductHeaderState extends State<ChatProductHeader> {
         ),
       ),
     ).then((result) {
-      // If valoración was successfully created, update the state
       if (result == true && mounted) {
         setState(() => _hasAlreadyRated = true);
       }

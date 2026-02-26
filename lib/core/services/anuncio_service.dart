@@ -368,7 +368,7 @@ class AnuncioService implements IAnuncioResponse {
       throw AnuncioException('Error de conexión al editar el anuncio: $e');
     }
   }
-
+  @override
   Future<void> eliminarAnuncioAdmin(int anuncioId) async {
     try {
       final token = await TokenStorage().getToken();
@@ -408,7 +408,7 @@ class AnuncioService implements IAnuncioResponse {
       throw AnuncioException('Error inesperado: $e');
     }
   }
-
+  
   Future<void> reportarAnuncio(int anuncioId, String motivo) async {
     try {
       final token = await TokenStorage().getToken();
