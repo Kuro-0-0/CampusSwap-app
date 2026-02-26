@@ -165,7 +165,7 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
                     _selectedCategoriaId = categoriaMatch.id;
                   });
                 } catch (e) {
-                  print("No se encontró la categoría pre-seleccionada");
+                  print("No se pudo encontrar la categoría del anuncio editado: ${widget.anuncioAEditar!.categoria}");
                 }
               }
             },
@@ -373,7 +373,6 @@ class _AnuncioFormScreenState extends State<AnuncioFormScreen> {
                   backgroundColor: Colors.white,
                   onSelected: (selected) {
                     setState(() => _selectedTipoOperacion = selected ? tipo : null);
-                    print(_selectedTipoOperacion);
                   },
                 );
               }).toList(),

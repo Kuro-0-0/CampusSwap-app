@@ -169,9 +169,7 @@ class LoginScreen extends StatelessWidget {
                                     ),
                                   );
                             },
-                            onForgotPasswordTap: () {
-                              print("Olvidé contraseña tap");
-                            },
+                            onForgotPasswordTap: () {},
                             onRegisterTap: () {
                               Navigator.push(
                                 context,
