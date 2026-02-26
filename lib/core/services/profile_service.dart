@@ -148,8 +148,7 @@ class ProfileService implements IProfileService {
       final response = await http
           .put(
             Uri.parse(
-              'http://10.0.2.2:8080/api/v1/anuncios/$anuncioId/alternar-estado',
-            ),
+              '${TokenStorage.baseUrl}/anuncios/$anuncioId/alternar-estado'),
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
@@ -468,7 +467,7 @@ class ProfileService implements IProfileService {
       if (response.statusCode == 200) {
         return UsuarioResponse.fromJson(
           jsonDecode(response.body),
-        ); // ← devuelve el usuario actualizado
+        ); 
       } else if (response.statusCode == 401 || response.statusCode == 403) {
         throw const ProfileException('No tienes permisos de administrador.');
       } else if (response.statusCode == 404) {

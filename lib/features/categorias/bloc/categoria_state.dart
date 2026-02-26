@@ -47,7 +47,7 @@ final class CategoriaError extends CategoriaState {
 
 final class CategoriaOperationLoading extends CategoriaState {
   final List<CategoriaResponseModel> categorias;
-  final String operationType; // 'create', 'update', 'delete'
+  final String operationType; 
 
   CategoriaOperationLoading({
     required this.categorias,
@@ -59,7 +59,7 @@ final class CategoriaOperationSuccess extends CategoriaState {
   final List<CategoriaResponseModel> categorias;
   final List<CategoriaResponseModel> filteredCategorias;
   final String message;
-  final String operationType; // 'create', 'update', 'delete'
+  final String operationType; 
 
   CategoriaOperationSuccess({
     required this.categorias,

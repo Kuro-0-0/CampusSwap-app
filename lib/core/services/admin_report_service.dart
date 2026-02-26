@@ -17,7 +17,6 @@ class AdminReportService {
   final String _baseUrl = "${TokenStorage.baseUrl}/api/v1/admin/reportes";
   final String _anunciosUrl = "${TokenStorage.baseUrl}/api/v1/anuncios";
 
-  /// Obtiene la lista de reportes pendientes
   Future<ReporteResponseModel> obtenerReportes({
     int page = 0,
     int size = 10,
@@ -66,7 +65,6 @@ class AdminReportService {
     }
   }
 
-  /// Ignora los reportes de un anuncio (elimina los reportes)
   Future<void> ignorarReportes(int anuncioId) async {
     final Uri uri = Uri.parse("$_baseUrl/$anuncioId");
 
@@ -91,7 +89,6 @@ class AdminReportService {
     }
 
     if (response.statusCode == 204 || response.statusCode == 200) {
-      // Éxito
       return;
     } else if (response.statusCode == 401) {
       TokenStorage.triggerLogout();
@@ -108,8 +105,7 @@ class AdminReportService {
       );
     }
   }
-
-  /// Elimina un anuncio reportado
+  
   Future<void> eliminarAnuncio(int anuncioId) async {
     final Uri uri = Uri.parse("$_anunciosUrl/$anuncioId");
 
@@ -134,7 +130,6 @@ class AdminReportService {
     }
 
     if (response.statusCode == 204 || response.statusCode == 200) {
-      // Éxito
       return;
     } else if (response.statusCode == 401) {
       TokenStorage.triggerLogout();

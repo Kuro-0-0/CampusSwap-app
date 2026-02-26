@@ -100,7 +100,6 @@ class CategoriaBloc extends Bloc<CategoriaEvent, CategoriaState> {
         ),
       );
 
-      // Return to success state
       emit(CategoriaSuccess(
         categorias: updatedCategorias,
         filteredCategorias: updatedCategorias,
@@ -161,7 +160,6 @@ class CategoriaBloc extends Bloc<CategoriaEvent, CategoriaState> {
         ),
       );
 
-      // Return to success state
       emit(CategoriaSuccess(
         categorias: updatedCategorias,
         filteredCategorias: updatedCategorias,
@@ -210,20 +208,17 @@ class CategoriaBloc extends Bloc<CategoriaEvent, CategoriaState> {
         ),
       );
 
-      // Return to success state
       emit(CategoriaSuccess(
         categorias: updatedCategorias,
         filteredCategorias: updatedCategorias,
       ));
     } on CategoriaException catch (e) {
-      // For conflict errors (409), show snack bar but return to list view
       if (e.code == 'conflict') {
         emit(
           CategoriaError(
             message: e.message,
           ),
         );
-        // Return to success state to avoid full screen error
         emit(CategoriaSuccess(
           categorias: currentState.categorias,
           filteredCategorias: currentState.filteredCategorias,

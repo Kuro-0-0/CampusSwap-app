@@ -68,7 +68,7 @@ class CategoriaService implements ICategoriaResponse {
       );
     }
   }
-
+  @override
   Future<CategoriaResponseModel> crearCategoria(
     CategoriaRequestModel categoria,
   ) async {
@@ -117,7 +117,7 @@ class CategoriaService implements ICategoriaResponse {
       );
     }
   }
-
+  @override
   Future<CategoriaResponseModel> actualizarCategoria(
     int categoryId,
     CategoriaRequestModel categoria,
@@ -169,7 +169,7 @@ class CategoriaService implements ICategoriaResponse {
       );
     }
   }
-
+  @override
   Future<void> eliminarCategoria(int categoryId) async {
     final Uri uri = Uri.parse('$_adminUrl/$categoryId');
 

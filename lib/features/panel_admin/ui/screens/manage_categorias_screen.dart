@@ -19,7 +19,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
   @override
   void initState() {
     super.initState();
-    // Defer BLoC access until after first frame to ensure context is fully set up
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<CategoriaBloc>().add(CargarCategorias());
@@ -399,7 +398,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header Section
             Container(
               color: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
@@ -451,7 +449,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  // Search Bar
                   Container(
                     height: 48,
                     decoration: BoxDecoration(
@@ -485,7 +482,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                 ],
               ),
             ),
-            // Content
             Expanded(
               child: BlocListener<CategoriaBloc, CategoriaState>(
                 listener: (context, state) {
@@ -759,7 +755,6 @@ class CategoryCard extends StatelessWidget {
   }
 }
 
-// Reusable Action Icon Button
 class ActionIconButton extends StatelessWidget {
   final IconData icon;
   final Color iconColor;

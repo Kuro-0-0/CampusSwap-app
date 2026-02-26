@@ -256,7 +256,6 @@ class _RatingModalState extends State<RatingModal> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                // Buttons
                 Row(
                   children: [
                     Expanded(

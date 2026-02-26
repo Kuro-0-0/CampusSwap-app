@@ -46,7 +46,6 @@ class _ModerationScreenState extends State<ModerationScreen> {
     }
   }
 
-  // --- Modal: Confirm Ignore Reports ---
   void _showIgnoreDialog(BuildContext context, Reporte reporte, int index) {
     showDialog(
       context: context,
@@ -139,7 +138,6 @@ class _ModerationScreenState extends State<ModerationScreen> {
     );
   }
 
-  // --- Modal: Confirm Delete Announcement ---
   void _showDeleteDialog(BuildContext context, Reporte reporte, int index) {
     showDialog(
       context: context,
@@ -317,7 +315,6 @@ class _ModerationScreenState extends State<ModerationScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // --- Header Section ---
             Container(
               color: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
@@ -355,7 +352,6 @@ class _ModerationScreenState extends State<ModerationScreen> {
               ),
             ),
             
-            // --- Content ---
             Expanded(
               child: isLoading
                   ? const Center(
@@ -451,7 +447,6 @@ class _ModerationScreenState extends State<ModerationScreen> {
   }
 }
 
-// --- Reusable Card Widget ---
 class ReportedAdCard extends StatelessWidget {
   final Reporte reporte;
   final VoidCallback onView;
@@ -487,7 +482,6 @@ class ReportedAdCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          // Orange Left Border Accent
           Positioned(
             left: 0,
             top: 0,
@@ -496,17 +490,14 @@ class ReportedAdCard extends StatelessWidget {
             child: Container(color: const Color(0xFFEA580C)),
           ),
           
-          // Card Content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Header: Image, Title, Author
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Image Placeholder
                     Container(
                       width: 56,
                       height: 56,
@@ -561,7 +552,6 @@ class ReportedAdCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 
-                // 2. Warning Box
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
@@ -601,7 +591,6 @@ class ReportedAdCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 
-                // 3. Action Buttons
                 Row(
                   children: [
                     Expanded(
@@ -644,7 +633,6 @@ class ReportedAdCard extends StatelessWidget {
   }
 }
 
-// --- Reusable Button for the Card ---
 class ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
