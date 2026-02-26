@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:campusswap_app/core/models/crear_valoracion_model.dart';
 import 'package:campusswap_app/core/models/valoracion_request_model.dart';
 import 'package:campusswap_app/core/models/valoracion_response_model.dart';
 import 'package:campusswap_app/core/services/valoracion_service.dart';
@@ -20,11 +21,14 @@ class ValoracionBloc extends Bloc<ValoracionEvent, ValoracionState> {
   Future<void> _onSubmitValoracion(SubmitValoracion event, Emitter<ValoracionState> emit) async {
     emit(ValoracionLoading());
     try {
+      print("Enviando solicitud de valoración: ${event.request.toJson()}");
       final response = await _service.crearValoracion(event.request);
+      print("Valoración creada exitosamente: ${response}");
       emit(ValoracionSuccess(response: response));
     } on ValoracionException catch (e) {
       emit(ValoracionError(e.message));
     } catch (e) {
+      print("Ocurrió un error inesperado: ${e}");
       emit(ValoracionError("Ocurrió un error inesperado."));
     }
   }

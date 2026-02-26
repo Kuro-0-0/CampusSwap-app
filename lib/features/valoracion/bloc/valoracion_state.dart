@@ -8,7 +8,7 @@ class ValoracionInitial extends ValoracionState {}
 class ValoracionLoading extends ValoracionState {}
 
 class ValoracionSuccess extends ValoracionState {
-  final Valoracion response;
+  final CrearValoracionModel response;
 
   ValoracionSuccess({required this.response});
 }
