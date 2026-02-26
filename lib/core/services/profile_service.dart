@@ -80,9 +80,6 @@ class ProfileService implements IProfileService {
           'No autorizado. Por favor, inicia sesión de nuevo.',
         );
       } else {
-        print(
-          'Error al obtener anuncios: ${response.statusCode} - ${response.body}',
-        );
         throw ProfileException(
           'Error al obtener anuncios (${response.statusCode})',
         );
@@ -118,9 +115,6 @@ class ProfileService implements IProfileService {
           'No autorizado. Por favor, inicia sesión de nuevo.',
         );
       } else {
-        print(
-          'Error al obtener favoritos: ${response.statusCode} - ${response.body}',
-        );
         throw ProfileException(
           'Error al obtener favoritos (${response.statusCode})',
         );
@@ -148,7 +142,7 @@ class ProfileService implements IProfileService {
       final response = await http
           .put(
             Uri.parse(
-              '${TokenStorage.baseUrl}/anuncios/$anuncioId/alternar-estado'),
+              '${TokenStorage.baseUrl}/api/v1/anuncios/$anuncioId/alternar-estado'),
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
@@ -170,7 +164,6 @@ class ProfileService implements IProfileService {
       } else if (response.statusCode == 404) {
         throw const ProfileException('Anuncio no encontrado.');
       } else {
-        print('Error al alternar estado del anuncio (${response.body})');
         throw ProfileException(
           'Error al alternar estado del anuncio (${response.statusCode})',
         );
@@ -210,7 +203,6 @@ class ProfileService implements IProfileService {
       } else if (response.statusCode == 404) {
         throw const ProfileException('Anuncio no encontrado.');
       } else {
-        print('Error al eliminar anuncio (${response.body})');
         throw ProfileException(
           'Error al eliminar anuncio (${response.statusCode})',
         );
@@ -314,7 +306,6 @@ class ProfileService implements IProfileService {
         final Map<String, dynamic> body = jsonDecode(response.body);
         return UsuarioResponse.fromJson(body);
       } else if (response.statusCode == 404) {
-        print('Usuario no encontrado: ${response.body}');
         throw const ProfileException('Usuario no encontrado.');
       } else {
         throw ProfileException(
@@ -347,7 +338,6 @@ class ProfileService implements IProfileService {
         final anuncioResponse = AnuncioResponseModel.fromJson(body);
         return anuncioResponse.content;
       } else if (response.statusCode == 404) {
-        print('Usuario no encontrado: ${response.body}');
         throw const ProfileException('Usuario no encontrado.');
       } else {
         throw ProfileException(
