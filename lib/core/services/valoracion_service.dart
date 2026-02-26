@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:campusswap_app/core/models/crear_valoracion_model.dart';
 import 'package:campusswap_app/core/models/valoracion_request_model.dart';
 import 'package:campusswap_app/core/models/valoracion_response_model.dart';
 import 'package:campusswap_app/core/services/token_storage_service.dart';
@@ -17,7 +18,7 @@ class ValoracionException implements Exception {
 class ValoracionService {
   final String _baseUrl = "${TokenStorage.baseUrl}/api/v1/valoraciones";
 
-  Future<Valoracion> crearValoracion(ValoracionRequest request) async {
+  Future<CrearValoracionModel> crearValoracion(ValoracionRequest request) async {
     final token = await TokenStorage().getToken();
     
     if (token == null) {
@@ -45,7 +46,7 @@ class ValoracionService {
 
     if (response.statusCode == 201 || response.statusCode == 200) {
       final Map<String, dynamic> body = jsonDecode(response.body);
-      return Valoracion.fromJson(body);
+      return CrearValoracionModel.fromJson(body);
     } else if (response.statusCode == 401) {
       throw const ValoracionException("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
     } else if (response.statusCode == 400) {

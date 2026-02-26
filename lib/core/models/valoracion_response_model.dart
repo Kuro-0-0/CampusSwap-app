@@ -31,6 +31,8 @@ class Valoracion {
   final String? fotoPerfilEvaluador;
   final String anuncioTitulo;
 
+  
+
   Valoracion({
     required this.id,
     required this.puntuacion,

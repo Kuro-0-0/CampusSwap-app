@@ -85,7 +85,7 @@ class _RatingModalState extends State<RatingModal> {
           setState(() => _isSubmitting = false);
           Navigator.pop(context, true);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('¡Valoración creada exitosamente!')),
+            const SnackBar(content: Text('¡Valoración creada exitosamente!'), backgroundColor: AppColors.primaryBlue),
           );
         } else if (state is ValoracionError) {
           setState(() => _isSubmitting = false);
